@@ -5,31 +5,22 @@
         <ul>
             <PGVDisplay v-for="(cur_pgv, cur_name, cur_ind) in current_pgv" v-bind:station_name="cur_name" />
         </ul>
-        <ul>
-            <li v-for="(cur_pgv, cur_name, cur_ind) in current_pgv">
-                <b>{{ cur_name }}:</b>
-                <p>pgv: {{ cur_pgv }}</p>
-            </li>
-        </ul>
 
+        
+        <h2> PGV graphs </h2>
+        <PGVGraph v-for="(cur_pgv, cur_name, cur_ind) in current_pgv" v-bind:station_name="cur_name" />
+        
+            
+        <h2> Station divs </h2>
         <div v-for="(cur_pgv, cur_name, cur_ind) in pgv_value" v-bind:id="cur_name">
             <b>{{ cur_name }}</b>
         </div>
-
-        <h2> All available PGV data </h2>
-        <ul>
-            <li v-for="(cur_pgv, cur_name, cur_ind) in pgv_value">
-                <b>{{ cur_name }}:</b>
-                <p>time: {{ cur_pgv.time }}</p>
-                <p>data: {{ cur_pgv.data }}</p>
-            </li>
-        </ul>
     </div>
 </template>
 
 <script>
-import Plotly from 'plotly.js/dist/plotly'
 import PGVDisplay from '../components/PGVDisplay.vue'
+import PGVGraph from '../components/PGVGraph.vue'
 
 export default {
     name: 'WebSocketDisplay',
@@ -37,7 +28,8 @@ export default {
         title: String
     },
     components: {
-        PGVDisplay
+        PGVDisplay,
+        PGVGraph
     },
     computed: {
         stations: function () {
