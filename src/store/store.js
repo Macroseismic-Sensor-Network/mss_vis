@@ -72,14 +72,14 @@ export default new Vuex.Store({
             return tmp
         },
 
-        current_pgv_by_station: (state) => (station_name) => {
-            var last_ind = state.pgv_data[station_name].data.length - 1
-            return state.pgv_data[station_name].data[last_ind]
+        current_pgv_by_station: (state) => (station_id) => {
+            var last_ind = state.pgv_data[station_id].data.length - 1
+            return state.pgv_data[station_id].data[last_ind]
         },
 
-        pgv_by_station: (state) => (station_name) => {
-            var last_ind = state.pgv_data[station_name].data.length - 1
-            return state.pgv_data[station_name]
+        pgv_by_station: (state) => (station_id) => {
+            var last_ind = state.pgv_data[station_id].data.length - 1
+            return state.pgv_data[station_id]
         },
 
         display_range: (state) => {
@@ -88,7 +88,7 @@ export default new Vuex.Store({
             for (var key in state.pgv_data) {
                 var last_ind = state.pgv_data[key].time.length - 1;
                 var cur_date = state.pgv_data[key].time[last_ind];
-                var res = cur_date.split(/[\:T-]/);
+                var res = cur_date.split(/[:T-]/);
                 last_dates.push(Date.UTC(res[0], res[1], res[2], res[3], res[4], res[5]));
             }
             var end_timestamp = Math.max.apply(null, last_dates);
