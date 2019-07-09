@@ -3,14 +3,12 @@
         <h1>{{ title }}</h1>
         <h2> Current PGV data </h2>
         <ul>
-            <PGVDisplay v-for="(cur_pgv, cur_name, cur_ind) in current_pgv" v-bind:station_name="cur_name" />
+            <PGVDisplay v-for="cur_stream in streams" v-bind:station_name="cur_stream" />
         </ul>
 
-        
         <h2> PGV graphs </h2>
-        <PGVGraph v-for="(cur_pgv, cur_name, cur_ind) in current_pgv" v-bind:station_name="cur_name" />
-        
-            
+        <PGVGraph v-for="cur_stream in streams" v-bind:stream_id="cur_stream" />
+
         <h2> Station divs </h2>
         <div v-for="(cur_pgv, cur_name, cur_ind) in pgv_value" v-bind:id="cur_name">
             <b>{{ cur_name }}</b>
@@ -32,8 +30,9 @@ export default {
         PGVGraph
     },
     computed: {
-        stations: function () {
-            return this.$store.state.stations
+        streams: function () {
+            var available_streams = Object.keys(this.$store.state.pgv_data);
+            return available_streams.sort();
         },
         pgv_value: function () {
             return this.$store.state.pgv_data
