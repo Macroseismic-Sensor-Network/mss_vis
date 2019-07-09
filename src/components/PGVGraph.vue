@@ -1,7 +1,7 @@
 <template>
     <div class="graph_container">
-        <div class="station_label">
-            {{ station_name }}
+        <div class="station_label_container">
+            <span class="station_label">{{ station }}</span>
         </div>
         <div class="pgv_axes" v-bind:id="element_id">
         </div>
@@ -16,29 +16,59 @@ export default {
     name: 'PGVGraph',
 
     props: {
-        station_name: String
+        stream_id: String
     },
 
     data: function () {
         return {
             layout: {
-                title: this.station_name,
-                titlefont: {size: 10},
+                //title: this.stream_id,
+                //titlefont: {size: 10},
                 margin: {
-                    l: 50,
-                    r: 50,
-                    t: 50,
-                    b: 50
+                    l: 2,
+                    r: 2,
+                    t: 2,
+                    b: 2
                 },
                 xaxis: {
                     type: 'date',
                     range: ['2019-07-05T11:00:00', '2019-07-05T13:00:00'],
                     autorange: false,
-                    fixedrange: true
+                    fixedrange: true,
+                    showticklabels: false,
+                    mirror: 'ticks',
+                    showline: true,
+                    ticks: 'inside',
+                    zeroline: false,
+                    hoverformat: '%H:%M:%S'
                 },
                 yaxis: {
-                    fixedrange: true
-                }
+                    type: 'log',
+                    autorange: false,
+                    range: [-4, 1],
+                    fixedrange: true,
+                    showticklabels: false,
+                    showline: true,
+                    mirror: 'ticks',
+                    ticks: 'inside',
+                    zeroline: false
+                },
+                shapes: [
+                    {
+                        type: 'rect',
+                        xref: 'paper',
+                        yref: 'y',
+                        x0: 0,
+                        x1: 1,
+                        y0: 0,
+                        y1: 0.1,
+                        opacity: 0.1,
+                        fillcolor: '#777777',
+                        line: {
+                            width: 0,
+                        }
+                    }
+                ]
             },
 
             config: {
@@ -49,28 +79,41 @@ export default {
 
     computed: {
         pgv_data: function() {
-            return this.$store.getters.pgv_by_station(this.$props.station_name);
+            return this.$store.getters.pgv_by_station(this.$props.stream_id);
         },
 
         plotly_data: function() {
-            var pgv_data = this.$store.getters.pgv_by_station(this.$props.station_name);
+            var pgv_data = this.$store.getters.pgv_by_station(this.$props.stream_id);
+            // Convert to mm/s.
+            var data_mm = pgv_data.data.map(function(x) {return x * 1000});
             var trace = {
                 x: pgv_data.time,
-                y: pgv_data.data,
+                y: data_mm,
                 type: 'scatter',
                 mode: 'lines',
-                fill: 'tozeroy'
+                line: {
+                    color: 'LightSkyBlue',
+                },
+                fill: 'tozeroy',
+                hovertemplate: 'pgv:  %{y}<br>' +
+                               'time:  %{x}' +
+                               '<extra></extra>',
             }
             var data = [trace, ]
             return data;
         },
 
         element_id: function() {
-            return 'pgv_graph_' + this.station_name;
+            return 'pgv_graph_' + this.stream_id;
         },
 
         display_range: function() {
             return this.$store.getters.display_range;
+        },
+
+        station: function() {
+            var res = this.stream_id.split('.');
+            return res[1];
         }
 
     },
@@ -94,6 +137,14 @@ export default {
             //var layout = this.layout;
             //this.layout.xaxis.range = ['2019-07-05T11:30:00', '2019-07-05T14:00']
             this.layout.xaxis.range = this.$store.getters.display_range;
+            if (Math.max.apply(null, this.plotly_data[0].y) >= 0.1)
+            {
+                this.plotly_data[0].line.color = 'SandyBrown';
+            }
+            else
+            {
+                this.plotly_data[0].line.color = 'LightSkyBlue';
+            }
             Plotly.react(this.element_id, this.plotly_data, this.layout, this.config);
         },
 
@@ -108,26 +159,36 @@ export default {
 <style scoped>
 div.graph_container {
     display: inline-block;
-    margin: 10px;
+    margin: 0px;
     padding: 0px;
     background-color: Azure;
     width: 90%;
-}
-
-div.station_label {
-    float: left;
-    padding: 10px;
-    background-color: FloralWhite;
-    height: 200px;
-    width: 15%;
+    height: 100px;
     overflow: hidden;
 }
 
-div.pgv_axes {
-    margin-left: 15%;
-    padding: 10px;
+div.station_label_container {
+    float: left;
+    padding: 0px;
     background-color: FloralWhite;
-    height: 200px;
+    overflow: hidden;
+    width: 100px;
+    height: 100%;
+    display: flex;
+    display: -webkit-flex;
+    vertical-align: middle;
+}
+
+span.station_label {
+    margin: auto;
+    font-weight: bold;
+}
+
+div.pgv_axes {
+    margin-left: 100px;
+    padding: 0px;
+    background-color: Red;
+    height: 100%;
     overflow: hidden;
 }
 </style>
