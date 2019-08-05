@@ -1,18 +1,25 @@
 <template>
+
     <div class="hello">
+      <h1>Test site for the MSS data visualization</h1>
+      <p> The site demonstrates the visualization of near real-time data received from the MSS data server using websockets. The PGV data from the server is pushed at an interval of 10 seconds.</p>
         <h1>{{ title }}</h1>
+
+        <h2> PGV graphs </h2>
+        <PGVGraph v-for="cur_stream in streams" v-bind:stream_id="cur_stream" />
+
+
         <h2> Current PGV data </h2>
         <ul>
             <PGVDisplay v-for="cur_stream in streams" v-bind:station_name="cur_stream" />
         </ul>
 
-        <h2> PGV graphs </h2>
-        <PGVGraph v-for="cur_stream in streams" v-bind:stream_id="cur_stream" />
-
+        <!--
         <h2> Station divs </h2>
         <div v-for="(cur_pgv, cur_name, cur_ind) in pgv_value" v-bind:id="cur_name">
             <b>{{ cur_name }}</b>
         </div>
+        -->
     </div>
 </template>
 
