@@ -2,6 +2,7 @@
     <li v-bind:id="element_id">
         <b>{{ station_name }}:</b>
         <p>latest pgv: {{ current_pgv }}</p>
+        <p>data length: {{ data_length }}</p>
     </li>
 </template>
 
@@ -19,8 +20,11 @@ export default {
 
         element_id: function() {
             return 'pgv_disp_' + this.station_name;
-        }
+        },
 
+        data_length: function() {
+            return this.$store.getters.data_length(this.$props.station_name);
+        },
     }
 }
 </script>
