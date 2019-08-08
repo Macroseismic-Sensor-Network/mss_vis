@@ -6,7 +6,7 @@
         <h1>{{ title }}</h1>
 
         <h2> Map view </h2>
-        <PGVMap />
+        <PGVMapSvg />
 
         <!--
         <h2> PGV graphs </h2>
@@ -29,7 +29,8 @@
 </template>
 
 <script>
-import PGVMap from '../components/PGVMap.vue'
+import PGVMapSvg from '../components/PGVMapSvg.vue'
+//import PGVMap from '../components/PGVMap.vue'
 //import PGVDisplay from '../components/PGVDisplay.vue'
 //import PGVGraph from '../components/PGVGraph.vue'
 
@@ -41,7 +42,7 @@ export default {
     components: {
         //PGVDisplay,
         //PGVGraph,
-        PGVMap
+        PGVMapSvg
     },
     computed: {
         streams: function () {
