@@ -5,6 +5,10 @@
       <p> The site demonstrates the visualization of near real-time data received from the MSS data server using websockets. The PGV data from the server is pushed at an interval of 10 seconds.</p>
         <h1>{{ title }}</h1>
 
+        <h2> Map view </h2>
+        <PGVMap />
+
+        <!--
         <h2> PGV graphs </h2>
         <PGVGraph v-for="cur_stream in streams" v-bind:stream_id="cur_stream" />
 
@@ -13,6 +17,7 @@
         <ul>
             <PGVDisplay v-for="cur_stream in streams" v-bind:station_name="cur_stream" />
         </ul>
+        -->
 
         <!--
         <h2> Station divs </h2>
@@ -24,8 +29,9 @@
 </template>
 
 <script>
-import PGVDisplay from '../components/PGVDisplay.vue'
-import PGVGraph from '../components/PGVGraph.vue'
+import PGVMap from '../components/PGVMap.vue'
+//import PGVDisplay from '../components/PGVDisplay.vue'
+//import PGVGraph from '../components/PGVGraph.vue'
 
 export default {
     name: 'WebSocketDisplay',
@@ -33,8 +39,9 @@ export default {
         title: String
     },
     components: {
-        PGVDisplay,
-        PGVGraph
+        //PGVDisplay,
+        //PGVGraph,
+        PGVMap
     },
     computed: {
         streams: function () {
