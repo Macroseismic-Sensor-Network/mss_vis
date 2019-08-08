@@ -145,7 +145,11 @@ export default {
             {
                 this.plotly_data[0].line.color = 'LightSkyBlue';
             }
-            Plotly.react(this.element_id, this.plotly_data, this.layout, this.config);
+            var element_exists = !!document.getElementById(this.element_id);
+            if (element_exists)
+            {
+                Plotly.react(this.element_id, this.plotly_data, this.layout, this.config);
+            }
         },
 
         update_range() {
