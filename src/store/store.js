@@ -23,6 +23,30 @@ function handle_msg_data(msg_id, payload, state) {
                     //console.log(payload[key].data)
                     state.pgv_data[key].data = state.pgv_data[key].data.concat(payload[key].data)
                     state.pgv_data[key].time = state.pgv_data[key].time.concat(payload[key].time)
+
+                    //console.log("display_range: " + display_range);
+                    var display_range = get_display_range(state);
+                    var display_start = new Date(new Date(display_range[0]) - 1000 * 10);
+
+                    // Crop the data to the needed length. Drop old data.
+                    var crop_ind = -1;
+                    for (var k = 0; k < state.pgv_data[key].time.length; k++)
+                    {
+                        var cur_time = new Date(state.pgv_data[key].time[k]);
+                        if (cur_time >= display_start)
+                        {
+                            crop_ind = k;
+                            break;
+                        }
+                    }
+
+                    if (crop_ind > 0)
+                    {
+                        //console.log("First value in display range: " + state.pgv_data[key].time[crop_ind])
+                        //console.log("crop_index: " + crop_ind)
+                        state.pgv_data[key].time = state.pgv_data[key].time.slice(crop_ind);
+                        state.pgv_data[key].data = state.pgv_data[key].data.slice(crop_ind);
+                    }
                 }
                 else
                 {
@@ -37,6 +61,26 @@ function handle_msg_data(msg_id, payload, state) {
     }
 
 }
+
+
+function get_display_range(state) {
+    var display_period = state.display_period;
+    var last_dates = [];
+    for (var key in state.pgv_data) {
+        var last_ind = state.pgv_data[key].time.length - 1;
+        var cur_date = state.pgv_data[key].time[last_ind];
+        var res = cur_date.split(/[:T-]/);
+        last_dates.push(Date.UTC(res[0], res[1], res[2], res[3], res[4], res[5]));
+    }
+    var end_timestamp = Math.max.apply(null, last_dates);
+    var start_timestamp = end_timestamp - display_period;
+
+    var start_date = new Date(start_timestamp);
+    var end_date = new Date(end_timestamp);
+
+    return [to_isoformat(start_date), to_isoformat(end_date)]
+}
+
 
 function to_isoformat(date) {
     Number.prototype.pad = function(size) {
@@ -59,7 +103,9 @@ export default new Vuex.Store({
         connected: 'no',
         message: '',
         server_id: '',
-        server_state: ''
+        server_state: '',
+        display_period: 1800000,
+        //display_period: 60000,
     },
 
     getters: {
@@ -78,12 +124,16 @@ export default new Vuex.Store({
         },
 
         pgv_by_station: (state) => (station_id) => {
-            var last_ind = state.pgv_data[station_id].data.length - 1
+            //var last_ind = state.pgv_data[station_id].data.length - 1
             return state.pgv_data[station_id]
         },
 
+        data_length: (state) => (station_id) => {
+            return state.pgv_data[station_id].data.length;
+        },
+
         display_range: (state) => {
-            var display_period = 1800000;
+            var display_period = state.display_period;
             var last_dates = [];
             for (var key in state.pgv_data) {
                 var last_ind = state.pgv_data[key].time.length - 1;
