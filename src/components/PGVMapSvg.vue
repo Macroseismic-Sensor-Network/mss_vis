@@ -18,39 +18,80 @@ export default {
 
     data() {
         return {
-            data: [99, 71, 78, 25, 36, 92],
+            stations_dev: [
+                        {name: "S1", x: 100, y: 10},
+                        {name: "S2", x: 300, y: 30},
+                        {name: "S3", x: 600, y: 60},
+                      ], 
             line: '',
-            map_image: 'undefined'
+            map_image: 'undefined',
+            map_image_url: '/image/mss_map.png',
+            map_limits: {'x_min': 527917.249,
+                         'y_min': 5262635.008,
+                         'x_max': 657965.249,
+                         'y_max': 5335787.008},
+            stations: [],
+            dataset: [10, 20, 30, 40, 50],
+            radius: 4,
         };
+    },
+
+    created() {
+        const self = this;
+        d3.csv("/data/mss_stations_2019_147.csv").then( function(data) {
+            //console.log(data);
+            //console.log("Length: " + data.length);
+            self.stations = data;
+            console.log("Data loaded.");
+            self.plot_stations();
+        });
     },
 
     mounted() {
         this.map_image = new Image;
-        this.show_image();
+        this.init_map();
         window.addEventListener('resize', this.on_resize);
+        this.$watch('radius', this.plot_stations);
     },
 
     computed: {
         display_range: function() {
             return this.$store.getters.display_range;
         },
-
-        // Use a computed attribute for the map url to make sure, that
-        // the correct assets path is returned.
-        // See https://vuejs-templates.github.io/webpack/static.html#getting-asset-paths-in-javascript
-        map_image_url: function() {
-            return require('../assets/mss_map.png');
-        },
     },
 
     methods: {
+        init_map() {
+            this.show_image();
+            this.on_resize();
+        },
+
+        plot_stations() {
+            console.log('Plotting stations.');
+            const map_svg = d3.select("#map");
+
+            var scales = this.get_scales();
+            
+            map_svg.selectAll("circle").remove();
+
+            map_svg.selectAll("circle")
+                   .data(this.stations)
+                   .enter()
+                   .append("circle")
+                        .attr("cx", function(d) { return scales.x(d.x_utm);})
+                        .attr("cy", function(d) { return scales.y(d.y_utm);})
+                        .attr("r", this.radius)
+                        .attr('fill', 'orange')
+                        .attr('stroke', 'black');
+        },
+
         get_scales() {
-            const x = d3.scaleTime().range([0, 430]);
-            const y = d3.scaleLinear().range([210, 0]);
-            d3.axisLeft().scale(x);
-            d3.axisTop().scale(y);
-            x.domain(d3.extent(this.data, (d, i) => i));
-            y.domain([0, d3.max(this.data, d => d)]);
+            const x = d3.scaleLinear().domain([this.map_limits.x_min, 
+                                                this.map_limits.x_max])
+                                       .range([0, 1280]);
+            const y = d3.scaleLinear().domain([this.map_limits.y_min,
+                                                this.map_limits.y_max])
+                                       .range([720, 0]);
             return {x, y};
         },
 
@@ -69,10 +110,11 @@ export default {
             {
                 console.log("Image loaded.")
                 map_svg.append("svg:image")
-                    .attr('width', 600)
-                    .attr('height', 600)
+                    .attr('width', 1280)
+                    .attr('height', 720)
                     .attr('id', 'map_image')
                     .attr("xlink:href", self.map_image_url);
+                d3.select('#map_image').lower();
                 self.on_resize();
             }
             this.map_image.src = this.map_image_url;
@@ -92,7 +134,6 @@ export default {
             map_image
                 .attr('width', this.map_image.width * scale)
                 .attr('height', this.map_image.height * scale)
-            //context.drawImage(this.map_image, 0, 0, this.map_image.width * scale, this.map_image.height * scale);
         }
     },
 }
@@ -103,11 +144,11 @@ export default {
 
 div#mapcontainer
     width: 100%
-    height: 700px
+    height: 720px
 
 svg#map
     border: solid 2px black
-    width: 700px
-    height: 700px
+    width: 1280px
+    height: 720px
 
 </style>
