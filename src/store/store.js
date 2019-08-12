@@ -1,5 +1,6 @@
 import Vuex from 'vuex'
 import Vue from 'vue'
+import * as d3 from "d3";
 
 Vue.use(Vuex)
 
@@ -99,8 +100,9 @@ function to_isoformat(date) {
 export default new Vuex.Store({
     state: {
         stations: [],
+        station_meta: [],
         pgv_data: {},
-        connected: 'no',
+        connected: false,
         message: '',
         server_id: '',
         server_state: '',
@@ -119,13 +121,27 @@ export default new Vuex.Store({
         },
 
         current_pgv_by_station: (state) => (station_id) => {
-            var last_ind = state.pgv_data[station_id].data.length - 1
-            return state.pgv_data[station_id].data[last_ind]
+            if (station_id in state.pgv_data) {
+                var last_ind = state.pgv_data[station_id].data.length - 1
+                return state.pgv_data[station_id].data[last_ind]
+            }
+            else {
+                return undefined;
+            }
         },
 
         pgv_by_station: (state) => (station_id) => {
             //var last_ind = state.pgv_data[station_id].data.length - 1
             return state.pgv_data[station_id]
+        },
+
+        disp_range_max_pgv_by_station: (state) => (station_id) => {
+            var max_pgv = undefined;
+            if (station_id in state.pgv_data)
+            {
+                max_pgv = Math.max(...state.pgv_data[station_id].data);
+            }
+            return max_pgv;
         },
 
         data_length: (state) => (station_id) => {
@@ -148,15 +164,24 @@ export default new Vuex.Store({
             var end_date = new Date(end_timestamp);
 
             return [to_isoformat(start_date), to_isoformat(end_date)]
-        }
+        },
+
+        station_meta: (state) => {
+            return state.station_meta;
+        },
+
 
     },
 
     mutations: {
         SOCKET_ONOPEN(state, event) {
-            Vue.prototype.$socket = event.currentTarget
-            state.connected = 'yes'
+            Vue.prototype.$socket = event.currentTarget;
+            state.connected = true;
+            console.info("Connected to websocket server.");
+            console.info("state: ", state);
+            console.info("event: ", event);
         },
+
         SOCKET_ONMESSAGE(state, payload) {
             var msg_class = payload.class
             var msg_id = payload.id
@@ -178,7 +203,45 @@ export default new Vuex.Store({
             //}
             //state.pgv_time = payload.time
             //state.pgv_value = payload.pgv
-        }
+        },
+
+        SOCKET_ONCLOSE(state, event) {
+            state.connected = false;
+            console.info("Disconnected from server.");
+            console.info("event: ", event);
+        },
+
+        SOCKET_ONERROR(state, event) {
+            console.error("Websocket error.");
+            console.error("state: ", state);
+            console.error("event: ", event);
+        },
+
+        SOCKET_RECONNECT(state, count) {
+            console.info("Reconnecting...");
+            console.info("state: ", state);
+            console.info("count: ", count);
+        },
+
+        SOCKET_RECONNECT_ERROR(state) {
+            console.error("Error while reconnecting.");
+            console.error(state);
+        },
+
+        LOAD_STATION_METADATA(state) {
+            d3.csv("/data/mss_stations_2019_147.csv").then( function(data) {
+                for (var k = 0; k < data.length; k++)
+                {
+                    data[k].id = data[k].network + "." +  
+                                 data[k].name + "." + 
+                                 data[k].location + "." +
+                                 "pgv";
+                }
+                state.station_meta = data;
+                console.log("Store :: Station metadata loaded.");
+                //self.plot_stations();
+            });
+        },
     },
 
     actions: {
