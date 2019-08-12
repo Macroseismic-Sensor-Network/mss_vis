@@ -1,12 +1,19 @@
 <template>
     <div id="mapcontainer">
         <svg id="map">
+            <PGVMapMarker v-for="cur_station in stations" 
+                          v-bind:key="cur_station.id"
+                          v-bind:station_id="cur_station.id"
+                          v-bind:x_utm="cur_station.x_utm"
+                          v-bind:y_utm="cur_station.y_utm"
+                          :map_limits="map_limits"/>
         </svg>
     </div>
 </template>
 
 
 <script>
+import PGVMapMarker from '../components/PGVMapMarker.vue'
 import * as d3 from "d3";
 
 export default {
@@ -16,47 +23,57 @@ export default {
         title: String,
     },
 
+    components: {
+        PGVMapMarker,
+    },
+
     data() {
         return {
-            stations_dev: [
-                        {name: "S1", x: 100, y: 10},
-                        {name: "S2", x: 300, y: 30},
-                        {name: "S3", x: 600, y: 60},
-                      ], 
-            line: '',
             map_image: 'undefined',
             map_image_url: '/image/mss_map.png',
             map_limits: {'x_min': 527917.249,
                          'y_min': 5262635.008,
                          'x_max': 657965.249,
                          'y_max': 5335787.008},
-            stations: [],
-            dataset: [10, 20, 30, 40, 50],
-            radius: 4,
         };
     },
 
     created() {
+        /*
         const self = this;
         d3.csv("/data/mss_stations_2019_147.csv").then( function(data) {
             //console.log(data);
             //console.log("Length: " + data.length);
+            for (var k = 0; k < data.length; k++)
+            {
+                data[k].id = data[k].network + "." +  
+                             data[k].name + "." + 
+                             data[k].location + "." +
+                             "pgv";
+                             
+            }
             self.stations = data;
             console.log("Data loaded.");
-            self.plot_stations();
+            //self.plot_stations();
         });
+        */
     },
 
     mounted() {
         this.map_image = new Image;
         this.init_map();
         window.addEventListener('resize', this.on_resize);
-        this.$watch('radius', this.plot_stations);
+        //this.$watch('radius', this.plot_stations);
+        this.$store.commit("LOAD_STATION_METADATA");
     },
 
     computed: {
         display_range: function() {
             return this.$store.getters.display_range;
+        },
+
+        stations: function() {
+            return this.$store.getters.station_meta;
         },
     },
 
@@ -82,7 +99,8 @@ export default {
                         .attr("cy", function(d) { return scales.y(d.y_utm);})
                         .attr("r", this.radius)
                         .attr('fill', 'orange')
-                        .attr('stroke', 'black');
+                        .attr('stroke', 'black')
+                        .attr('id', function(d) { return d.id;});
         },
 
         get_scales() {
