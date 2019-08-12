@@ -20,8 +20,14 @@ Vue.use(new VueSocketIO({
             }))
 */
 
-//Vue.use(VueNativeSock, 'ws://mss.mertl-research.at:8100', {store: store, format: 'json'})
-Vue.use(VueNativeSock, 'ws://localhost:8100', {store: store, format: 'json'})
+Vue.use(VueNativeSock,
+        'ws://mss.mertl-research.at:8100', 
+        {store: store,
+         format: 'json',
+         reconnection: true,
+         reconnectionDelay: 3000});
+
+//Vue.use(VueNativeSock, 'ws://localhost:8100', {store: store, format: 'json'})
 
 new Vue({
     store,
