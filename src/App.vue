@@ -8,10 +8,12 @@
 import WebSocketDisplay from './components/WebSocketDisplay.vue'
 
 export default {
-  name: 'app',
-  components: {
-    WebSocketDisplay
-  }
+    name: 'app',
+
+    components: {
+        WebSocketDisplay
+    },
+
 }
 </script>
 
