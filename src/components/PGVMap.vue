@@ -12,10 +12,16 @@
                           v-bind:x_utm="cur_station.x_utm"
                           v-bind:y_utm="cur_station.y_utm"
                           :map_limits="map_limits"
-                          :map_size="map_size"/>
+                          :map_size="map_size"
+                          :radius_limits="marker_radius_limits"
+                          :pgv_limits="pgv_limits"/>
 
             <PGVLegend name="map_legend"
-                       :pgv_values="legend_values"/>
+                       :pgv_values="legend_values"
+                       :radius_limits="marker_radius_limits"
+                       :map_limits="map_limits"
+                       :pgv_limits="pgv_limits"
+                       :position="{x: 100, y: 100}"/>
         </svg>
     </div>
 </template>
@@ -48,29 +54,13 @@ export default {
                          'y_max': 5347335.484},
             map_size: {'width': 4000,
                        'height': 2500},
-            legend_values: [1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1],
+            legend_values: [1e-5, 3e-5, 1e-4, 3e-4, 1e-3, 3e-3, 1e-2],
+            marker_radius_limits: [5, 40],
+            pgv_limits: [1e-6, 1e-1],
         };
     },
 
     created() {
-        /*
-        const self = this;
-        d3.csv("/data/mss_stations_2019_147.csv").then( function(data) {
-            //console.log(data);
-            //console.log("Length: " + data.length);
-            for (var k = 0; k < data.length; k++)
-            {
-                data[k].id = data[k].network + "." +  
-                             data[k].name + "." + 
-                             data[k].location + "." +
-                             "pgv";
-                             
-            }
-            self.stations = data;
-            console.log("Data loaded.");
-            //self.plot_stations();
-        });
-        */
     },
 
     mounted() {
