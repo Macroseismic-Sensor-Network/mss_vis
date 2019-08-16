@@ -1,5 +1,5 @@
 <template>
-    <div class="graph_container">
+    <div class="graph_container" v-bind:style="{height: div_height + 'px',}">
         <div class="station_label_container">
             <span class="station_label">{{ station }}</span>
         </div>
@@ -16,7 +16,8 @@ export default {
     name: 'PGVGraph',
 
     props: {
-        stream_id: String
+        stream_id: String,
+        height: Number,
     },
 
     data: function () {
@@ -78,6 +79,10 @@ export default {
     },
 
     computed: {
+        div_height: function () {
+            return window.innerHeight * this.$props.height / 100;
+        },
+
         pgv_data: function() {
             return this.$store.getters.pgv_by_station(this.$props.stream_id);
         },
@@ -162,12 +167,11 @@ export default {
 
 <style scoped>
 div.graph_container {
-    display: inline-block;
     margin: 0px;
     padding: 0px;
     background-color: Azure;
     width: 90%;
-    height: 100px;
+    height: 20px;
     overflow: hidden;
 }
 

@@ -2,8 +2,9 @@ import Vue from 'vue'
 import App from './App.vue'
 import store from './store/store.js'
 import VueNativeSock from 'vue-native-websocket'
-//import VueSocketIO from 'vue-socket.io'
-//import socketio from 'socket.io-client'
+import 'fullpage.js/vendors/scrolloverflow'
+//import './fullpage.scrollHorizontally.min'
+import VueFullPage from 'vue-fullpage.js'
 
 Vue.config.productionTip = false
 
@@ -26,6 +27,8 @@ Vue.use(VueNativeSock,
          format: 'json',
          reconnection: true,
          reconnectionDelay: 3000});
+
+Vue.use(VueFullPage);
 
 //Vue.use(VueNativeSock, 'ws://localhost:8100', {store: store, format: 'json'})
 
