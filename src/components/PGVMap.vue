@@ -1,33 +1,84 @@
 <template>
     <div id="mapcontainer">
-        <canvas id="map">
-        </canvas>
+        <!--<svg id="map" viewBox="0 0 4000 2500" preserveAspectRatio="xMidYMid slice">-->
+        <svg id="map"
+             width="100%"
+             height="100%"
+             viewBox="0 0 4000 2500"
+             preserveAspectRatio="xMidYMid meet">
+            <PGVMapMarker v-for="cur_station in stations" 
+                          v-bind:key="cur_station.id"
+                          v-bind:station_id="cur_station.id"
+                          v-bind:x_utm="cur_station.x_utm"
+                          v-bind:y_utm="cur_station.y_utm"
+                          :map_limits="map_limits"
+                          :map_size="map_size"/>
+
+            <PGVLegend name="map_legend"
+                       :pgv_values="legend_values"/>
+        </svg>
     </div>
 </template>
 
 
 <script>
+import PGVMapMarker from '../components/PGVMapMarker.vue'
+import PGVLegend from '../components/PGVLegend.vue'
 import * as d3 from "d3";
 
 export default {
-    name: 'PGVMap',
+    name: 'PGVMapSvg',
 
     props: {
         title: String,
     },
 
+    components: {
+        PGVMapMarker,
+        PGVLegend,
+    },
+
     data() {
         return {
-            data: [99, 71, 78, 25, 36, 92],
-            line: '',
-            map_image: 'undefined'
+            map_image: 'undefined',
+            map_image_url: '/image/mss_map_with_stations.jpg',
+            map_limits: {'x_min': 519685.529,
+                         'y_min': 5252085.484,
+                         'x_max': 672085.529,
+                         'y_max': 5347335.484},
+            map_size: {'width': 4000,
+                       'height': 2500},
+            legend_values: [1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1],
         };
+    },
+
+    created() {
+        /*
+        const self = this;
+        d3.csv("/data/mss_stations_2019_147.csv").then( function(data) {
+            //console.log(data);
+            //console.log("Length: " + data.length);
+            for (var k = 0; k < data.length; k++)
+            {
+                data[k].id = data[k].network + "." +  
+                             data[k].name + "." + 
+                             data[k].location + "." +
+                             "pgv";
+                             
+            }
+            self.stations = data;
+            console.log("Data loaded.");
+            //self.plot_stations();
+        });
+        */
     },
 
     mounted() {
         this.map_image = new Image;
-        this.show_image();
-        window.addEventListener('resize', this.on_resize);
+        this.init_map();
+        //window.addEventListener('resize', this.on_resize);
+        //this.$watch('radius', this.plot_stations);
+        this.$store.commit("LOAD_STATION_METADATA");
     },
 
     computed: {
@@ -35,22 +86,44 @@ export default {
             return this.$store.getters.display_range;
         },
 
-        // Use a computed attribute for the map url to make sure, that
-        // the correct assets path is returned.
-        // See https://vuejs-templates.github.io/webpack/static.html#getting-asset-paths-in-javascript
-        map_image_url: function() {
-            return require('../assets/mss_map.png');
+        stations: function() {
+            return this.$store.getters.station_meta;
         },
     },
 
     methods: {
+        init_map() {
+            this.show_image();
+            //this.on_resize();
+        },
+
+        plot_stations() {
+            console.log('Plotting stations.');
+            const map_svg = d3.select("#map");
+
+            var scales = this.get_scales();
+
+            map_svg.selectAll("circle").remove();
+
+            map_svg.selectAll("circle")
+                   .data(this.stations)
+                   .enter()
+                   .append("circle")
+                        .attr("cx", function(d) { return scales.x(d.x_utm);})
+                        .attr("cy", function(d) { return scales.y(d.y_utm);})
+                        .attr("r", this.radius)
+                        .attr('fill', 'orange')
+                        .attr('stroke', 'black')
+                        .attr('id', function(d) { return d.id;});
+        },
+
         get_scales() {
-            const x = d3.scaleTime().range([0, 430]);
-            const y = d3.scaleLinear().range([210, 0]);
-            d3.axisLeft().scale(x);
-            d3.axisTop().scale(y);
-            x.domain(d3.extent(this.data, (d, i) => i));
-            y.domain([0, d3.max(this.data, d => d)]);
+            const x = d3.scaleLinear().domain([this.map_limits.x_min, 
+                                                this.map_limits.x_max])
+                                       .range([0, 1920]);
+            const y = d3.scaleLinear().domain([this.map_limits.y_min,
+                                                this.map_limits.y_max])
+                                       .range([1080, 0]);
             return {x, y};
         },
 
@@ -63,32 +136,35 @@ export default {
         },
 
         show_image() {
-            var canvas = d3.select("#map");
-            const context = canvas.node().getContext("2d");
-            const window = d3.select(window);
-            console.log("Canvas: " + canvas);
-            console.log("context: " + context);
             let self = this;
+            var map_svg = d3.select("#map");
             this.map_image.onload = function()
             {
                 console.log("Image loaded.")
-                self.on_resize();
+                map_svg.append("svg:image")
+                    .attr('width', 4000)
+                    .attr('height', 2500)
+                    .attr('id', 'map_image')
+                    .attr("xlink:href", self.map_image_url);
+                d3.select('#map_image').lower();
             }
             this.map_image.src = this.map_image_url;
         },
 
         on_resize() {
             var map_container = d3.select("#mapcontainer").node();
-            var canvas = d3.select("#map");
-            const context = canvas.node().getContext("2d");
+            var map_svg = d3.select("#map");
             const width = map_container.clientWidth;
             const height = map_container.clientHeight;
             console.log("w: " + width + " h: " + height);
-            canvas.attr("width", width)
-                  .attr("height", height);
-            //context.drawImage(this.map_image, 0, 0);
-            const scale = height / this.map_image.height;
-            context.drawImage(this.map_image, 0, 0, this.map_image.width * scale, this.map_image.height * scale);
+            map_svg.attr("width", width)
+                   .attr("height", height);
+            //const scale = height / this.map_image.height;
+
+            //const map_image = d3.select("#map_image");
+            //map_image
+            //    .attr('width', this.map_image.width * scale)
+            //    .attr('height', this.map_image.height * scale)
         }
     },
 }
@@ -98,10 +174,12 @@ export default {
 <style scoped lang="sass">
 
 div#mapcontainer
-    width: 100%
-    height: 700px
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 
-canvas#map
+svg#map
     border: solid 2px black
-
 </style>
