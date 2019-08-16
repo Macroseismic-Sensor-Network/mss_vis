@@ -27,6 +27,8 @@ export default {
         y_utm: String,
         map_limits: Object,
         map_size: Object,
+        radius_limits: Array,
+        pgv_limits: Array,
     },
 
     mounted () {
@@ -41,14 +43,19 @@ export default {
                   .attr("cy", scales.y(this.y_utm))
                   .attr('stroke', 'black');
         marker_svg.lower();
+
+        var map_svg = d3.select("#map");
+        this.svg_matrix = map_svg.node().getScreenCTM();
+
+        window.addEventListener('resize', this.on_resize);
     },
 
     data() {
         return {
-            radius: 4,
-            scale: 5,
-            current_fill_opacity: 0.5,
+            scale: 1,
+            current_fill_opacity: 0.85,
             max_fill_opacity: 0.3,
+            svg_matrix: [],
         };
     },
 
@@ -57,40 +64,43 @@ export default {
             return 'pgv_map_marker_' + this.station_id.replace(/\./g, '-');
         },
 
+        svg_scale: function() {
+            var scale = 1;
+            if (this.svg_matrix.a)
+            {
+                scale = this.svg_matrix.a
+            }
+            return scale;
+        },
+
         pgv_radius: function() {
             var cur_pgv = this.$store.getters.current_pgv_by_station(this.$props.station_id);
-            var map_svg = d3.select("#map");
-            var matrix = map_svg.node().getScreenCTM();
+            //var map_svg = d3.select("#map");
+            //var matrix = map_svg.node().getScreenCTM();
+
+            var radius = 4;
 
             if (cur_pgv) {
-                var radius = Math.log10(cur_pgv * 1000) + 6;
-                if (radius > 20)
-                {   
-                    radius = 20;
-                }
-                return this.scale * radius / matrix.a;
+                const scales = this.get_scales();
+                radius = this.scale * scales.radius(cur_pgv);
             }
-            else {
-                return 4 / matrix.a;
-            }
+
+            return radius / this.svg_scale;
         },
 
         pgv_max_radius: function() {
             var cur_pgv = this.$store.getters.disp_range_max_pgv_by_station(this.$props.station_id);
-            var map_svg = d3.select("#map");
-            var matrix = map_svg.node().getScreenCTM();
+            //var map_svg = d3.select("#map");
+            //var matrix = map_svg.node().getScreenCTM();
+
+            var radius = 0;
 
             if (cur_pgv) {
-                var radius = Math.log10(cur_pgv * 1000) + 6;
-                if (radius > 20)
-                {   
-                    radius = 20;
-                }
-                return this.scale * radius / matrix.a;
+                const scales = this.get_scales();
+                radius = this.scale * scales.radius(cur_pgv);
             }
-            else {
-                return 0;
-            }
+
+            return radius / this.svg_scale;
         },
 
         pgv_fill: function() {
@@ -156,7 +166,9 @@ export default {
             const y = d3.scaleLinear().domain([this.map_limits.y_min,
                                                this.map_limits.y_max])
                                        .range([2500, 0]);
-            return {x, y};
+            const radius = d3.scaleLog().domain(this.$props.pgv_limits)
+                                        .range(this.$props.radius_limits);
+            return {x, y, radius};
         },
 
         pgv_to_color(pgv) {
@@ -166,6 +178,11 @@ export default {
             var color = d3.interpolatePlasma(scale(pgv));
 
             return color;
+        },
+
+        on_resize: function() {
+            var map_svg = d3.select("#map");
+            this.svg_matrix = map_svg.node().getScreenCTM();
         },
     },
 }
