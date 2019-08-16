@@ -1,5 +1,5 @@
 <template>
-    <g v-bind:id="element_id">
+    <g v-bind:id="element_id" :transform="legend_transform">
         <circle v-for="(cur_pgv, k) in pgv_values"
                 v-bind:key="cur_pgv"
                 :id="'pgv_legend_marker_' + k"
@@ -20,11 +20,6 @@ export default {
 
     props: {
         name: String,
-        pgv_values: Array,
-        radius_limits: Array,
-        pgv_limits: Array,
-        map_limits: Object,
-        position: Object,
     },
 
     mounted () {
@@ -95,42 +90,72 @@ export default {
                 if (k == 0)
                 {
                     space = this.pgv_radius[k];
-                    cur_pos.x = this.$props.position.x + space + gap_x;
-                    cur_pos.y = this.$props.position.y;
+                    cur_pos.x = space + gap_x;
+                    cur_pos.y = 0;
                 }
                 else
                 {
                     space = this.pgv_radius[k-1] + this.pgv_radius[k];
                     cur_pos.x = position[k-1].x + space + gap_x;
-                    cur_pos.y = this.$props.position.y;
+                    cur_pos.y = position[k-1].y;
                 }
                 position.push(cur_pos);
             }
-
             return position;
+        },
+
+        legend_position: function() {
+            var left_middle = {x: 0, y: 0};
+            var width = this.marker_position[this.marker_position.length - 1].x +
+                        this.pgv_radius[this.pgv_radius.length - 1];
+            var height = this.pgv_radius[this.pgv_radius.length - 1];
+
+            if (this.config.position == 'bottom-right')
+            {
+                left_middle.x = this.map_size.width - width - this.config.margin;
+                left_middle.y = this.map_size.height - height - this.config.margin;
+            }
+
+            return left_middle;
+        },
+
+        map_size: function() {
+            return this.$store.getters.map_config.size;  
+        },
+
+        map_limits: function() {
+            return this.$store.getters.map_config.map_limits;
+        },
+
+        scales: function() {
+            return this.$store.getters.scales;
+        },
+
+        pgv_values: function() {
+            return this.$store.getters.map_config.legend.values;
+        },
+
+        width: function() {
+            return 0;    
+        },
+
+        config: function() {
+            return this.$store.getters.map_config.legend;
+        },
+
+        legend_transform: function() {
+            return "translate(" + this.legend_position.x + "," + this.legend_position.y + ")";
         },
 
     },
 
     methods: {
-        get_scales() {
-            const x = d3.scaleLinear().domain([this.map_limits.x_min, 
-                                               this.map_limits.x_max])
-                                       .range([0, 4000]);
-            const y = d3.scaleLinear().domain([this.map_limits.y_min,
-                                               this.map_limits.y_max])
-                                       .range([2500, 0]);
-            const radius = d3.scaleLog().domain(this.$props.pgv_limits)
-                                        .range(this.$props.radius_limits);
-            return {x, y, radius};
-        },
-
         compute_pgv_radius: function(pgv) {
             var cur_pgv = pgv;
             var radius = 4;
 
             if (cur_pgv) {
-                const scales = this.get_scales();
+                const scales = this.scales;
                 radius = this.scale * scales.radius(cur_pgv);
             }
 
@@ -140,20 +165,12 @@ export default {
 
         pgv_to_color(pgv) {
             // Convert the PGV value [m/s] to a color value.
-            var scale = d3.scaleLog().domain([1e-6, 1e-2])
-                                     .range([0, 1]);
-            var color = d3.interpolatePlasma(scale(pgv));
-
+            const colormap = this.$store.getters.map_config.colormap;
+            var color = colormap(this.scales.color(pgv));
             return color;
         },
 
         on_resize: function() {
-            //var markers = d3.selectAll("circle[id^='pgv_legend_marker']");
-            //var self = this;
-            //markers.each(function(d, k) {
-            //    var cur_el = d3.select(this);
-            //    cur_el.attr("r", self.pgv_radius(self.pgv_values[k]));
-            //});
             var map_svg = d3.select("#map");
             this.svg_matrix = map_svg.node().getScreenCTM();
         }

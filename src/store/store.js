@@ -108,6 +108,22 @@ export default new Vuex.Store({
         server_state: '',
         display_period: 1800000,
         //display_period: 60000,
+
+        map_config: { 
+                     map_limits: {'x_min': 519685.529,
+                                  'y_min': 5252085.484,
+                                  'x_max': 672085.529,
+                                  'y_max': 5347335.484},
+                     size: {'width': 4000,
+                            'height': 2500},
+                     marker_radius_limits: [5, 30],
+                     pgv_limits: [1e-6, 1e-2],
+                     colormap: d3.interpolatePlasma,
+                     legend: { values: [1e-6, 1e-5, 3e-5, 1e-4, 3e-4, 1e-3, 3e-3, 1e-2],
+                               position: 'bottom-right',
+                               margin: 40,
+                             },
+                    },
     },
 
     getters: {
@@ -170,6 +186,28 @@ export default new Vuex.Store({
             return state.station_meta;
         },
 
+        map_config: (state) => {
+            return state.map_config;
+        },
+
+        scales: (state) => {
+            const x = d3.scaleLinear().domain([state.map_config.map_limits.x_min, 
+                                               state.map_config.map_limits.x_max])
+                                       .range([0,
+                                               state.map_config.size.width]);
+            const y = d3.scaleLinear().domain([state.map_config.map_limits.y_min,
+                                               state.map_config.map_limits.y_max])
+                                       .range([state.map_config.size.height,
+                                               0]);
+            const radius = d3.scaleLog().domain(state.map_config.pgv_limits)
+                                        .range(state.map_config.marker_radius_limits)
+                                        .clamp(true);
+            const color = d3.scaleLog().domain(state.map_config.pgv_limits)
+                                       .range([0, 1])
+                                       .clamp(true);
+            return {x, y, radius, color};
+        },
+
 
     },
 
@@ -194,15 +232,6 @@ export default new Vuex.Store({
                     handle_msg_data(msg_id, payload.payload, state)
                     break;
             }
-            //state.stations = Object.keys(payload)
-            //state.pgv_data = {}
-            //for (var key in payload)
-            //{
-            //    state.pgv_data[key] = {time: payload[key].time,
-            //                           data: payload[key].data}
-            //}
-            //state.pgv_time = payload.time
-            //state.pgv_value = payload.pgv
         },
 
         SOCKET_ONCLOSE(state, event) {

@@ -25,14 +25,11 @@ export default {
         station_id: String,
         x_utm: String,
         y_utm: String,
-        map_limits: Object,
-        map_size: Object,
         radius_limits: Array,
-        pgv_limits: Array,
     },
 
     mounted () {
-        var scales = this.get_scales();
+        var scales = this.scales;
         var marker_svg = d3.select("#" + this.element_id + "_current");
         marker_svg.attr("cx", scales.x(this.x_utm))
                   .attr("cy", scales.y(this.y_utm))
@@ -73,67 +70,60 @@ export default {
             return scale;
         },
 
+        pgv: function() {
+            return this.$store.getters.disp_range_max_pgv_by_station(this.$props.station_id);
+        },
+
         pgv_radius: function() {
-            var cur_pgv = this.$store.getters.current_pgv_by_station(this.$props.station_id);
-            //var map_svg = d3.select("#map");
-            //var matrix = map_svg.node().getScreenCTM();
+            const scales = this.scales;
+            var radius = scales.radius(0);
 
-            var radius = 4;
-
-            if (cur_pgv) {
-                const scales = this.get_scales();
-                radius = this.scale * scales.radius(cur_pgv);
+            if (this.pgv) {
+                radius = this.scale * scales.radius(this.pgv);
             }
 
             return radius / this.svg_scale;
         },
 
         pgv_max_radius: function() {
-            var cur_pgv = this.$store.getters.disp_range_max_pgv_by_station(this.$props.station_id);
-            //var map_svg = d3.select("#map");
-            //var matrix = map_svg.node().getScreenCTM();
-
             var radius = 0;
 
-            if (cur_pgv) {
-                const scales = this.get_scales();
-                radius = this.scale * scales.radius(cur_pgv);
+            if (this.pgv) {
+                const scales = this.scales;
+                radius = this.scale * scales.radius(this.pgv);
             }
 
             return radius / this.svg_scale;
         },
 
         pgv_fill: function() {
-            var cur_pgv = this.$store.getters.current_pgv_by_station(this.$props.station_id);
             var cur_fill = 'grey';
 
-            if (cur_pgv)
+            if (this.pgv)
             {
-                cur_fill = this.pgv_to_color(cur_pgv);
+                cur_fill = this.pgv_to_color(this.pgv);
             }
 
             return cur_fill;
         },
 
         pgv_max_fill: function() {
-            var cur_pgv = this.$store.getters.disp_range_max_pgv_by_station(this.$props.station_id);
             var cur_fill = 'grey';
 
-            if (cur_pgv)
+            if (this.pgv)
             {
-                cur_fill = this.pgv_to_color(cur_pgv);
+                cur_fill = this.pgv_to_color(this.pgv);
             }
 
             return cur_fill;
         },
 
         pgv_stroke: function() {
-            var cur_pgv = this.$store.getters.current_pgv_by_station(this.$props.station_id);
             var cur_fill = 'black';
 
-            if (cur_pgv)
+            if (this.pgv)
             {
-                if (cur_pgv >= 1e-4)
+                if (this.pgv >= 1e-4)
                 {
                     cur_fill = 'red';
                 }
@@ -143,40 +133,38 @@ export default {
         },
 
         pgv_max_stroke: function() {
-            var cur_pgv = this.$store.getters.disp_range_max_pgv_by_station(this.$props.station_id);
             var cur_fill = 'black';
 
-            if (cur_pgv)
+            if (this.pgv)
             {
-                if (cur_pgv >= 1e-4)
+                if (this.pgv >= 1e-4)
                 {
                     cur_fill = 'red';
                 }
             }
 
             return cur_fill;
-        }
+        },
+
+        map_limits: function() {
+            return this.$store.getters.map_config.map_limits;
+        },
+
+        scales: function() {
+            return this.$store.getters.scales;
+        },
+
+        pgv_limits: function() {
+            return this.$store.getters.map_config.pgv_limits;
+        },
     },
 
     methods: {
-        get_scales() {
-            const x = d3.scaleLinear().domain([this.map_limits.x_min, 
-                                               this.map_limits.x_max])
-                                       .range([0, 4000]);
-            const y = d3.scaleLinear().domain([this.map_limits.y_min,
-                                               this.map_limits.y_max])
-                                       .range([2500, 0]);
-            const radius = d3.scaleLog().domain(this.$props.pgv_limits)
-                                        .range(this.$props.radius_limits);
-            return {x, y, radius};
-        },
 
         pgv_to_color(pgv) {
             // Convert the PGV value [m/s] to a color value.
-            var scale = d3.scaleLog().domain([1e-6, 1e-2])
-                                     .range([0, 1]);
-            var color = d3.interpolatePlasma(scale(pgv));
-
+            const colormap = this.$store.getters.map_config.colormap;
+            var color = colormap(this.scales.color(pgv));
             return color;
         },
 

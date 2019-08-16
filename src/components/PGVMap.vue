@@ -10,18 +10,9 @@
                           v-bind:key="cur_station.id"
                           v-bind:station_id="cur_station.id"
                           v-bind:x_utm="cur_station.x_utm"
-                          v-bind:y_utm="cur_station.y_utm"
-                          :map_limits="map_limits"
-                          :map_size="map_size"
-                          :radius_limits="marker_radius_limits"
-                          :pgv_limits="pgv_limits"/>
+                          v-bind:y_utm="cur_station.y_utm"/>
 
-            <PGVLegend name="map_legend"
-                       :pgv_values="legend_values"
-                       :radius_limits="marker_radius_limits"
-                       :map_limits="map_limits"
-                       :pgv_limits="pgv_limits"
-                       :position="{x: 100, y: 100}"/>
+            <PGVLegend name="map_legend"/>
         </svg>
     </div>
 </template>
@@ -48,15 +39,6 @@ export default {
         return {
             map_image: 'undefined',
             map_image_url: '/image/mss_map_with_stations.jpg',
-            map_limits: {'x_min': 519685.529,
-                         'y_min': 5252085.484,
-                         'x_max': 672085.529,
-                         'y_max': 5347335.484},
-            map_size: {'width': 4000,
-                       'height': 2500},
-            legend_values: [1e-5, 3e-5, 1e-4, 3e-4, 1e-3, 3e-3, 1e-2],
-            marker_radius_limits: [5, 40],
-            pgv_limits: [1e-6, 1e-1],
         };
     },
 
@@ -79,42 +61,16 @@ export default {
         stations: function() {
             return this.$store.getters.station_meta;
         },
+
+        scales: function() {
+            return this.$store.getters.scales;
+        },
     },
 
     methods: {
         init_map() {
             this.show_image();
             //this.on_resize();
-        },
-
-        plot_stations() {
-            console.log('Plotting stations.');
-            const map_svg = d3.select("#map");
-
-            var scales = this.get_scales();
-
-            map_svg.selectAll("circle").remove();
-
-            map_svg.selectAll("circle")
-                   .data(this.stations)
-                   .enter()
-                   .append("circle")
-                        .attr("cx", function(d) { return scales.x(d.x_utm);})
-                        .attr("cy", function(d) { return scales.y(d.y_utm);})
-                        .attr("r", this.radius)
-                        .attr('fill', 'orange')
-                        .attr('stroke', 'black')
-                        .attr('id', function(d) { return d.id;});
-        },
-
-        get_scales() {
-            const x = d3.scaleLinear().domain([this.map_limits.x_min, 
-                                                this.map_limits.x_max])
-                                       .range([0, 1920]);
-            const y = d3.scaleLinear().domain([this.map_limits.y_min,
-                                                this.map_limits.y_max])
-                                       .range([1080, 0]);
-            return {x, y};
         },
 
         calculate_path() {
@@ -164,12 +120,13 @@ export default {
 <style scoped lang="sass">
 
 div#mapcontainer
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    height: 100%;
+    //position: relative;
+    //top: 0;
+    //left: 0;
+    //right: 0;
+    //bottom: 0;
 
 svg#map
-    border: solid 2px black
+    border: none;
 </style>
