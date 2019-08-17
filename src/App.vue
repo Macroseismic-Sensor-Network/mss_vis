@@ -1,18 +1,13 @@
 <template>
     <div id="app">
-        <full-page ref="fullpage" :options="options" id="fullpage">
-            <div class="section">
-                <PGVMap />
+        <div>
+            <PGVMap />
+        </div>
+        <div>
+            <div id="graph_display">
+                <PGVGraph v-for="cur_stream in streams" v-bind:key="cur_stream" v-bind:stream_id="cur_stream" :height="100 / streams.length"/>
             </div>
-            <div class="section">
-                <div id="graph_display">
-                    <PGVGraph v-for="cur_stream in streams" v-bind:key="cur_stream" v-bind:stream_id="cur_stream" :height="100 / streams.length"/>
-                </div>
-            </div>
-            <div class="section">
-                <h2>Third section</h2>
-            </div>
-        </full-page>
+        </div>
     </div>
 </template>
 
