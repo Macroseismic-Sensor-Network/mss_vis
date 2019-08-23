@@ -33,29 +33,6 @@ function handle_msg_data(msg_id, payload, state) {
                     state.pgv_data[key].data = state.pgv_data[key].data.concat(payload[key].data)
                     state.pgv_data[key].time = state.pgv_data[key].time.concat(payload[key].time)
 
-                    //console.log("display_range: " + display_range);
-                    var display_range = get_display_range(state);
-                    var display_start = new Date(new Date(display_range[0]) - 1000 * 10);
-
-                    // Crop the data to the needed length. Drop old data.
-                    var crop_ind = -1;
-                    for (var k = 0; k < state.pgv_data[key].time.length; k++)
-                    {
-                        var cur_time = new Date(state.pgv_data[key].time[k]);
-                        if (cur_time >= display_start)
-                        {
-                            crop_ind = k;
-                            break;
-                        }
-                    }
-
-                    if (crop_ind > 0)
-                    {
-                        //console.log("First value in display range: " + state.pgv_data[key].time[crop_ind])
-                        //console.log("crop_index: " + crop_ind)
-                        state.pgv_data[key].time = state.pgv_data[key].time.slice(crop_ind);
-                        state.pgv_data[key].data = state.pgv_data[key].data.slice(crop_ind);
-                    }
                 }
                 else
                 {
@@ -71,6 +48,8 @@ function handle_msg_data(msg_id, payload, state) {
         case 'pgv_archive':
             console.log("Received pgv archive data.");
             state.server_state = 'archive received'
+            // Clear the pgv_data.
+            state.pgv_data = {}
             for (key in payload)
             {
                 if (key in state.pgv_data)
@@ -88,9 +67,41 @@ function handle_msg_data(msg_id, payload, state) {
                 }
             }
             break;
-
     }
 
+    // Trim the data to the display range.
+    trim_data(state);
+
+}
+
+
+function trim_data(state) {
+    for (var key in state.pgv_data)
+    {
+        //console.log("display_range: " + display_range);
+        var display_range = get_display_range(state);
+        var display_start = new Date(new Date(display_range[0]) - 1000 * 10);
+
+        // Crop the data to the needed length. Drop old data.
+        var crop_ind = -1;
+        for (var k = 0; k < state.pgv_data[key].time.length; k++)
+        {
+            var cur_time = new Date(state.pgv_data[key].time[k]);
+            if (cur_time >= display_start)
+            {
+                crop_ind = k;
+                break;
+            }
+        }
+
+        if (crop_ind > 0)
+        {
+            //console.log("First value in display range: " + state.pgv_data[key].time[crop_ind])
+            //console.log("crop_index: " + crop_ind)
+            state.pgv_data[key].time = state.pgv_data[key].time.slice(crop_ind);
+            state.pgv_data[key].data = state.pgv_data[key].data.slice(crop_ind);
+        }
+    }
 }
 
 
@@ -136,6 +147,7 @@ export default new Vuex.Store({
         message: '',
         server_id: '',
         server_state: '',
+        current_range: 60000,
         display_period: 1800000,
         //display_period: 60000,
 
@@ -170,10 +182,17 @@ export default new Vuex.Store({
             return tmp
         },
 
-        current_pgv_by_station: (state) => (station_id) => {
+        current_pgv_by_station: (state, getters) => (station_id) => {
             if (station_id in state.pgv_data) {
-                var last_ind = state.pgv_data[station_id].data.length - 1
-                return state.pgv_data[station_id].data[last_ind]
+                var last_ind = state.pgv_data[station_id].data.length - 1;
+                var cur_pgv = state.pgv_data[station_id].data[last_ind];
+                var cur_time = new Date(state.pgv_data[station_id].time[last_ind]);
+                const cur_time_limit = new Date(new Date(getters.data_time_range[1]) - state.current_range);
+                if (cur_time < cur_time_limit)
+                {
+                    cur_pgv = undefined;
+                }
+                return cur_pgv;
             }
             else {
                 return undefined;
@@ -185,11 +204,22 @@ export default new Vuex.Store({
             return state.pgv_data[station_id]
         },
 
-        disp_range_max_pgv_by_station: (state) => (station_id) => {
+        disp_range_max_pgv_by_station: (state, getters) => (station_id) => {
             var max_pgv = undefined;
+            const time_limit = new Date(new Date(getters.data_time_range[1]) - state.current_range);
             if (station_id in state.pgv_data)
             {
-                max_pgv = Math.max(...state.pgv_data[station_id].data);
+                var cur_data = []
+                for (var k = 0; k < state.pgv_data[station_id].time.length; k++)
+                {
+                    var cur_time = new Date(state.pgv_data[station_id].time[k]);
+                    if (cur_time >= time_limit)
+                    {
+                        cur_data.push(state.pgv_data[station_id].data[k]);
+                    }
+                }
+                //max_pgv = Math.max(...state.pgv_data[station_id].data);
+                max_pgv = Math.max(...cur_data);
             }
             return max_pgv;
         },
@@ -215,7 +245,7 @@ export default new Vuex.Store({
 
             return [to_isoformat(start_date), to_isoformat(end_date)]
         },
-        
+
         data_time_range: (state) => {
             var first_dates = [];
             var last_dates = [];
@@ -224,12 +254,11 @@ export default new Vuex.Store({
                 var cur_date = state.pgv_data[key].time[0];
                 var res = cur_date.split(/[:T-]/);
                 first_dates.push(Date.UTC(res[0], res[1], res[2], res[3], res[4], res[5]));
-                
+
                 var last_ind = state.pgv_data[key].time.length - 1;
                 cur_date = state.pgv_data[key].time[last_ind];
                 res = cur_date.split(/[:T-]/);
                 last_dates.push(Date.UTC(res[0], res[1], res[2], res[3], res[4], res[5]));
-                
             }
             var end_timestamp = Math.max.apply(null, last_dates);
             var start_timestamp = Math.min.apply(null, first_dates);
