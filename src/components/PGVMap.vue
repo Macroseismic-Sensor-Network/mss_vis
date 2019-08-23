@@ -1,6 +1,9 @@
 <template>
     <div id="mapcontainer">
         <!--<svg id="map" viewBox="0 0 4000 2500" preserveAspectRatio="xMidYMid slice">-->
+        <div id="map_info">last data: {{ data_time_range[1] }} UTC<br>
+                           first data: {{ data_time_range[0] }} UTC<br>
+                           server state: {{ server_state }}</div>
         <svg id="map"
              width="100%"
              height="100%"
@@ -24,7 +27,7 @@ import PGVLegend from '../components/PGVLegend.vue'
 import * as d3 from "d3";
 
 export default {
-    name: 'PGVMapSvg',
+    name: 'PGVMap',
 
     props: {
         title: String,
@@ -38,7 +41,7 @@ export default {
     data() {
         return {
             map_image: 'undefined',
-            map_image_url: '/image/mss_map_with_stations.jpg',
+            map_image_url: '/assets/vue/image/mss_map_with_stations.jpg',
         };
     },
 
@@ -54,8 +57,12 @@ export default {
     },
 
     computed: {
-        display_range: function() {
-            return this.$store.getters.display_range;
+        data_time_range: function() {
+            return this.$store.getters.data_time_range;
+        },
+
+        server_state: function() {
+            return this.$store.getters.server_state;
         },
 
         stations: function() {
@@ -94,6 +101,7 @@ export default {
                     .attr("xlink:href", self.map_image_url);
                 d3.select('#map_image').lower();
             }
+            console.log("Loading map image: " + this.map_image_url);
             this.map_image.src = this.map_image_url;
         },
 
@@ -121,11 +129,19 @@ export default {
 
 div#mapcontainer
     height: 100%;
-    //position: relative;
+    position: relative;
     //top: 0;
     //left: 0;
     //right: 0;
     //bottom: 0;
+
+div#map_info
+    width: 100%;
+    position: absolute;
+    text-align: right;
+    font-size: 10pt;
+    //background-color: #ff0000;
+    //opacity: 0.3;
 
 svg#map
     border: none;
