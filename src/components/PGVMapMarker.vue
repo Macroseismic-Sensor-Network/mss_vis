@@ -71,6 +71,10 @@ export default {
         },
 
         pgv: function() {
+            return this.$store.getters.current_pgv_by_station(this.$props.station_id);
+        },
+
+        pgv_max: function() {
             return this.$store.getters.disp_range_max_pgv_by_station(this.$props.station_id);
         },
 
@@ -88,9 +92,9 @@ export default {
         pgv_max_radius: function() {
             var radius = 0;
 
-            if (this.pgv) {
+            if (this.pgv_max) {
                 const scales = this.scales;
-                radius = this.scale * scales.radius(this.pgv);
+                radius = this.scale * scales.radius(this.pgv_max);
             }
 
             return radius / this.svg_scale;
@@ -110,9 +114,9 @@ export default {
         pgv_max_fill: function() {
             var cur_fill = 'grey';
 
-            if (this.pgv)
+            if (this.pgv_max)
             {
-                cur_fill = this.pgv_to_color(this.pgv);
+                cur_fill = this.pgv_to_color(this.pgv_max);
             }
 
             return cur_fill;
@@ -135,9 +139,9 @@ export default {
         pgv_max_stroke: function() {
             var cur_fill = 'black';
 
-            if (this.pgv)
+            if (this.pgv_max)
             {
-                if (this.pgv >= 1e-4)
+                if (this.pgv_max >= 1e-4)
                 {
                     cur_fill = 'red';
                 }
