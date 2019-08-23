@@ -23,6 +23,7 @@ function handle_msg_soh(msg_id, payload, state) {
 function handle_msg_data(msg_id, payload, state) {
     switch (msg_id) {
         case 'pgv':
+            state.server_state = 'online'
             for (var key in payload)
             {
                 if (key in state.pgv_data)
@@ -65,7 +66,29 @@ function handle_msg_data(msg_id, payload, state) {
                     Vue.set(state.pgv_data[key], "time", payload[key].time)
                 }
             }
-            break
+            break;
+
+        case 'pgv_archive':
+            console.log("Received pgv archive data.");
+            state.server_state = 'archive received'
+            for (key in payload)
+            {
+                if (key in state.pgv_data)
+                {
+                    state.pgv_data[key].time = payload[key].time
+                    state.pgv_data[key].data = payload[key].data
+                }
+                else
+                {
+                    // Use the Vue.set function to ensure, that the store
+                    // tracks the changes of the object elements.
+                    Vue.set(state.pgv_data, key, {})
+                    Vue.set(state.pgv_data[key], "data", payload[key].data)
+                    Vue.set(state.pgv_data[key], "time", payload[key].time)
+                }
+            }
+            break;
+
     }
 
 }
@@ -265,8 +288,6 @@ export default new Vuex.Store({
                     handle_msg_soh(msg_id, payload.payload, state)
                     break;
                 case 'data':
-                    state.server_state = 'online'
-                    console.info("Received data.", payload.payload)
                     handle_msg_data(msg_id, payload.payload, state)
                     break;
             }
