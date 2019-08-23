@@ -8,7 +8,14 @@ function handle_msg_soh(msg_id, payload, state) {
     switch (msg_id) {
         case 'connection':
             state.server_id = payload.server_id
-            state.server_state = payload.state
+            if (payload.state == 'registered')
+            {
+                state.server_state = 'waiting for data';
+            }
+            else
+            {
+                state.server_state = payload.state;
+            }
             break
     }
 }
@@ -127,6 +134,10 @@ export default new Vuex.Store({
     },
 
     getters: {
+        server_state: state => {
+            return state.server_state;
+        },
+
         current_pgv: state => {
             var tmp = {}
             for (var key in state.pgv_data) {
@@ -164,7 +175,7 @@ export default new Vuex.Store({
             return state.pgv_data[station_id].data.length;
         },
 
-        display_range: (state) => {
+        display_time_range: (state) => {
             var display_period = state.display_period;
             var last_dates = [];
             for (var key in state.pgv_data) {
@@ -175,6 +186,30 @@ export default new Vuex.Store({
             }
             var end_timestamp = Math.max.apply(null, last_dates);
             var start_timestamp = end_timestamp - display_period;
+
+            var start_date = new Date(start_timestamp);
+            var end_date = new Date(end_timestamp);
+
+            return [to_isoformat(start_date), to_isoformat(end_date)]
+        },
+        
+        data_time_range: (state) => {
+            var first_dates = [];
+            var last_dates = [];
+            for (var key in state.pgv_data) {
+                // Get the first date of the data.
+                var cur_date = state.pgv_data[key].time[0];
+                var res = cur_date.split(/[:T-]/);
+                first_dates.push(Date.UTC(res[0], res[1], res[2], res[3], res[4], res[5]));
+                
+                var last_ind = state.pgv_data[key].time.length - 1;
+                cur_date = state.pgv_data[key].time[last_ind];
+                res = cur_date.split(/[:T-]/);
+                last_dates.push(Date.UTC(res[0], res[1], res[2], res[3], res[4], res[5]));
+                
+            }
+            var end_timestamp = Math.max.apply(null, last_dates);
+            var start_timestamp = Math.min.apply(null, first_dates);
 
             var start_date = new Date(start_timestamp);
             var end_date = new Date(end_timestamp);
@@ -215,6 +250,7 @@ export default new Vuex.Store({
         SOCKET_ONOPEN(state, event) {
             Vue.prototype.$socket = event.currentTarget;
             state.connected = true;
+            state.server_state = 'connection opened'
             console.info("Connected to websocket server.");
             console.info("state: ", state);
             console.info("event: ", event);
@@ -229,6 +265,8 @@ export default new Vuex.Store({
                     handle_msg_soh(msg_id, payload.payload, state)
                     break;
                 case 'data':
+                    state.server_state = 'online'
+                    console.info("Received data.", payload.payload)
                     handle_msg_data(msg_id, payload.payload, state)
                     break;
             }
@@ -236,29 +274,33 @@ export default new Vuex.Store({
 
         SOCKET_ONCLOSE(state, event) {
             state.connected = false;
+            state.server_state = 'disconnected'
             console.info("Disconnected from server.");
             console.info("event: ", event);
         },
 
         SOCKET_ONERROR(state, event) {
+            state.server_state = 'error';
             console.error("Websocket error.");
             console.error("state: ", state);
             console.error("event: ", event);
         },
 
         SOCKET_RECONNECT(state, count) {
+            state.server_state = 'reconnecting';
             console.info("Reconnecting...");
             console.info("state: ", state);
             console.info("count: ", count);
         },
 
         SOCKET_RECONNECT_ERROR(state) {
+            state.server_state = 'reconnection error';
             console.error("Error while reconnecting.");
             console.error(state);
         },
 
         LOAD_STATION_METADATA(state) {
-            d3.csv("/data/mss_stations_2019_147.csv").then( function(data) {
+            d3.csv("/assets/vue/data/mss_stations_2019_147.csv").then( function(data) {
                 for (var k = 0; k < data.length; k++)
                 {
                     data[k].id = data[k].network + "." +  
