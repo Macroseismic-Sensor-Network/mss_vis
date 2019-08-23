@@ -22,10 +22,14 @@
             var height = window.innerHeight;
             map.style.height =  height + 'px';
             var img_bbox = map_image.getBoundingClientRect();
-            map_info.style.left = img_bbox.x - parseInt(body_style.marginLeft) + 'px';
-            map_info.style.top = img_bbox.y - parseInt(body_style.marginTop) + 'px';
+            // The rectangel returned by getBoundingClientRect takes the
+            // current scrolling into account. Add it therefore to the 
+            // position value.
+            map_info.style.left = img_bbox.left - parseInt(body_style.marginLeft) + window.scrollX + 'px';
+            map_info.style.top = img_bbox.top - parseInt(body_style.marginTop) + window.scrollY + 'px';
             map_info.style.width =  img_bbox.width + 'px';
             map_info.style.height = img_bbox.height + 'px';
+            console.log(img_bbox);
         }
 
         window.addEventListener("resize", resize_map);
