@@ -1,0 +1,5 @@
+<!-- Javascript links created by vue.js using webpack  -->
+
+<% for (var chunk in htmlWebpackPlugin.files.chunks) { %>
+<script src="{{ site.url }}{{ site.baseurl }}/<%= htmlWebpackPlugin.files.chunks[chunk].entry %>"></script>
+<% } %>

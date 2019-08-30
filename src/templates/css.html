@@ -1,0 +1,7 @@
+<!-- CSS stylesheet links created by vue.js using webpack  -->
+
+<style type="text/css">
+    <% for (var css in htmlWebpackPlugin.files.css) { %>
+      @import url("{{ site.url }}{{ site.baseurl }}/<%= htmlWebpackPlugin.files.css[css] %>");
+    <% } %>
+</style>
