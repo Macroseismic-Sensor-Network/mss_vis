@@ -163,7 +163,7 @@ export default new Vuex.Store({
                      colormap: d3.interpolatePlasma,
                      legend: { values: [1e-6, 1e-5, 3e-5, 1e-4, 3e-4, 1e-3, 3e-3, 1e-2],
                                position: 'bottom-right',
-                               margin: 40,
+                               margin: 20,
                              },
                     },
     },
