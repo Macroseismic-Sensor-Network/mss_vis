@@ -1,5 +1,9 @@
 <template>
     <g v-bind:id="element_id" :transform="legend_transform">
+        <text id="legend_title"
+              :x="legend_position.width / 2"
+              :y="-30"
+              text-anchor="middle">peak-ground-velocity [mm/s]</text>
         <circle v-for="(cur_pgv, k) in pgv_values"
                 v-bind:key="cur_pgv"
                 :id="'pgv_legend_marker_' + k"
@@ -8,6 +12,16 @@
                 :cx="marker_position[k].x"
                 :cy="marker_position[k].y"
                 :fill="marker_color[k]"/>
+        <text v-for="(cur_pgv, k) in pgv_values"
+              v-bind:key="'pgv_legend_label' + k"
+              :id="'pgv_legend_label' + k"
+              :x="marker_position[k].x + 30"
+              :y="marker_position[k].y"
+              text-anchor="left"
+              :font-size="font_size"
+              :transform="'rotate(90 ' + marker_position[k].x + ' ' + marker_position[k].y +')'"
+              style="">{{ label_pgv[k] }}
+        </text>
     </g>
 </template>
 
@@ -50,6 +64,7 @@ export default {
     data() {
         return {
             scale: 1,
+            default_font_size: 15,
             svg_matrix: [],
             marker_color: [],
         };
@@ -79,6 +94,10 @@ export default {
             return radius;
         },
 
+        font_size: function() {
+            return this.default_font_size;
+        },
+
         marker_position: function() {
             var position = [];
             var gap_x = 10;
@@ -105,15 +124,17 @@ export default {
         },
 
         legend_position: function() {
-            var left_middle = {x: 0, y: 0};
+            var left_middle = {x: 0, y: 0, width: 0, height: 0};
             var width = this.marker_position[this.marker_position.length - 1].x +
                         this.pgv_radius[this.pgv_radius.length - 1];
-            var height = this.pgv_radius[this.pgv_radius.length - 1];
+            var height = this.pgv_radius[this.pgv_radius.length - 1] + 70;
 
             if (this.config.position == 'bottom-right')
             {
                 left_middle.x = this.map_size.width - width - this.config.margin;
                 left_middle.y = this.map_size.height - height - this.config.margin;
+                left_middle.width = width;
+                left_middle.height = height;
             }
 
             return left_middle;
@@ -134,6 +155,28 @@ export default {
         pgv_values: function() {
             return this.$store.getters.map_config.legend.values;
         },
+        
+        label_pgv: function() {
+            var pgv = [];
+            for (var k = 0; k < this.config.values.length; k++)
+            {
+                var cur_pgv = this.config.values[k];
+                cur_pgv = cur_pgv * 1000;
+                if (k == 0)
+                {
+                    pgv.push('<=' + Math.round(cur_pgv * 1000) / 1000);
+                }
+                else if (k == this.config.values.length - 1)
+                {
+                    pgv.push('>=' + Math.round(cur_pgv * 1000) / 1000);
+                }
+                else
+                {
+                    pgv.push(Math.round(cur_pgv * 1000) / 1000);
+                }
+            }
+            return pgv;
+        },
 
         width: function() {
             return 0;    
@@ -144,7 +187,18 @@ export default {
         },
 
         legend_transform: function() {
-            return "translate(" + this.legend_position.x + "," + this.legend_position.y + ")";
+            console.log(this.legend_position);
+            console.log(this.svg_scale);
+            console.log(this.legend_position.width / this.svg_scale);
+            var translate_x = this.legend_position.x - this.legend_position.width / this.svg_scale;
+            var translate_y = this.legend_position.y - this.legend_position.height / this.svg_scale;
+
+            var scale = 1/this.svg_scale;
+            console.log("scale: " + scale);
+            translate_x = this.legend_position.x - (this.legend_position.width * scale - this.legend_position.width);
+            translate_y = this.legend_position.y - (this.legend_position.height * scale - this.legend_position.height);
+            return "translate(" + translate_x +  "," + translate_y + ")" +  
+                   "scale(" + scale + ")";
         },
 
     },
@@ -159,7 +213,7 @@ export default {
                 radius = this.scale * scales.radius(cur_pgv);
             }
 
-            return radius / this.svg_scale;
+            return radius;
         },
 
 
