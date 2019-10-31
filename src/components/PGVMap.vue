@@ -9,6 +9,7 @@
              height="100%"
              viewBox="0 0 4000 2500"
              preserveAspectRatio="xMidYMid meet">
+            <PGVEventVoronoi event_id="mss_event_20191031T155000"/>
             <PGVMapMarker v-for="cur_station in stations" 
                           v-bind:key="cur_station.id"
                           v-bind:station_id="cur_station.id"
@@ -24,6 +25,7 @@
 <script>
 import PGVMapMarker from '../components/PGVMapMarker.vue'
 import PGVLegend from '../components/PGVLegend.vue'
+import PGVEventVoronoi from '../components/PGVEventVoronoi.vue'
 import * as d3 from "d3";
 
 export default {
@@ -36,6 +38,7 @@ export default {
     components: {
         PGVMapMarker,
         PGVLegend,
+        PGVEventVoronoi
     },
 
     data() {
