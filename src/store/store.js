@@ -67,6 +67,10 @@ function handle_msg_data(msg_id, payload, state) {
                 }
             }
             break;
+
+        case 'detection_result':
+            console.log("Received a detection result");
+            state.detection_result_data = payload;
     }
 
     // Trim the data to the display range.
@@ -143,6 +147,7 @@ export default new Vuex.Store({
         stations: [],
         station_meta: [],
         pgv_data: {},
+        detection_result_data: {},
         connected: false,
         message: '',
         server_id: '',
@@ -293,6 +298,10 @@ export default new Vuex.Store({
                                        .range([0, 1])
                                        .clamp(true);
             return {x, y, radius, color};
+        },
+
+        detection_result: (state) => {
+            return state.detection_result_data;
         },
 
 
