@@ -52,11 +52,42 @@ export default {
             console.log("Plotting the detection result.");
 
             // Create the Delaunay triangles.
-            var vertices = [];
             var scales= this.scales;
-            var used_stations = this.detection_result.used_stations;
-            var stations = [];
+            //var used_stations = this.detection_result.used_stations;
 
+            var line_generator = d3.line().x(function(d) { return scales.x(d[0]); })
+                                          .y(function(d) { return scales.y(d[1]); });
+
+            var container = d3.select('#' + this.event_id);
+
+            // Clear all elements in the container.
+            container.selectAll("*").remove();
+            for (const cur_simp of this.detection_result.trigger_data) {
+                var simp_stations = []
+                for (const cur_simp_station of cur_simp.simp_stations) {
+                    var cur_station = this.stations.find(x => x.name === cur_simp_station);
+                    simp_stations.push(cur_station);
+                }
+            
+                var vertices = [];
+                for (const cur_station of simp_stations) {
+                    vertices.push([parseFloat(cur_station.x_utm),
+                                   parseFloat(cur_station.y_utm)]);
+                }
+                
+                var fill_color = 'none';
+                if (cur_simp.trigger.includes(false)) {
+                    var max_pgv = cur_simp.pgv.map(function(row){ return Math.max.apply(Math, row); });
+                    max_pgv = Math.max.apply(null, max_pgv);
+                    fill_color = this.pgv_to_color(max_pgv);
+                }
+                container.append('path').attr('d', line_generator(vertices))
+                                        .attr('stroke', 'orange')
+                                        .attr('stroke-width', 5)
+                                        .attr('fill', fill_color);
+            }
+
+            /*
             for (const cur_snl of used_stations) {
                 for (const cur_station of this.stations) {
                     if (cur_station.name == cur_snl[0]) {
@@ -102,7 +133,16 @@ export default {
                                         .attr('stroke-width', 5)
                                         .attr('fill', 'none');
             }
+            */
         },
+
+        pgv_to_color(pgv) {
+            // Convert the PGV value [m/s] to a color value.
+            const colormap = this.$store.getters.map_config.colormap;
+            var color = colormap(this.scales.color(pgv));
+            return color;
+        },
+        
     },
 }
 </script>
