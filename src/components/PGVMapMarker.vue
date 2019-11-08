@@ -50,8 +50,8 @@ export default {
     data() {
         return {
             scale: 1,
-            current_fill_opacity: 0.85,
-            max_fill_opacity: 0.3,
+            current_fill_opacity: 1.0,
+            max_fill_opacity: 0.6,
             svg_matrix: [],
         };
     },
