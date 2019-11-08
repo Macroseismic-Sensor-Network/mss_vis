@@ -71,6 +71,17 @@ function handle_msg_data(msg_id, payload, state) {
         case 'detection_result':
             console.log("Received a detection result");
             state.detection_result_data = payload;
+            break;
+
+        case 'event_data':
+            console.log("Received event data.");
+            state.event_data = payload;
+            break;
+
+        case 'event_warning':
+            console.log("Received event warning.");
+            state.event_warning = payload;
+            break;
     }
 
     // Trim the data to the display range.
@@ -148,6 +159,8 @@ export default new Vuex.Store({
         station_meta: [],
         pgv_data: {},
         detection_result_data: {},
+        event_data: {},
+        event_warning: {},
         connected: false,
         message: '',
         server_id: '',
@@ -302,6 +315,10 @@ export default new Vuex.Store({
 
         detection_result: (state) => {
             return state.detection_result_data;
+        },
+
+        event_warning: (state) => {
+            return state.event_warning;
         },
 
 
