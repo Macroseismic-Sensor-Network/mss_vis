@@ -38,6 +38,10 @@ export default {
         detection_result: function() {
             return this.$store.getters.detection_result;
         },
+
+        event_warning: function() {
+            return this.$store.getters.event_warning;
+        },
     },
 
     watch: {
@@ -55,7 +59,8 @@ export default {
             var scales= this.scales;
             //var used_stations = this.detection_result.used_stations;
 
-            var line_generator = d3.line().x(function(d) { return scales.x(d[0]); })
+            var line_generator = d3.line().curve(d3.curveLinearClosed)
+                                          .x(function(d) { return scales.x(d[0]); })
                                           .y(function(d) { return scales.y(d[1]); });
 
             var container = d3.select('#' + this.event_id);
@@ -68,23 +73,52 @@ export default {
                     var cur_station = this.stations.find(x => x.name === cur_simp_station);
                     simp_stations.push(cur_station);
                 }
-            
+
                 var vertices = [];
                 for (const cur_station of simp_stations) {
                     vertices.push([parseFloat(cur_station.x_utm),
                                    parseFloat(cur_station.y_utm)]);
                 }
-                
+
                 var fill_color = 'none';
                 if (cur_simp.trigger.includes(false)) {
                     var max_pgv = cur_simp.pgv.map(function(row){ return Math.max.apply(Math, row); });
                     max_pgv = Math.max.apply(null, max_pgv);
                     fill_color = this.pgv_to_color(max_pgv);
                 }
+                
                 container.append('path').attr('d', line_generator(vertices))
-                                        .attr('stroke', 'orange')
+                                        .attr('stroke', 'black')
                                         .attr('stroke-width', 5)
                                         .attr('fill', fill_color);
+            }
+
+            if (Object.keys(this.event_warning).length > 0)
+            {
+                for (var k = 0; k < this.event_warning.simp_stations.length; k++)
+                {
+                    var simp_pgv = this.event_warning.trigger_pgv[k];
+                    simp_stations = [];
+                    for (const cur_simp_station of this.event_warning.simp_stations[k]) {
+                        cur_station = this.stations.find(x => x.name === cur_simp_station);
+                        simp_stations.push(cur_station);
+                    }
+
+                    vertices = [];
+                    for (const cur_station of simp_stations) {
+                        vertices.push([parseFloat(cur_station.x_utm),
+                                       parseFloat(cur_station.y_utm)]);
+                    }
+
+                    fill_color = 'none';
+                    fill_color = this.pgv_to_color(simp_pgv);
+
+                    container.append('path').attr('d', line_generator(vertices))
+                                            .attr('stroke', 'red')
+                                            .attr('stroke-width', 5)
+                                            .attr('fill', fill_color);
+
+                }
             }
 
             /*
@@ -142,7 +176,7 @@ export default {
             var color = colormap(this.scales.color(pgv));
             return color;
         },
-        
+
     },
 }
 </script>
