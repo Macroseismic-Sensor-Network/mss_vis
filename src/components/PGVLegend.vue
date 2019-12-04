@@ -18,9 +18,9 @@
               :x="marker_position[k].x + 30"
               :y="marker_position[k].y"
               text-anchor="left"
-              :font-size="font_size"
               :transform="'rotate(90 ' + marker_position[k].x + ' ' + marker_position[k].y +')'"
-              style="">{{ label_pgv[k] }}
+              style=""
+              class="marker_text">{{ label_pgv[k] }}
         </text>
     </g>
 </template>
@@ -64,7 +64,7 @@ export default {
     data() {
         return {
             scale: 1,
-            default_font_size: 15,
+            default_font_size: 12,
             svg_matrix: [],
             marker_color: [],
         };
@@ -155,7 +155,7 @@ export default {
         pgv_values: function() {
             return this.$store.getters.map_config.legend.values;
         },
-        
+
         label_pgv: function() {
             var pgv = [];
             for (var k = 0; k < this.config.values.length; k++)
@@ -234,5 +234,18 @@ export default {
 
 
 <style scoped lang="sass">
+
+#legend_title
+    font-size: 10pt;
+
+.marker_text
+    font-size: 8pt;
+
+$breakpoint-mobile-width: 700px;
+$breakpoint-mobile-height: 350px;
+@media (max-width: $breakpoint-mobile-width), (max-height: $breakpoint-mobile-height)
+    #pgvlegend_map_legend
+        visibility: hidden;
+
 
 </style>
