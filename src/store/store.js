@@ -127,6 +127,12 @@ function get_display_range(state) {
         var last_ind = state.pgv_data[key].time.length - 1;
         var cur_date = state.pgv_data[key].time[last_ind];
         var res = cur_date.split(/[:T-]/);
+        for (var k = 0; k < res.length; k++)
+        {
+            res[k] = parseInt(res[k]);
+        }
+        // Convert the month to zero-based month (January = 0).
+        res[1] = res[1] - 1;
         last_dates.push(Date.UTC(res[0], res[1], res[2], res[3], res[4], res[5]));
     }
     var end_timestamp = Math.max.apply(null, last_dates);
@@ -146,7 +152,8 @@ function to_isoformat(date) {
       return s;
     }
 
-    var isoformat_string  = date.getUTCFullYear() + '-' + (date.getUTCMonth()).pad(2) + '-' + (date.getUTCDate()).pad(2) + 'T' + (date.getUTCHours()).pad(2) + ':' + (date.getUTCMinutes()).pad(2) + ':' + (date.getUTCSeconds()).pad(2) + '.' + (date.getUTCMilliseconds()).pad(6);
+    // The month is zero-based (January = 0). Add 1 to the month.
+    var isoformat_string  = date.getUTCFullYear() + '-' + (date.getUTCMonth() + 1).pad(2) + '-' + (date.getUTCDate()).pad(2) + 'T' + (date.getUTCHours()).pad(2) + ':' + (date.getUTCMinutes()).pad(2) + ':' + (date.getUTCSeconds()).pad(2) + '.' + (date.getUTCMilliseconds()).pad(6);
     return isoformat_string;
 
 }
@@ -176,7 +183,7 @@ export default new Vuex.Store({
                                   'y_max': 5347335.484},
                      size: {'width': 4000,
                             'height': 2500},
-                     marker_radius_limits: [5, 30],
+                     marker_radius_limits: [5, 20],
                      pgv_limits: [1e-6, 1e-2],
                      colormap: d3.interpolatePlasma,
                      legend: { values: [1e-6, 1e-5, 3e-5, 1e-4, 3e-4, 1e-3, 3e-3, 1e-2],
@@ -184,6 +191,13 @@ export default new Vuex.Store({
                                margin: 20,
                              },
                     },
+
+        map_control: {
+                        show_event_warning: true,
+                        show_event_detection: true,
+                        show_last_event: false,
+                        show_detection_result: false,
+        },
     },
 
     getters: {
@@ -253,6 +267,12 @@ export default new Vuex.Store({
                 var last_ind = state.pgv_data[key].time.length - 1;
                 var cur_date = state.pgv_data[key].time[last_ind];
                 var res = cur_date.split(/[:T-]/);
+                for (var k = 0; k < res.length; k++)
+                {
+                    res[k] = parseInt(res[k]);
+                }
+                // Convert the month to zero-based month (January = 0).
+                res[1] = res[1] - 1;
                 last_dates.push(Date.UTC(res[0], res[1], res[2], res[3], res[4], res[5]));
             }
             var end_timestamp = Math.max.apply(null, last_dates);
@@ -271,15 +291,27 @@ export default new Vuex.Store({
                 // Get the first date of the data.
                 var cur_date = state.pgv_data[key].time[0];
                 var res = cur_date.split(/[:T-]/);
+                for (var k = 0; k < res.length; k++)
+                {
+                    res[k] = parseInt(res[k]);
+                }
+                // Convert the month to zero-based month (January = 0).
+                res[1] = res[1] - 1;
                 first_dates.push(Date.UTC(res[0], res[1], res[2], res[3], res[4], res[5]));
 
                 var last_ind = state.pgv_data[key].time.length - 1;
                 cur_date = state.pgv_data[key].time[last_ind];
                 res = cur_date.split(/[:T-]/);
+                for (k = 0; k < res.length; k++)
+                {
+                    res[k] = parseInt(res[k]);
+                }
+                // Convert the month to zero-based month (January = 0).
+                res[1] = res[1] - 1;
                 last_dates.push(Date.UTC(res[0], res[1], res[2], res[3], res[4], res[5]));
             }
-            var end_timestamp = Math.max.apply(null, last_dates);
             var start_timestamp = Math.min.apply(null, first_dates);
+            var end_timestamp = Math.max.apply(null, last_dates);
 
             var start_date = new Date(start_timestamp);
             var end_date = new Date(end_timestamp);
@@ -321,6 +353,9 @@ export default new Vuex.Store({
             return state.event_warning;
         },
 
+        map_control: (state) => {
+            return state.map_control;
+        },
 
     },
 
@@ -376,7 +411,7 @@ export default new Vuex.Store({
         },
 
         LOAD_STATION_METADATA(state) {
-            d3.csv("/assets/vue/data/mss_stations_2019_147.csv").then( function(data) {
+            d3.csv("/assets/vue/data/mss_stations_2019_297.csv").then( function(data) {
                 for (var k = 0; k < data.length; k++)
                 {
                     data[k].id = data[k].network + "." +  
@@ -388,6 +423,10 @@ export default new Vuex.Store({
                 console.log("Store :: Station metadata loaded.");
                 //self.plot_stations();
             });
+        },
+
+        set_map_control(state, payload) {
+            Vue.set(state.map_control, payload.property, payload.value);
         },
     },
 
