@@ -42,18 +42,30 @@ export default {
         event_warning: function() {
             return this.$store.getters.event_warning;
         },
+
+        map_control: function() {
+            return this.$store.getters.map_control;
+        },
     },
 
     watch: {
-        detection_result(new_value, old_value) {
+        detection_result: function (new_value, old_value) {
             console.log('Detection result has changed.' + new_value + old_value);
             this.plot_detection_result();
         },
+
+        'map_control.show_detection_result': function() {
+            this.plot_detection_result();
+        },
+
+        'map_control.show_event_warning': function() {
+            this.plot_detection_result();
+        }
     },
 
     methods: {
         plot_detection_result() {
-            console.log("Plotting the detection result.");
+            console.log("Plotting the detection properties.");
 
             // Create the Delaunay triangles.
             var scales= this.scales;
@@ -67,57 +79,62 @@ export default {
 
             // Clear all elements in the container.
             container.selectAll("*").remove();
-            for (const cur_simp of this.detection_result.trigger_data) {
-                var simp_stations = []
-                for (const cur_simp_station of cur_simp.simp_stations) {
-                    var cur_station = this.stations.find(x => x.name === cur_simp_station);
-                    simp_stations.push(cur_station);
-                }
 
-                var vertices = [];
-                for (const cur_station of simp_stations) {
-                    vertices.push([parseFloat(cur_station.x_utm),
-                                   parseFloat(cur_station.y_utm)]);
-                }
-
-                var fill_color = 'none';
-                if (cur_simp.trigger.includes(false)) {
-                    var max_pgv = cur_simp.pgv.map(function(row){ return Math.max.apply(Math, row); });
-                    max_pgv = Math.max.apply(null, max_pgv);
-                    fill_color = this.pgv_to_color(max_pgv);
-                }
-                
-                container.append('path').attr('d', line_generator(vertices))
-                                        .attr('stroke', 'black')
-                                        .attr('stroke-width', 5)
-                                        .attr('fill', fill_color);
-            }
-
-            if (Object.keys(this.event_warning).length > 0)
-            {
-                for (var k = 0; k < this.event_warning.simp_stations.length; k++)
-                {
-                    var simp_pgv = this.event_warning.trigger_pgv[k];
-                    simp_stations = [];
-                    for (const cur_simp_station of this.event_warning.simp_stations[k]) {
-                        cur_station = this.stations.find(x => x.name === cur_simp_station);
+            if (this.map_control.show_detection_result) {
+                for (const cur_simp of this.detection_result.trigger_data) {
+                    var simp_stations = []
+                    for (const cur_simp_station of cur_simp.simp_stations) {
+                        var cur_station = this.stations.find(x => x.name === cur_simp_station);
                         simp_stations.push(cur_station);
                     }
 
-                    vertices = [];
+                    var vertices = [];
                     for (const cur_station of simp_stations) {
                         vertices.push([parseFloat(cur_station.x_utm),
                                        parseFloat(cur_station.y_utm)]);
                     }
 
-                    fill_color = 'none';
-                    fill_color = this.pgv_to_color(simp_pgv);
+                    var fill_color = 'none';
+                    if (cur_simp.trigger.includes(true)) {
+                        var max_pgv = cur_simp.pgv.map(function(row){ return Math.max.apply(Math, row); });
+                        max_pgv = Math.max.apply(null, max_pgv);
+                        fill_color = this.pgv_to_color(max_pgv);
+                    }
 
                     container.append('path').attr('d', line_generator(vertices))
-                                            .attr('stroke', 'red')
+                                            .attr('stroke', 'black')
                                             .attr('stroke-width', 5)
                                             .attr('fill', fill_color);
+                }
+            }
 
+            if (this.map_control.show_event_warning) {
+                if (Object.keys(this.event_warning).length > 0)
+                {
+                    for (var k = 0; k < this.event_warning.simp_stations.length; k++)
+                    {
+                        var simp_pgv = this.event_warning.trigger_pgv[k];
+                        simp_stations = [];
+                        for (const cur_simp_station of this.event_warning.simp_stations[k]) {
+                            cur_station = this.stations.find(x => x.name === cur_simp_station);
+                            simp_stations.push(cur_station);
+                        }
+
+                        vertices = [];
+                        for (const cur_station of simp_stations) {
+                            vertices.push([parseFloat(cur_station.x_utm),
+                                           parseFloat(cur_station.y_utm)]);
+                        }
+
+                        fill_color = 'none';
+                        fill_color = this.pgv_to_color(simp_pgv);
+
+                        container.append('path').attr('d', line_generator(vertices))
+                                                .attr('stroke', 'red')
+                                                .attr('stroke-width', 5)
+                                                .attr('fill', fill_color);
+
+                    }
                 }
             }
 
