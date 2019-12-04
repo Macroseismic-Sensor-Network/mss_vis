@@ -4,6 +4,13 @@
         <div id="map_info">last data: {{ data_time_range[1] }} UTC<br>
                            first data: {{ data_time_range[0] }} UTC<br>
                            server state: {{ server_state }}</div>
+        <div id="map_config">
+            <label><input type='checkbox' v-model='show_event_warning' />show event warning</label>
+            <label><input type='checkbox' v-model='show_event_detection' />show event detection</label>
+            <label><input type='checkbox' v-model='show_last_event' />show last event</label>
+            <label><input type='checkbox' v-model='show_detection_result' />show detection result</label>
+        </div>
+
         <svg id="map"
              width="100%"
              height="100%"
@@ -38,7 +45,7 @@ export default {
     components: {
         PGVMapMarker,
         PGVLegend,
-        PGVEventVoronoi
+        PGVEventVoronoi,
     },
 
     data() {
@@ -60,6 +67,58 @@ export default {
     },
 
     computed: {
+        show_event_warning: {
+            get() {
+                return this.$store.getters.map_control.show_event_warning;
+            },
+
+            set(value) {
+                console.log("Setting the show_event_warning: " + value);
+                var payload = {property: 'show_event_warning',
+                               value: value}
+                this.$store.commit('set_map_control', payload);
+            }
+        },
+
+        show_event_detection: {
+            get() {
+                return this.$store.getters.map_control.show_event_detection;
+            },
+
+            set(value) {
+                console.log("Setting the show_event_detection: " + value);
+                var payload = {property: 'show_event_detection',
+                               value: value}
+                this.$store.commit('set_map_control', payload);
+            }
+        },
+
+        show_last_event: {
+            get() {
+                return this.$store.getters.map_control.show_last_event;
+            },
+
+            set(value) {
+                console.log("Setting the show_last_event: " + value);
+                var payload = {property: 'show_last_event',
+                               value: value}
+                this.$store.commit('set_map_control', payload);
+            }
+        },
+
+        show_detection_result: {
+            get() {
+                return this.$store.getters.map_control.show_detection_result;
+            },
+
+            set(value) {
+                console.log("Setting the show_detection_result: " + value);
+                var payload = {property: 'show_detection_result',
+                               value: value}
+                this.$store.commit('set_map_control', payload);
+            }
+        },
+
         data_time_range: function() {
             return this.$store.getters.data_time_range;
         },
@@ -129,10 +188,15 @@ export default {
 
 
 <style scoped lang="sass">
+$breakpoint-mobile-width: 700px;
+$breakpoint-mobile-height: 350px;
 
 div#mapcontainer
     height: 100%;
     position: relative;
+    min-width: 500px;
+    min-height: 300px;
+    font-family: Helvetica, sans-serif;
     //top: 0;
     //left: 0;
     //right: 0;
@@ -143,9 +207,15 @@ div#map_info
     position: absolute;
     text-align: right;
     font-size: 10pt;
+    font-family: Helvetica, sans-serif;
+    padding: 5px;
     //background-color: #ff0000;
     //opacity: 0.3;
 
 svg#map
     border: none;
+
+@media (max-width: $breakpoint-mobile-width), (max-height: $breakpoint-mobile-height)
+    div#map_info
+        font-size: 8pt;
 </style>
