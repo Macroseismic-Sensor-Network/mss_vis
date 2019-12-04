@@ -20,6 +20,7 @@
             var map_image = document.getElementById("map_image");
             var body = document.getElementsByTagName('body')[0];
             var body_style = body.currentStyle || window.getComputedStyle(body);
+            var mapinfo_style = map_info.currentStyle || window.getComputedStyle(map_info);
             var height = window.innerHeight;
             map.style.height =  height + 'px';
             var img_bbox = map_image.getBoundingClientRect();
@@ -28,8 +29,9 @@
             // position value.
             map_info.style.left = img_bbox.left - parseInt(body_style.marginLeft) + window.scrollX + 'px';
             map_info.style.top = img_bbox.top - parseInt(body_style.marginTop) + window.scrollY + 'px';
-            map_info.style.width =  img_bbox.width + 'px';
-            map_info.style.height = img_bbox.height + 'px';
+            map_info.style.width =  img_bbox.width - parseInt(mapinfo_style.paddingLeft) - parseInt(mapinfo_style.paddingRight) + 'px';
+            map_info.style.height = img_bbox.height - parseInt(mapinfo_style.paddingTop) - parseInt(mapinfo_style.paddingBottom) + 'px';
+            console.log(mapinfo_style.paddingLeft);
         }
 
         window.addEventListener("resize", resize_map);
