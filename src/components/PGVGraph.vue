@@ -26,17 +26,17 @@ export default {
                 //title: this.stream_id,
                 //titlefont: {size: 10},
                 margin: {
-                    l: 2,
+                    l: 40,
                     r: 2,
-                    t: 2,
-                    b: 2
+                    t: 20,
+                    b: 40
                 },
                 xaxis: {
                     type: 'date',
-                    range: ['2019-07-05T11:00:00', '2019-07-05T13:00:00'],
+                    //range: ['2019-07-05T11:00:00', '2019-07-05T13:00:00'],
                     autorange: false,
                     fixedrange: true,
-                    showticklabels: false,
+                    showticklabels: true,
                     mirror: 'ticks',
                     showline: true,
                     ticks: 'inside',
@@ -48,7 +48,7 @@ export default {
                     autorange: false,
                     range: [-4, 1],
                     fixedrange: true,
-                    showticklabels: false,
+                    showticklabels: true,
                     showline: true,
                     mirror: 'ticks',
                     ticks: 'inside',
@@ -80,7 +80,8 @@ export default {
 
     computed: {
         div_height: function () {
-            return window.innerHeight * this.$props.height / 100;
+            //return window.innerHeight * this.$props.height / 100;
+            return this.$props.height;
         },
 
         pgv_data: function() {
@@ -89,22 +90,25 @@ export default {
 
         plotly_data: function() {
             var pgv_data = this.$store.getters.pgv_by_station(this.$props.stream_id);
-            // Convert to mm/s.
-            var data_mm = pgv_data.data.map(function(x) {return x * 1000});
-            var trace = {
-                x: pgv_data.time,
-                y: data_mm,
-                type: 'scatter',
-                mode: 'lines',
-                line: {
-                    color: 'LightSkyBlue',
-                },
-                fill: 'tozeroy',
-                hovertemplate: 'pgv:  %{y}<br>' +
-                               'time:  %{x}' +
-                               '<extra></extra>',
+            var data = [];
+            if (typeof pgv_data != 'undefined') {
+                // Convert to mm/s.
+                var data_mm = pgv_data.data.map(function(x) {return x * 1000});
+                var trace = {
+                    x: pgv_data.time,
+                    y: data_mm,
+                    type: 'scatter',
+                    mode: 'lines',
+                    line: {
+                        color: 'LightSkyBlue',
+                    },
+                    fill: 'tozeroy',
+                    hovertemplate: 'pgv:  %{y}<br>' +
+                                   'time:  %{x}' +
+                                   '<extra></extra>',
+                }
+                data = [trace, ]
             }
-            var data = [trace, ]
             return data;
         },
 
@@ -113,7 +117,7 @@ export default {
         },
 
         display_range: function() {
-            return this.$store.getters.display_range;
+            return this.$store.getters.display_time_range;
         },
 
         station: function() {
@@ -141,19 +145,22 @@ export default {
         update() {
             //var layout = this.layout;
             //this.layout.xaxis.range = ['2019-07-05T11:30:00', '2019-07-05T14:00']
-            this.layout.xaxis.range = this.$store.getters.display_range;
-            if (Math.max.apply(null, this.plotly_data[0].y) >= 0.1)
-            {
-                this.plotly_data[0].line.color = 'SandyBrown';
-            }
-            else
-            {
-                this.plotly_data[0].line.color = 'LightSkyBlue';
-            }
-            var element_exists = !!document.getElementById(this.element_id);
-            if (element_exists)
-            {
-                Plotly.react(this.element_id, this.plotly_data, this.layout, this.config);
+            this.layout.xaxis.range = this.display_range;
+
+            if (this.plotly_data.length > 0) {
+                if (Math.max.apply(null, this.plotly_data[0].y) >= 0.1)
+                {
+                    this.plotly_data[0].line.color = 'SandyBrown';
+                }
+                else
+                {
+                    this.plotly_data[0].line.color = 'LightSkyBlue';
+                }
+                var element_exists = !!document.getElementById(this.element_id);
+                if (element_exists)
+                {
+                    Plotly.react(this.element_id, this.plotly_data, this.layout, this.config);
+                }
             }
         },
 
@@ -167,12 +174,12 @@ export default {
 
 <style scoped>
 div.graph_container {
-    margin: 0px;
+    margin: 20px;
     padding: 0px;
     background-color: Azure;
     width: 90%;
     height: 20px;
-    overflow: hidden;
+    overflow: visible;
 }
 
 div.station_label_container {
