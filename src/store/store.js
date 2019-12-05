@@ -23,13 +23,14 @@ function handle_msg_soh(msg_id, payload, state) {
 function handle_msg_data(msg_id, payload, state) {
     switch (msg_id) {
         case 'pgv':
+            console.log("Received pgv data.");
             state.server_state = 'online'
             for (var key in payload)
             {
                 if (key in state.pgv_data)
                 {
                     //console.log("Key found: " + key)
-                    //console.log(payload[key].data)
+                    console.log(payload[key].time[0])
                     state.pgv_data[key].data = state.pgv_data[key].data.concat(payload[key].data)
                     state.pgv_data[key].time = state.pgv_data[key].time.concat(payload[key].time)
 
@@ -43,6 +44,9 @@ function handle_msg_data(msg_id, payload, state) {
                     Vue.set(state.pgv_data[key], "time", payload[key].time)
                 }
             }
+            // Trim the data to the display range.
+            trim_data(state);
+            console.log("Finished processing the pgv data.");
             break;
 
         case 'pgv_archive':
@@ -66,6 +70,8 @@ function handle_msg_data(msg_id, payload, state) {
                     Vue.set(state.pgv_data[key], "time", payload[key].time)
                 }
             }
+            // Trim the data to the display range.
+            trim_data(state);
             break;
 
         case 'detection_result':
@@ -84,8 +90,6 @@ function handle_msg_data(msg_id, payload, state) {
             break;
     }
 
-    // Trim the data to the display range.
-    trim_data(state);
 
 }
 
@@ -173,7 +177,7 @@ export default new Vuex.Store({
         server_id: '',
         server_state: '',
         current_range: 60000,
-        display_period: 1800000,
+        display_period: 300000,
         //display_period: 60000,
 
         map_config: { 
@@ -215,6 +219,7 @@ export default new Vuex.Store({
         },
 
         current_pgv_by_station: (state, getters) => (station_id) => {
+            //console.log('Computing current_pgv_by_station.');
             if (station_id in state.pgv_data) {
                 var last_ind = state.pgv_data[station_id].data.length - 1;
                 var cur_pgv = state.pgv_data[station_id].data[last_ind];
@@ -233,10 +238,13 @@ export default new Vuex.Store({
 
         pgv_by_station: (state) => (station_id) => {
             //var last_ind = state.pgv_data[station_id].data.length - 1
+            console.log('Computing pgv_by_station.');
             return state.pgv_data[station_id]
         },
 
+        // eslint-disable-next-line
         disp_range_max_pgv_by_station: (state, getters) => (station_id) => {
+            console.log('Computing disp_range_max_pgv_by_station.');
             var max_pgv = undefined;
             const time_limit = new Date(new Date(getters.data_time_range[1]) - state.current_range);
             if (station_id in state.pgv_data)
