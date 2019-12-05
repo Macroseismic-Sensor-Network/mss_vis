@@ -3,6 +3,7 @@
         <div id="map-container" class = "grid-x">
             <div class="cell"><PGVMap /></div>
         </div>
+        <!--
         <div id="timeseries-container" class = "grid-x">
             <div class="cell"><PGVGraph v-for="cur_station in stations"
                                         v-bind:key="cur_station.id"
@@ -10,6 +11,7 @@
                                         height=200 />
             </div>
         </div>
+        -->
     </div>
 </template>
 
@@ -25,6 +27,7 @@ export default {
     },
     components: {
         PGVMap,
+        // eslint-disable-next-line
         PGVGraph,
     },
     computed: {
