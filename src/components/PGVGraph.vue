@@ -89,6 +89,7 @@ export default {
         },
 
         plotly_data: function() {
+            // eslint-disable-next-line
             var pgv_data = this.$store.getters.pgv_by_station(this.$props.stream_id);
             var data = [];
             if (typeof pgv_data != 'undefined') {
@@ -133,7 +134,7 @@ export default {
 
     created() {
         this.$watch('plotly_data', this.update);
-        this.$watch('display_range', this.update);
+        //this.$watch('display_range', this.update);
     },
 
     methods: {
@@ -143,9 +144,10 @@ export default {
         },
 
         update() {
+            console.log('Updating Graph ' + this.element_id);
             //var layout = this.layout;
             //this.layout.xaxis.range = ['2019-07-05T11:30:00', '2019-07-05T14:00']
-            this.layout.xaxis.range = this.display_range;
+            //this.layout.xaxis.range = this.display_range;
 
             if (this.plotly_data.length > 0) {
                 if (Math.max.apply(null, this.plotly_data[0].y) >= 0.1)
@@ -159,7 +161,8 @@ export default {
                 var element_exists = !!document.getElementById(this.element_id);
                 if (element_exists)
                 {
-                    Plotly.react(this.element_id, this.plotly_data, this.layout, this.config);
+                    // The performance of Plotly.react is very poor. Try to find another solution.
+                    //Plotly.react(this.element_id, this.plotly_data, this.layout, this.config);
                 }
             }
         },
