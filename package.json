@@ -11,10 +11,10 @@
   "dependencies": {
     "core-js": "^2.6.5",
     "d3": "^5.9.7",
-    "extract-text-webpack-plugin": "^3.0.2",
-    "node-sass": "^4.12.0",
+    "node-sass": "^4.13.0",
     "plotly.js": "^1.48.3",
-    "sass-loader": "^7.1.0",
+    "sass": "^1.23.7",
+    "sass-loader": "^8.0.0",
     "socket.io-client": "^2.2.0",
     "style-loader": "^1.0.0",
     "v-selectmenu": "^2.0.2",
@@ -24,7 +24,8 @@
     "vue-loader": "^15.7.1",
     "vue-native-websocket": "^2.0.13",
     "vue-socket.io": "^3.0.7",
-    "vuex": "^3.1.1"
+    "vuex": "^3.1.1",
+    "webpack": "^4.41.2"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.8.0",
