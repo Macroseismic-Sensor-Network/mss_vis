@@ -236,16 +236,16 @@ export default {
 <style scoped lang="sass">
 
 #legend_title
-    font-size: 10pt;
+    font-size: 10pt
 
 .marker_text
-    font-size: 8pt;
+    font-size: 8pt
 
-$breakpoint-mobile-width: 700px;
-$breakpoint-mobile-height: 350px;
+$breakpoint-mobile-width: 700px
+$breakpoint-mobile-height: 350px
 @media (max-width: $breakpoint-mobile-width), (max-height: $breakpoint-mobile-height)
     #pgvlegend_map_legend
-        visibility: hidden;
+        visibility: hidden
 
 
 </style>

@@ -188,34 +188,28 @@ export default {
 
 
 <style scoped lang="sass">
-$breakpoint-mobile-width: 700px;
-$breakpoint-mobile-height: 350px;
+$breakpoint-mobile-width: 700px
+$breakpoint-mobile-height: 350px
 
 div#mapcontainer
-    height: 100%;
-    position: relative;
-    min-width: 500px;
-    min-height: 300px;
-    font-family: Helvetica, sans-serif;
-    //top: 0;
-    //left: 0;
-    //right: 0;
-    //bottom: 0;
+    height: 100%
+    position: relative
+    min-width: 500px
+    min-height: 300px
+    font-family: Helvetica, sans-serif
 
 div#map_info
-    width: 100%;
-    position: absolute;
-    text-align: right;
-    font-size: 10pt;
-    font-family: Helvetica, sans-serif;
-    padding: 5px;
-    //background-color: #ff0000;
-    //opacity: 0.3;
+    width: 100%
+    position: absolute
+    text-align: right
+    font-size: 10pt
+    font-family: Helvetica, sans-serif
+    padding: 5px
 
 svg#map
-    border: none;
+    border: none
 
 @media (max-width: $breakpoint-mobile-width), (max-height: $breakpoint-mobile-height)
     div#map_info
-        font-size: 8pt;
+        font-size: 8pt
 </style>
