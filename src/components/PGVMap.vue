@@ -4,11 +4,12 @@
         <div id="map_info">last data: {{ data_time_range[1] }} UTC<br>
                            first data: {{ data_time_range[0] }} UTC<br>
                            server state: {{ server_state }}</div>
+
         <div id="map_config">
-            <label><input type='checkbox' v-model='show_event_warning' />show event warning</label>
-            <label><input type='checkbox' v-model='show_event_detection' />show event detection</label>
-            <label><input type='checkbox' v-model='show_last_event' />show last event</label>
-            <label><input type='checkbox' v-model='show_detection_result' />show detection result</label>
+            <input type='checkbox' v-model='show_event_warning' />show event warning<br>
+            <!--<label><input type='checkbox' v-model='show_event_detection'/>show event detection</label><br>-->
+            <input type='checkbox' v-model='show_last_event' />show last event<br>
+            <input type='checkbox' v-model='show_detection_result' />show detection data<br>
         </div>
 
         <svg id="map"
@@ -202,6 +203,14 @@ div#map_info
     width: 100%
     position: absolute
     text-align: right
+    font-size: 10pt
+    font-family: Helvetica, sans-serif
+    padding: 5px
+
+div#map_config
+    width: 100%
+    position: absolute
+    text-align: left
     font-size: 10pt
     font-family: Helvetica, sans-serif
     padding: 5px
