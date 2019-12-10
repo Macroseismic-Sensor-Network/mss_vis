@@ -147,7 +147,7 @@ export default {
             console.log('Updating Graph ' + this.element_id);
             //var layout = this.layout;
             //this.layout.xaxis.range = ['2019-07-05T11:30:00', '2019-07-05T14:00']
-            //this.layout.xaxis.range = this.display_range;
+            this.layout.xaxis.range = this.display_range;
 
             if (this.plotly_data.length > 0) {
                 if (Math.max.apply(null, this.plotly_data[0].y) >= 0.1)
@@ -162,7 +162,7 @@ export default {
                 if (element_exists)
                 {
                     // The performance of Plotly.react is very poor. Try to find another solution.
-                    //Plotly.react(this.element_id, this.plotly_data, this.layout, this.config);
+                    Plotly.react(this.element_id, this.plotly_data, this.layout, this.config);
                 }
             }
         },
