@@ -198,8 +198,8 @@ export default new Vuex.Store({
 
         map_control: {
                         show_event_warning: true,
-                        show_event_detection: true,
-                        show_last_event: false,
+                        show_event_detection: false,
+                        show_last_event: true,
                         show_detection_result: false,
         },
     },
@@ -359,6 +359,10 @@ export default new Vuex.Store({
 
         event_warning: (state) => {
             return state.event_warning;
+        },
+
+        current_event: (state) => {
+            return state.event_data;
         },
 
         map_control: (state) => {
