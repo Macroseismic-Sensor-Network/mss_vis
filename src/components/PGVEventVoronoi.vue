@@ -43,6 +43,10 @@ export default {
             return this.$store.getters.event_warning;
         },
 
+        current_event: function() {
+            return this.$store.getters.current_event;
+        },
+
         map_control: function() {
             return this.$store.getters.map_control;
         },
@@ -60,7 +64,11 @@ export default {
 
         'map_control.show_event_warning': function() {
             this.plot_detection_result();
-        }
+        },
+        
+        'map_control.show_last_event': function() {
+            this.plot_detection_result();
+        },
     },
 
     methods: {
@@ -95,16 +103,22 @@ export default {
                     }
 
                     var fill_color = 'none';
+                    var fill_opacity = 0.3;
+                    var stroke_opacity = 0.3;
+                    var max_pgv = cur_simp.pgv.map(function(row){ return Math.max.apply(Math, row); });
+                    max_pgv = Math.max.apply(null, max_pgv);
+                    fill_color = this.pgv_to_color(max_pgv);
                     if (cur_simp.trigger.includes(true)) {
-                        var max_pgv = cur_simp.pgv.map(function(row){ return Math.max.apply(Math, row); });
-                        max_pgv = Math.max.apply(null, max_pgv);
-                        fill_color = this.pgv_to_color(max_pgv);
+                        fill_opacity = 0.8;
+                        stroke_opacity = 0.8;
                     }
 
                     container.append('path').attr('d', line_generator(vertices))
                                             .attr('stroke', 'black')
                                             .attr('stroke-width', 5)
-                                            .attr('fill', fill_color);
+                                            .attr('fill', fill_color)
+                                            .attr('fill-opacity', fill_opacity)
+                                            .attr('stroke-opacity', stroke_opacity);
                 }
             }
 
@@ -128,12 +142,51 @@ export default {
 
                         fill_color = 'none';
                         fill_color = this.pgv_to_color(simp_pgv);
+                        fill_opacity = 0.5;
+                        stroke_opacity = 0.5;
 
                         container.append('path').attr('d', line_generator(vertices))
-                                                .attr('stroke', 'red')
+                                                .attr('stroke', 'DarkOrange')
                                                 .attr('stroke-width', 5)
-                                                .attr('fill', fill_color);
+                                                .attr('fill', fill_color)
+                                                .attr('fill-opacity', fill_opacity)
+                                                .attr('stroke-opacity', stroke_opacity);
 
+                    }
+                }
+            }
+
+            if (this.map_control.show_last_event)
+            {
+                for (const cur_simp of this.current_event.overall_trigger_data) {
+                    var simp_stations = []
+                    for (const cur_simp_station of cur_simp.simp_stations) {
+                        var cur_station = this.stations.find(x => x.name === cur_simp_station);
+                        simp_stations.push(cur_station);
+                    }
+
+                    var vertices = [];
+                    for (const cur_station of simp_stations) {
+                        vertices.push([parseFloat(cur_station.x_utm),
+                                       parseFloat(cur_station.y_utm)]);
+                    }
+
+                    var fill_color = 'none';
+                    var fill_opacity = 0.3;
+                    var stroke_opacity = 0.3;
+                    var max_pgv = cur_simp.pgv.map(function(row){ return Math.max.apply(Math, row); });
+                    max_pgv = Math.max.apply(null, max_pgv);
+                    fill_color = this.pgv_to_color(max_pgv);
+                    if (cur_simp.trigger.includes(true)) {
+                        fill_opacity = 0.8;
+                        stroke_opacity = 0.8;
+
+                        container.append('path').attr('d', line_generator(vertices))
+                                                .attr('stroke', 'Green')
+                                                .attr('stroke-width', 5)
+                                                .attr('fill', fill_color)
+                                                .attr('fill-opacity', fill_opacity)
+                                                .attr('stroke-opacity', stroke_opacity);
                     }
                 }
             }
