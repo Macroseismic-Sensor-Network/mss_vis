@@ -5,6 +5,15 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
     publicPath: "./",
     assetsDir: "assets/vue",
+    pages: {
+        index: {
+            entry: 'src/main.js',
+        },
+        mss_ntr_ts: {
+            entry: 'src/mss_nrt_ts/main.js',
+            template: 'public/mss_nrt_ts.html',
+        }
+    },
     configureWebpack: {
 
         resolve: {
