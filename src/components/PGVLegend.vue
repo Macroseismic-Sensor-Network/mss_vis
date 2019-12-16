@@ -187,14 +187,10 @@ export default {
         },
 
         legend_transform: function() {
-            console.log(this.legend_position);
-            console.log(this.svg_scale);
-            console.log(this.legend_position.width / this.svg_scale);
             var translate_x = this.legend_position.x - this.legend_position.width / this.svg_scale;
             var translate_y = this.legend_position.y - this.legend_position.height / this.svg_scale;
 
             var scale = 1/this.svg_scale;
-            console.log("scale: " + scale);
             translate_x = this.legend_position.x - (this.legend_position.width * scale - this.legend_position.width);
             translate_y = this.legend_position.y - (this.legend_position.height * scale - this.legend_position.height);
             return "translate(" + translate_x +  "," + translate_y + ")" +  
