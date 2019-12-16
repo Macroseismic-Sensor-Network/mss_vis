@@ -25,11 +25,17 @@ export default {
             layout: {
                 //title: this.stream_id,
                 //titlefont: {size: 10},
+                //margin: {
+                //    l: 40,
+                //    r: 2,
+                //    t: 20,
+                //    b: 40
+                //},
                 margin: {
                     l: 40,
                     r: 2,
-                    t: 20,
-                    b: 40
+                    t: 2,
+                    b: 2,
                 },
                 xaxis: {
                     type: 'date',
@@ -134,7 +140,7 @@ export default {
 
     created() {
         this.$watch('plotly_data', this.update);
-        //this.$watch('display_range', this.update);
+        this.$watch('display_range', this.update_range);
     },
 
     methods: {
@@ -147,7 +153,7 @@ export default {
             console.log('Updating Graph ' + this.element_id);
             //var layout = this.layout;
             //this.layout.xaxis.range = ['2019-07-05T11:30:00', '2019-07-05T14:00']
-            this.layout.xaxis.range = this.display_range;
+            //this.layout.xaxis.range = this.display_range;
 
             if (this.plotly_data.length > 0) {
                 if (Math.max.apply(null, this.plotly_data[0].y) >= 0.1)
@@ -169,6 +175,7 @@ export default {
 
         update_range() {
             console.log('Updating the range.');
+            this.layout.xaxis.range = this.display_range;
         }
     }
 }
@@ -177,7 +184,7 @@ export default {
 
 <style scoped>
 div.graph_container {
-    margin: 20px;
+    margin: 10px;
     padding: 0px;
     background-color: Azure;
     width: 90%;
@@ -207,6 +214,6 @@ div.pgv_axes {
     padding: 0px;
     background-color: Red;
     height: 100%;
-    overflow: hidden;
+    overflow: visible;
 }
 </style>
