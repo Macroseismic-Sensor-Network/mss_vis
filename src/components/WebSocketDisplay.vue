@@ -8,11 +8,11 @@
         <h2> Map view </h2>
         <PGVMap />
 
-        <!--
         <h2> PGV graphs </h2>
-        <PGVGraph v-for="cur_stream in streams" v-bind:stream_id="cur_stream" />
+        <PGVGraph v-for="cur_stream in streams" v-bind:key="cur_stream" stream_id="cur_stream" />
 
 
+        <!--
         <h2> Current PGV data </h2>
         <ul>
             <PGVDisplay v-for="cur_stream in streams" v-bind:station_name="cur_stream" />
@@ -31,7 +31,7 @@
 <script>
 import PGVMap from '../components/PGVMap.vue'
 //import PGVDisplay from '../components/PGVDisplay.vue'
-//import PGVGraph from '../components/PGVGraph.vue'
+import PGVGraph from '../components/PGVGraph.vue'
 
 export default {
     name: 'WebSocketDisplay',
@@ -40,7 +40,7 @@ export default {
     },
     components: {
         //PGVDisplay,
-        //PGVGraph,
+        PGVGraph,
         PGVMap
     },
     computed: {
