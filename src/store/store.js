@@ -30,7 +30,6 @@ function handle_msg_data(msg_id, payload, state) {
                 if (key in state.pgv_data)
                 {
                     //console.log("Key found: " + key)
-                    console.log(payload[key].time[0])
                     state.pgv_data[key].data = state.pgv_data[key].data.concat(payload[key].data)
                     state.pgv_data[key].time = state.pgv_data[key].time.concat(payload[key].time)
 
@@ -87,6 +86,11 @@ function handle_msg_data(msg_id, payload, state) {
         case 'event_warning':
             console.log("Received event warning.");
             state.event_warning = payload;
+            break;
+
+        case 'event_archive':
+            console.log("Received an event archive.");
+            state.event_archive = payload;
             break;
     }
 
@@ -170,14 +174,17 @@ export default new Vuex.Store({
         station_meta: [],
         pgv_data: {},
         detection_result_data: {},
-        event_data: {},
+        event_data: {'start_time': 'undefined',
+                     'end_time': 'undefined',
+                     'state': 'no event available'},
         event_warning: {},
+        event_archive: {},
         connected: false,
         message: '',
         server_id: '',
         server_state: '',
         current_range: 60000,
-        display_period: 300000,
+        display_period: 600000,
         //display_period: 60000,
 
         map_config: { 
@@ -201,6 +208,7 @@ export default new Vuex.Store({
                         show_event_detection: false,
                         show_last_event: true,
                         show_detection_result: false,
+                        show_archive_event: undefined,
         },
     },
 
@@ -365,8 +373,70 @@ export default new Vuex.Store({
             return state.event_data;
         },
 
+        current_event_max_pgv: (state) => {
+            var trigger_data;
+            var cur_pgv;
+            var max_pgv = [];
+            if (state.event_data.overall_trigger_data)
+            {
+                trigger_data = state.event_data.overall_trigger_data;
+                for (var k = 0; k < trigger_data.length; k++)
+                {
+                    cur_pgv = trigger_data[k].pgv;
+                    for (var m = 0; m < cur_pgv.length; m++)
+                    {
+                         max_pgv.push(Math.max.apply(null, cur_pgv[m]));
+                    }
+                }
+                max_pgv = Math.max.apply(null, max_pgv);
+            }
+
+            if (max_pgv.length === 0)
+            {
+                max_pgv = undefined;
+            }
+            return max_pgv;
+        },
+
+        archive_event_max_pgv: (state) => (pos) =>  {
+            var trigger_data ;
+            var cur_pgv;
+            var max_pgv = [];
+            if (state.event_archive[pos].overall_trigger_data)
+            {
+                trigger_data = state.event_archive[pos].overall_trigger_data;
+                for (var k = 0; k < trigger_data.length; k++)
+                {
+                    cur_pgv = trigger_data[k].pgv;
+                    for (var m = 0; m < cur_pgv.length; m++)
+                    {
+                         max_pgv.push(Math.max.apply(null, cur_pgv[m]));
+                    }
+                }
+                max_pgv = Math.max.apply(null, max_pgv);
+            }
+
+            if (max_pgv.length === 0)
+            {
+                max_pgv = undefined;
+            }
+            return max_pgv;
+        },
+
         map_control: (state) => {
             return state.map_control;
+        },
+
+        event_archive: (state) => {
+            // Return the event archive sorted descending by the start time.
+            if (state.event_archive.length > 1)
+            {
+                return state.event_archive.sort((a, b) => (a.start_time < b.start_time) ? 1 : -1);
+            }
+            else
+            {
+                return state.event_archive;
+            }
         },
 
     },
@@ -377,8 +447,8 @@ export default new Vuex.Store({
             state.connected = true;
             state.server_state = 'connection opened'
             console.info("Connected to websocket server.");
-            console.info("state: ", state);
-            console.info("event: ", event);
+            //console.info("state: ", state);
+            //console.info("event: ", event);
         },
 
         SOCKET_ONMESSAGE(state, payload) {
@@ -439,6 +509,17 @@ export default new Vuex.Store({
 
         set_map_control(state, payload) {
             Vue.set(state.map_control, payload.property, payload.value);
+        },
+
+        set_show_archive_event(state, payload) {
+            if (payload.pos === state.map_control.show_archive_event)
+            {
+                state.map_control.show_archive_event = undefined;
+            }
+            else
+            {
+                state.map_control.show_archive_event = payload.pos;
+            }
         },
     },
 
