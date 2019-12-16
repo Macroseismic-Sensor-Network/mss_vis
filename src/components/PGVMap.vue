@@ -1,14 +1,30 @@
 <template>
+    <!--<div id="mapcontainer" @click.ctrl="capture_map">-->
     <div id="mapcontainer">
         <!--<svg id="map" viewBox="0 0 4000 2500" preserveAspectRatio="xMidYMid slice">-->
         <div id="map_info">last data: {{ data_time_range[1] }} UTC<br>
                            first data: {{ data_time_range[0] }} UTC<br>
-                           server state: {{ server_state }}</div>
+                           server state: {{ server_state }}<br><br>
+                           <b>current event</b><br>
+                           <div id="current_event">
+                               start: {{ current_event.start_time }}<br>
+                               end: {{ current_event.end_time }}<br>
+                               state: {{ current_event.state }}<br>
+                               max PGV: {{ (current_event_max_pgv * 1000).toFixed(3) + ' mm/s'}}<br><br>
+                           </div>
+
+                           <b>past events</b><br>
+                           <ArchiveEvent v-for="(cur_event, index) in event_archive"
+                                         v-bind:key="cur_event.start_time"
+                                         v-bind:id="cur_event.start_time"
+                                         v-bind:pos="index"/>
+
+        </div>
 
         <div id="map_config">
             <input type='checkbox' v-model='show_event_warning' />show event warning<br>
             <!--<label><input type='checkbox' v-model='show_event_detection'/>show event detection</label><br>-->
-            <input type='checkbox' v-model='show_last_event' />show last event<br>
+            <input type='checkbox' v-model='show_last_event' />show current event<br>
             <input type='checkbox' v-model='show_detection_result' />show detection data<br>
         </div>
 
@@ -31,10 +47,12 @@
 
 
 <script>
-import PGVMapMarker from '../components/PGVMapMarker.vue'
-import PGVLegend from '../components/PGVLegend.vue'
-import PGVEventVoronoi from '../components/PGVEventVoronoi.vue'
+import PGVMapMarker from '../components/PGVMapMarker.vue';
+import PGVLegend from '../components/PGVLegend.vue';
+import PGVEventVoronoi from '../components/PGVEventVoronoi.vue';
+import ArchiveEvent from '../components/ArchiveEvent.vue';
 import * as d3 from "d3";
+import domtoimage from 'dom-to-image';
 
 export default {
     name: 'PGVMap',
@@ -47,6 +65,7 @@ export default {
         PGVMapMarker,
         PGVLegend,
         PGVEventVoronoi,
+        ArchiveEvent,
     },
 
     data() {
@@ -74,7 +93,6 @@ export default {
             },
 
             set(value) {
-                console.log("Setting the show_event_warning: " + value);
                 var payload = {property: 'show_event_warning',
                                value: value}
                 this.$store.commit('set_map_control', payload);
@@ -87,7 +105,6 @@ export default {
             },
 
             set(value) {
-                console.log("Setting the show_event_detection: " + value);
                 var payload = {property: 'show_event_detection',
                                value: value}
                 this.$store.commit('set_map_control', payload);
@@ -100,7 +117,6 @@ export default {
             },
 
             set(value) {
-                console.log("Setting the show_last_event: " + value);
                 var payload = {property: 'show_last_event',
                                value: value}
                 this.$store.commit('set_map_control', payload);
@@ -113,7 +129,6 @@ export default {
             },
 
             set(value) {
-                console.log("Setting the show_detection_result: " + value);
                 var payload = {property: 'show_detection_result',
                                value: value}
                 this.$store.commit('set_map_control', payload);
@@ -134,6 +149,18 @@ export default {
 
         scales: function() {
             return this.$store.getters.scales;
+        },
+
+        current_event: function() {
+            return this.$store.getters.current_event;
+        },
+
+        current_event_max_pgv: function() {
+            return this.$store.getters.current_event_max_pgv;  
+        },
+
+        event_archive: function() {
+            return this.$store.getters.event_archive;
         },
     },
 
@@ -173,7 +200,6 @@ export default {
             var map_svg = d3.select("#map");
             const width = map_container.clientWidth;
             const height = map_container.clientHeight;
-            console.log("w: " + width + " h: " + height);
             map_svg.attr("width", width)
                    .attr("height", height);
             //const scale = height / this.map_image.height;
@@ -182,7 +208,23 @@ export default {
             //map_image
             //    .attr('width', this.map_image.width * scale)
             //    .attr('height', this.map_image.height * scale)
-        }
+        },
+
+        capture_map() {
+            // TODO: SVG images are not rendered by the domtoimage export.
+            console.log('Capturing the map.');
+            domtoimage.toPng(document.getElementById('mapcontainer'), {height: 2000})
+                .then(function (dataUrl) {
+                     var link = document.createElement('a');
+                     link.download = 'my-image-name.png';
+                     link.href = dataUrl;
+                     link.click();
+                });
+        },
+
+        on_click() {
+            console.log("Clicked the map.");
+        },
     },
 }
 </script>
@@ -200,7 +242,6 @@ div#mapcontainer
     font-family: Helvetica, sans-serif
 
 div#map_info
-    width: 100%
     position: absolute
     text-align: right
     font-size: 10pt
@@ -208,7 +249,6 @@ div#map_info
     padding: 5px
 
 div#map_config
-    width: 100%
     position: absolute
     text-align: left
     font-size: 10pt
