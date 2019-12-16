@@ -4,7 +4,7 @@
             <div class="cell"><PGVGraph v-for="cur_station in stations"
                                         v-bind:key="cur_station.id"
                                         v-bind:stream_id="cur_station.id" 
-                                        height=200 />
+                                        height=100 />
             </div>
         </div>
     </div>
@@ -24,12 +24,14 @@ export default {
     },
 
     mounted() {
+        console.log("Mounted timeseries display.");
         this.$store.commit("LOAD_STATION_METADATA");
     },
 
     computed: {
         stations: function() {
-            return this.$store.getters.station_meta;
+            var stations = this.$store.getters.station_meta;
+            return stations.sort((a, b) => a.id.localeCompare(b.id))
         },
 
     }
