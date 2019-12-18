@@ -226,9 +226,9 @@ export default new Vuex.Store({
                     },
 
         map_control: {
-                        show_event_warning: true,
+                        show_event_warning: false,
                         show_event_detection: false,
-                        show_last_event: true,
+                        show_event_monitor: true,
                         show_detection_result: false,
                         show_archive_event: undefined,
         },

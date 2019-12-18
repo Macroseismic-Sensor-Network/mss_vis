@@ -91,8 +91,8 @@ export default {
         'map_control.show_event_warning': function() {
             this.plot_detection_result();
         },
-        
-        'map_control.show_last_event': function() {
+
+        'map_control.show_event_monitor': function() {
             this.plot_detection_result();
         },
 
@@ -186,7 +186,7 @@ export default {
                 }
             }
 
-            if (this.map_control.show_last_event && ('overall_trigger_data' in this.current_event))
+            if (this.map_control.show_event_monitor && ('overall_trigger_data' in this.current_event))
             {
                 for (const cur_simp of this.current_event.overall_trigger_data) {
                     simp_stations = []

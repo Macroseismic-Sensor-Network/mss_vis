@@ -48,9 +48,9 @@
         </div>
 
         <div id="map_config">
+            <input type='checkbox' v-model='show_event_monitor' />show event monitor<br>
             <input type='checkbox' v-model='show_event_warning' />show event warning<br>
             <!--<label><input type='checkbox' v-model='show_event_detection'/>show event detection</label><br>-->
-            <input type='checkbox' v-model='show_last_event' />show event monitor<br>
             <input type='checkbox' v-model='show_detection_result' />show detection data<br>
         </div>
 
@@ -137,13 +137,13 @@ export default {
             }
         },
 
-        show_last_event: {
+        show_event_monitor: {
             get() {
-                return this.$store.getters.map_control.show_last_event;
+                return this.$store.getters.map_control.show_event_monitor;
             },
 
             set(value) {
-                var payload = {property: 'show_last_event',
+                var payload = {property: 'show_event_monitor',
                                value: value}
                 this.$store.commit('set_map_control', payload);
             }
