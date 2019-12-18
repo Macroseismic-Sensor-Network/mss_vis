@@ -31,15 +31,15 @@
         <div id="map_info">last data: {{ data_time_range[1] }} UTC<br>
                            first data: {{ data_time_range[0] }} UTC<br>
                            server state: {{ server_state }}<br><br>
-                           <b>current event</b><br>
+                           <b>event monitor</b><br>
                            <div id="current_event">
-                               start: {{ current_event.start_time }}<br>
-                               end: {{ current_event.end_time }}<br>
-                               state: {{ current_event.state }}<br>
+                               start: {{ current_event_start }}<br>
+                               end: {{ current_event_end }}<br>
+                               state: {{ current_event_state }}<br>
                                max PGV: {{ (current_event_max_pgv * 1000).toFixed(3) + ' mm/s'}}<br><br>
                            </div>
 
-                           <b>past events</b><br>
+                           <b>archived events</b><br>
                            <ArchiveEvent v-for="(cur_event, index) in event_archive"
                                          v-bind:key="cur_event.start_time"
                                          v-bind:id="cur_event.start_time"
@@ -50,7 +50,7 @@
         <div id="map_config">
             <input type='checkbox' v-model='show_event_warning' />show event warning<br>
             <!--<label><input type='checkbox' v-model='show_event_detection'/>show event detection</label><br>-->
-            <input type='checkbox' v-model='show_last_event' />show current event<br>
+            <input type='checkbox' v-model='show_last_event' />show event monitor<br>
             <input type='checkbox' v-model='show_detection_result' />show detection data<br>
         </div>
 
@@ -182,7 +182,48 @@ export default {
         },
 
         current_event_max_pgv: function() {
-            return this.$store.getters.current_event_max_pgv;  
+            var max_pgv = this.$store.getters.current_event_max_pgv;
+            if (max_pgv)
+            {
+                return max_pgv;
+            }
+            else
+            {
+                return 0;
+            }
+        },
+
+        current_event_start: function() {
+            if ('start_time' in this.current_event)
+            {
+                return this.current_event.start_time;
+            }
+            else
+            {
+                return "";
+            }
+        },
+
+        current_event_end: function() {
+            if ('end_time' in this.current_event)
+            {
+                return this.current_event.end_time;
+            }
+            else
+            {
+                return "";
+            }
+        },
+        
+        current_event_state: function() {
+            if ('state' in this.current_event)
+            {
+                return this.current_event.state;
+            }
+            else
+            {
+                return "No active event.";
+            }
         },
 
         event_archive: function() {
