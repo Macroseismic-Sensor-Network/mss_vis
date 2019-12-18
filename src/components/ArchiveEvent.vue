@@ -25,7 +25,7 @@
 -->
 
 <template>
-    <div class="archive_event" v-on:click="show_event"><span class="archive_event" v-bind:class="{ active: is_active }" v-bind:style="{backgroundColor: color}">{{ event_id }} ({{ (max_pgv * 1000).toFixed(3) }} mm/s)</span><br></div>
+    <div class="archive_event"><span class="archive_event" v-bind:class="{ active: is_active }" v-bind:style="{backgroundColor: color}" v-on:click="show_event">{{ event_id }} ({{ (max_pgv * 1000).toFixed(3) }} mm/s)</span><br></div>
 </template>
 
 
