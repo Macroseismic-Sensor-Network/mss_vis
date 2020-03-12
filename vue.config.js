@@ -28,7 +28,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
     publicPath: "./",
-    assetsDir: "assets/vue",
+    assetsDir: "assets/vue/nrt",
     /*
     pages: {
         index: {
@@ -50,12 +50,12 @@ module.exports = {
         },
         plugins: [
             new HtmlWebpackPlugin({
-                filename: '_includes/vue/vue_scripts.html',
+                filename: '_includes/vue/nrt/vue_scripts.html',
                 template: 'src/templates/scripts.html',
                 inject: false,
             }),
             new HtmlWebpackPlugin({
-                filename: '_includes/vue/vue_css.html',
+                filename: '_includes/vue/nrt/vue_css.html',
                 template: 'src/templates/css.html',
                 inject: false,
             }),

@@ -97,7 +97,7 @@ export default {
     data() {
         return {
             map_image: 'undefined',
-            map_image_url: '/assets/vue/image/mss_map_with_stations.jpg',
+            map_image_url: '/assets/vue/nrt/image/mss_map_with_stations.jpg',
         };
     },
 

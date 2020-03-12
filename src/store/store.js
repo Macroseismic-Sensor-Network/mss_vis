@@ -471,6 +471,10 @@ export default new Vuex.Store({
             console.info("Connected to websocket server.");
             //console.info("state: ", state);
             //console.info("event: ", event);
+            var msg = {'class': 'control',
+                   'id': 'mode',
+                   'payload': 'pgv'};
+            Vue.prototype.$socket.send(JSON.stringify(msg));
         },
 
         SOCKET_ONMESSAGE(state, payload) {
@@ -515,7 +519,7 @@ export default new Vuex.Store({
         },
 
         LOAD_STATION_METADATA(state) {
-            d3.csv("/assets/vue/data/mss_stations_2019_297.csv").then( function(data) {
+            d3.csv("/assets/vue/nrt/data/mss_stations_2020_062.csv").then( function(data) {
                 for (var k = 0; k < data.length; k++)
                 {
                     data[k].id = data[k].network + "." +  
