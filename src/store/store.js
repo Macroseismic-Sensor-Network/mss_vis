@@ -231,6 +231,7 @@ export default new Vuex.Store({
                         show_event_monitor: true,
                         show_detection_result: false,
                         show_archive_event: undefined,
+                        show_archive_event_cells: true,
         },
     },
 
