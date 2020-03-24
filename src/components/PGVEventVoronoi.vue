@@ -107,8 +107,6 @@ export default {
 
             // Create the Delaunay triangles.
             var scales= this.scales;
-            //var used_stations = this.detection_result.used_stations;
-
             var line_generator = d3.line().curve(d3.curveLinearClosed)
                                           .x(function(d) { return scales.x(d[0]); })
                                           .y(function(d) { return scales.y(d[1]); });
@@ -121,8 +119,9 @@ export default {
             if (this.map_control.show_detection_result && ('trigger_data' in this.detection_result)) {
                 for (const cur_simp of this.detection_result.trigger_data) {
                     var simp_stations = []
-                    for (const cur_simp_station of cur_simp.simp_stations) {
-                        var cur_station = this.stations.find(x => x.name === cur_simp_station);
+                  for (const cur_simp_station of cur_simp.simp_stations) {
+                        var cur_station_name = cur_simp_station.split(/:/)[0];
+                        var cur_station = this.stations.find(x => x.name === cur_station_name);
                         simp_stations.push(cur_station);
                     }
 
@@ -223,8 +222,68 @@ export default {
 
             if (this.map_control.show_archive_event != undefined)
             {
-                console.log("Plotting the archive event.");
-                var plot_event = this.$store.getters.event_archive[this.map_control.show_archive_event]
+              console.log("Plotting the archive event.");
+              var plot_event = this.$store.getters.event_archive[this.map_control.show_archive_event]
+              var stations = [];
+              var used_stations = Object.keys(plot_event.max_station_pgv_used);
+              vertices = [];
+
+              if (this.map_control.show_archive_event_cells != undefined)
+              {
+                for (const cur_snl of used_stations) {
+                    for (const cur_station of this.stations) {
+                        if (cur_station.name == cur_snl.split(/:/)[0]) {
+                            stations.push(cur_station);
+                            break;
+                        }
+                    }
+                }
+                console.log('Stations: ', stations);
+                for (const cur_station of stations) { 
+                    vertices.push([cur_station.x_utm, cur_station.y_utm])
+                }
+                console.log(vertices);
+
+                console.log(this.map_limits);
+                var voronoi = d3.voronoi();
+                voronoi.extent([[this.map_limits.x_min, this.map_limits.y_min],
+                               [this.map_limits.x_max, this.map_limits.y_max]]);
+                var polygons = voronoi.polygons(vertices);
+
+                fill_color = 'none';
+                fill_opacity = 0.3;
+                stroke_opacity = 0.3;
+
+                var closed_poly;
+
+                for (k = 0; k < polygons.length; k++) {
+                    const cur_poly = polygons[k];
+                    cur_station = stations[k];
+                    const cur_snl = cur_station.name + ':' + cur_station.network + ':' + cur_station.location;
+                    if (Object.keys(plot_event.max_station_pgv).includes(cur_snl))
+                    {
+                      console.log("Use triggered PGV for station " + cur_snl);
+                      max_pgv = plot_event.max_station_pgv[cur_snl];
+                      fill_opacity = 0.7;
+                    }
+                    else
+                    {
+                      max_pgv = plot_event.max_station_pgv_used[cur_snl];
+                      fill_opacity = 0.2;
+                    }
+                    fill_color = this.pgv_to_color(max_pgv);
+                    closed_poly = cur_poly;
+                    closed_poly.push(cur_poly[0]);
+                    container.append('path').attr('d', line_generator(closed_poly))
+                                            .attr('stroke', fill_color)
+                                            .attr('stroke-width', 1)
+                                            .attr('stroke-opacity', fill_opacity)
+                                            .attr('fill', fill_color)
+                                            .attr('fill-opacity', fill_opacity);
+                }
+              }
+              else
+              {
                 for (const cur_simp of plot_event.overall_trigger_data) {
                     simp_stations = []
                     for (const cur_simp_station of cur_simp.simp_stations) {
@@ -256,55 +315,9 @@ export default {
                                                 .attr('stroke-opacity', stroke_opacity);
                     }
                 }
+              }
             }
 
-            /*
-            for (const cur_snl of used_stations) {
-                for (const cur_station of this.stations) {
-                    if (cur_station.name == cur_snl[0]) {
-                        stations.push(cur_station);
-                        break;
-                    }
-                }
-            }
-            console.log('Stations: ', stations);
-            for (const cur_station of stations) { 
-                vertices.push([cur_station.x_utm, cur_station.y_utm])
-            }
-            console.log(vertices);
-
-            console.log(this.map_limits);
-            var voronoi = d3.voronoi();
-            voronoi.extent([[this.map_limits.x_min, this.map_limits.y_min],
-                           [this.map_limits.x_max, this.map_limits.y_max]]);
-            var triangles = voronoi.triangles(vertices);
-            var polygons = voronoi.polygons(vertices);
-
-            var line_generator = d3.line().x(function(d) { return scales.x(d[0]); })
-                                          .y(function(d) { return scales.y(d[1]); });
-
-            var container = d3.select('#' + this.event_id);
-            //container.append('path');
-
-            var closed_poly;
-            for (const cur_poly of triangles) {
-                closed_poly = cur_poly;
-                closed_poly.push(cur_poly[0]);
-                container.append('path').attr('d', line_generator(closed_poly))
-                                        .attr('stroke', 'orange')
-                                        .attr('stroke-width', 5)
-                                        .attr('fill', 'none');
-            }
-
-            for (const cur_poly of polygons) {
-                closed_poly = cur_poly;
-                closed_poly.push(cur_poly[0]);
-                container.append('path').attr('d', line_generator(closed_poly))
-                                        .attr('stroke', 'black')
-                                        .attr('stroke-width', 5)
-                                        .attr('fill', 'none');
-            }
-            */
         },
 
         pgv_to_color(pgv) {
