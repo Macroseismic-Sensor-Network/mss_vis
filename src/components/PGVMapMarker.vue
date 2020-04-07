@@ -66,19 +66,12 @@ export default {
                   .attr("cy", scales.y(this.y_utm))
                   .attr('stroke', 'black');
         marker_svg.lower();
-
-        var map_svg = d3.select("#map");
-        this.svg_matrix = map_svg.node().getScreenCTM();
-
-        window.addEventListener('resize', this.on_resize);
     },
 
     data() {
         return {
-            scale: 1,
             current_fill_opacity: 1.0,
             max_fill_opacity: 0.6,
-            svg_matrix: [],
         };
     },
 
@@ -88,12 +81,7 @@ export default {
         },
 
         svg_scale: function() {
-            var scale = 1;
-            if (this.svg_matrix.a)
-            {
-                scale = this.svg_matrix.a
-            }
-            return scale;
+            return this.$store.getters.svg_scale;
         },
 
         pgv: function() {
@@ -109,7 +97,7 @@ export default {
             var radius = scales.radius(0);
 
             if (this.pgv) {
-                radius = this.scale * scales.radius(this.pgv);
+                radius = scales.radius(this.pgv);
             }
 
             return radius / this.svg_scale;
@@ -120,7 +108,7 @@ export default {
 
             if (this.pgv_max) {
                 const scales = this.scales;
-                radius = this.scale * scales.radius(this.pgv_max);
+                radius = scales.radius(this.pgv_max);
             }
 
             return radius / this.svg_scale;
@@ -196,11 +184,6 @@ export default {
             const colormap = this.$store.getters.map_config.colormap;
             var color = colormap(this.scales.color(pgv));
             return color;
-        },
-
-        on_resize: function() {
-            var map_svg = d3.select("#map");
-            this.svg_matrix = map_svg.node().getScreenCTM();
         },
     },
 }
