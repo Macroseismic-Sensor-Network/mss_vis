@@ -208,6 +208,7 @@ export default new Vuex.Store({
         current_range: 60000,
         display_period: 600000,
         //display_period: 60000,
+        svg_scale: 1,
 
         map_config: { 
                      map_limits: {'x_min': 519685.529,
@@ -462,6 +463,10 @@ export default new Vuex.Store({
             }
         },
 
+        svg_scale: (state) => {
+            return state.svg_scale;
+        },
+
     },
 
     mutations: {
@@ -548,6 +553,17 @@ export default new Vuex.Store({
                 state.map_control.show_archive_event = payload.pos;
             }
         },
+
+        compute_svg_scale(state) {
+            var scale = 1;
+            var map_svg = d3.select("#map");
+            var svg_matrix = map_svg.node().getScreenCTM();
+            if (svg_matrix.a)
+            {
+                scale = svg_matrix.a
+            }
+            state.svg_scale = scale;
+        }
     },
 
     actions: {
