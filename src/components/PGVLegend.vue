@@ -65,9 +65,6 @@ export default {
     mounted () {
         //var markers = d3.selectAll("circle[id^='pgv_legend_marker']");
         //var self = this;
-        var map_svg = d3.select("#map");
-
-        this.svg_matrix = map_svg.node().getScreenCTM();
 
         /*
         markers.each(function(d, k) {
@@ -83,15 +80,11 @@ export default {
         {
             this.marker_color[k] = this.pgv_to_color(this.pgv_values[k]);
         }
-
-        window.addEventListener('resize', this.on_resize);
     },
 
     data() {
         return {
-            scale: 1,
             default_font_size: 12,
-            svg_matrix: [],
             marker_color: [],
         };
     },
@@ -102,12 +95,7 @@ export default {
         },
 
         svg_scale: function() {
-            var scale = 1;
-            if (this.svg_matrix.a)
-            {
-                scale = this.svg_matrix.a
-            }
-            return scale;
+            return this.$store.getters.svg_scale;
         },
 
         pgv_radius: function() {
@@ -232,7 +220,7 @@ export default {
 
             if (cur_pgv) {
                 const scales = this.scales;
-                radius = this.scale * scales.radius(cur_pgv);
+                radius = scales.radius(cur_pgv);
             }
 
             return radius;
@@ -245,11 +233,6 @@ export default {
             var color = colormap(this.scales.color(pgv));
             return color;
         },
-
-        on_resize: function() {
-            var map_svg = d3.select("#map");
-            this.svg_matrix = map_svg.node().getScreenCTM();
-        }
     },
 }
 </script>
