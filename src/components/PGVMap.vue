@@ -59,12 +59,14 @@
              height="100%"
              viewBox="0 0 4000 2500"
              preserveAspectRatio="xMidYMid meet">
-            <PGVEventVoronoi event_id="mss_event_20191031T155000"/>
-            <PGVMapMarker v-for="cur_station in stations" 
-                          v-bind:key="cur_station.id"
-                          v-bind:station_id="cur_station.id"
-                          v-bind:x_utm="cur_station.x_utm"
-                          v-bind:y_utm="cur_station.y_utm"/>
+             <PGVEventVoronoi event_id="mss_event_20191031T155000"/>
+             <g id="current_pgv_marker">
+                <PGVMapMarker v-for="cur_station in stations" 
+                              v-bind:key="cur_station.id"
+                              v-bind:station_id="cur_station.id"
+                              v-bind:x_utm="cur_station.x_utm"
+                              v-bind:y_utm="cur_station.y_utm"/>
+             </g>
 
             <PGVLegend name="map_legend"/>
         </svg>
@@ -97,7 +99,8 @@ export default {
     data() {
         return {
             map_image: 'undefined',
-            map_image_url: '/assets/vue/nrt/image/mss_map_with_stations.jpg',
+            //map_image_url: '/assets/vue/nrt/image/mss_map_with_stations.jpg',
+            map_image_url: '/assets/vue/nrt/image/mss_map_clean.jpg',
         };
     },
 
@@ -107,7 +110,7 @@ export default {
     mounted() {
         this.map_image = new Image;
         this.init_map();
-        //window.addEventListener('resize', this.on_resize);
+        window.addEventListener('resize', this.on_resize);
         //this.$watch('radius', this.plot_stations);
         this.$store.commit("LOAD_STATION_METADATA");
     },
@@ -214,7 +217,7 @@ export default {
                 return "";
             }
         },
-        
+
         current_event_state: function() {
             if ('state' in this.current_event)
             {
@@ -263,18 +266,13 @@ export default {
         },
 
         on_resize() {
-            var map_container = d3.select("#mapcontainer").node();
-            var map_svg = d3.select("#map");
-            const width = map_container.clientWidth;
-            const height = map_container.clientHeight;
-            map_svg.attr("width", width)
-                   .attr("height", height);
-            //const scale = height / this.map_image.height;
-
-            //const map_image = d3.select("#map_image");
-            //map_image
-            //    .attr('width', this.map_image.width * scale)
-            //    .attr('height', this.map_image.height * scale)
+            //var map_container = d3.select("#mapcontainer").node();
+            //var map_svg = d3.select("#map");
+            //const width = map_container.clientWidth;
+            //const height = map_container.clientHeight;
+            //map_svg.attr("width", width)
+            //       .attr("height", height);
+            this.$store.commit('compute_svg_scale');
         },
 
         capture_map() {
