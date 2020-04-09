@@ -59,7 +59,8 @@
              height="100%"
              viewBox="0 0 4000 2500"
              preserveAspectRatio="xMidYMid meet">
-             <PGVEventVoronoi event_id="mss_event_20191031T155000"/>
+             <ArchiveEventPlot />
+             <EventMonitorPlot />
              <g id="current_pgv_marker">
                 <PGVMapMarker v-for="cur_station in stations" 
                               v-bind:key="cur_station.id"
@@ -77,8 +78,10 @@
 <script>
 import PGVMapMarker from '../components/PGVMapMarker.vue';
 import PGVLegend from '../components/PGVLegend.vue';
-import PGVEventVoronoi from '../components/PGVEventVoronoi.vue';
+//import PGVEventVoronoi from '../components/PGVEventVoronoi.vue';
+import EventMonitorPlot from '../components/EventMonitorPlot.vue';
 import ArchiveEvent from '../components/ArchiveEvent.vue';
+import ArchiveEventPlot from '../components/ArchiveEventPlot.vue';
 import * as d3 from "d3";
 import domtoimage from 'dom-to-image';
 
@@ -92,8 +95,10 @@ export default {
     components: {
         PGVMapMarker,
         PGVLegend,
-        PGVEventVoronoi,
+        //PGVEventVoronoi,
+        EventMonitorPlot,
         ArchiveEvent,
+        ArchiveEventPlot,
     },
 
     data() {
