@@ -32,6 +32,8 @@
 
 <script>
 import * as d3 from "d3";
+import * as poly_util from "../polygon_util.js";
+import _ from "lodash"
 
 export default {
     name: 'ArchiveEventPlot',
@@ -45,6 +47,7 @@ export default {
     data() {
         return {
             element_id: "archive_event_plot_group",
+            hull_padding: 150,
         };
     },
 
@@ -97,7 +100,6 @@ export default {
             var max_pgv;
             var simp_stations;
             var cur_station;
-            var k;
             var pgv_radius;
 
             // Clear all elements in the container.
@@ -126,22 +128,26 @@ export default {
                         }
                     }
                 }
-                console.log('Stations: ', stations);
                 for (const cur_station of stations) { 
                     vertices.push([cur_station.x_utm, cur_station.y_utm])
                 }
-                console.log(vertices);
 
                 // Create the clipping path.
                 var hull = d3.polygonHull(vertices);
+                hull = _.cloneDeep(hull);
+                for (let m = 0; m < hull.length; m++)
+                {
+                    hull[m][0] = scales.x(hull[m][0]);
+                    hull[m][1] = scales.y(hull[m][1]);
+                }
+                hull = poly_util.rounded_hull(hull.reverse(), this.hull_padding);
                 container.append('clipPath').attr('id', 'convex_hull_clip')
-                                      .append('path').attr('d', line_generator(hull));
-                container.append('path').attr('d', line_generator(hull))
+                                            .append('path').attr('d', hull);
+                container.append('path').attr('d', hull)
                                         .attr('stroke', 'black')
                                         .attr('stroke-width', 8)
                                         .attr('fill', 'none');
 
-                console.log(this.map_limits);
                 var voronoi = d3.voronoi();
                 voronoi.extent([[this.map_limits.x_min, this.map_limits.y_min],
                                [this.map_limits.x_max, this.map_limits.y_max]]);
@@ -153,13 +159,16 @@ export default {
 
                 var closed_poly;
 
-                for (k = 0; k < polygons.length; k++) {
+                for (let k = 0; k < polygons.length; k++) {
                     const cur_poly = polygons[k];
+                    if (cur_poly === undefined)
+                    {
+                        continue;
+                    }
                     cur_station = stations[k];
                     const cur_snl = cur_station.name + ':' + cur_station.network + ':' + cur_station.location;
                     if (Object.keys(plot_event.max_station_pgv).includes(cur_snl))
                     {
-                        console.log("Use triggered PGV for station " + cur_snl);
                         max_pgv = plot_event.max_station_pgv[cur_snl];
                         fill_opacity = 0.8;
                         marker_fill_opacity = 1.0;
