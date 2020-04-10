@@ -32,6 +32,8 @@
 
 <script>
 import * as d3 from "d3";
+import * as poly_util from "../polygon_util.js";
+import _ from "lodash"
 
 export default {
     name: 'EventMonitorPlot',
@@ -45,6 +47,7 @@ export default {
     data() {
         return {
             element_id: "event_monitor_plot_group",
+            hull_padding: 150,
         };
     },
 
@@ -89,7 +92,7 @@ export default {
         },
 
         'map_control.show_event_monitor': function() {
-            //this.plot_event_monitor();
+            this.plot_event_monitor();
         },
     },
 
@@ -145,10 +148,16 @@ export default {
 
             // Create the clipping path.
             hull = d3.polygonHull(vertices);
+            hull = _.cloneDeep(hull);
+            for (let m = 0; m < hull.length; m++)
+            {
+                hull[m][0] = scales.x(hull[m][0]);
+                hull[m][1] = scales.y(hull[m][1]);
+            }
+            hull = poly_util.rounded_hull(hull.reverse(), this.hull_padding);
             container.append('clipPath').attr('id', 'convex_hull_clip')
-                                  .append('path').attr('d', line_generator(hull));
-            // Plot the clipping path polygon for debugging.
-            container.append('path').attr('d', line_generator(hull))
+                                        .append('path').attr('d', hull);
+            container.append('path').attr('d', hull)
                                     .attr('stroke', 'black')
                                     .attr('stroke-width', 8)
                                     .attr('fill', 'none');
