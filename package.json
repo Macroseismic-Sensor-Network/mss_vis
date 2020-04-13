@@ -12,6 +12,8 @@
     "core-js": "^2.6.5",
     "d3": "^5.9.7",
     "dom-to-image": "^2.6.0",
+    "loglevel-plugin-prefix": "^0.8.4",
+    "moment": "^2.24.0",
     "node-sass": "^4.13.0",
     "plotly.js": "^1.48.3",
     "sass": "^1.23.7",
