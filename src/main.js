@@ -28,12 +28,14 @@ import MSSTimeSeriesDisplay from './components/MSSTimeSeriesDisplay.vue'
 import LWZDisplay from './components/LWZDisplay.vue'
 import store from './store/store.js'
 import VueNativeSock from 'vue-native-websocket'
+import * as log from 'loglevel';
+import * as log_prefix from 'loglevel-plugin-prefix';
 
 Vue.config.productionTip = false
 
 Vue.use(VueNativeSock,
-        'wss://mss.mertl-research.at/ws_vis/', 
-        //'ws://localhost:8100', 
+        //'wss://mss.mertl-research.at/ws_vis/', 
+        'ws://localhost:8100', 
         {store: store,
          format: 'json',
          reconnection: true,
@@ -47,4 +49,14 @@ Vue.component('lwz-display', LWZDisplay);
 new Vue({
     store,
     el: '#app',
+    created: function() {
+        log.setLevel(this.$store.getters.log_level);
+        //this.$store.getters.logger.setLevel(this.$store.getters.log_level);
+        this.$store.getters.logger.setLevel('debug');
+       
+        log_prefix.reg(log);
+        log_prefix.apply(this.$store.getters.logger,
+                         this.$store.getters.prefix_options);
+    },
+
 });

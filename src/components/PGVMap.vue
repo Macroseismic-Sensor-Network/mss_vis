@@ -84,6 +84,8 @@ import ArchiveEvent from '../components/ArchiveEvent.vue';
 import ArchiveEventPlot from '../components/ArchiveEventPlot.vue';
 import * as d3 from "d3";
 import domtoimage from 'dom-to-image';
+import * as log from 'loglevel';
+import * as log_prefix from 'loglevel-plugin-prefix';
 
 export default {
     name: 'PGVMap',
@@ -106,10 +108,18 @@ export default {
             map_image: 'undefined',
             //map_image_url: '/assets/vue/nrt/image/mss_map_with_stations.jpg',
             map_image_url: '/assets/vue/nrt/image/mss_map_clean.jpg',
+            logger: undefined,
         };
     },
 
+    beforeCreate() {
+    },
+
     created() {
+        this.logger = log.getLogger(this.$options.name)
+        this.logger.setLevel(this.$store.getters.log_level);
+        log_prefix.apply(this.logger,
+                         this.$store.getters.prefix_options);
     },
 
     mounted() {
@@ -258,7 +268,7 @@ export default {
             var map_svg = d3.select("#map");
             this.map_image.onload = function()
             {
-                console.log("Image loaded.")
+                self.logger.debug("Map image loaded.")
                 map_svg.append("svg:image")
                     .attr('width', 4000)
                     .attr('height', 2500)
@@ -266,7 +276,7 @@ export default {
                     .attr("xlink:href", self.map_image_url);
                 d3.select('#map_image').lower();
             }
-            console.log("Loading map image: " + this.map_image_url);
+            this.logger.debug("Loading map image: " + this.map_image_url);
             this.map_image.src = this.map_image_url;
         },
 
@@ -282,7 +292,7 @@ export default {
 
         capture_map() {
             // TODO: SVG images are not rendered by the domtoimage export.
-            console.log('Capturing the map.');
+            this.logger.debug('Capturing the map.');
             domtoimage.toPng(document.getElementById('mapcontainer'), {height: 2000})
                 .then(function (dataUrl) {
                      var link = document.createElement('a');
@@ -293,7 +303,7 @@ export default {
         },
 
         on_click() {
-            console.log("Clicked the map.");
+            this.logger.debug("Clicked the map.");
         },
     },
 }

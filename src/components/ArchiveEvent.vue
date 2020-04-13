@@ -30,6 +30,8 @@
 
 
 <script>
+import * as log from 'loglevel';
+import * as log_prefix from 'loglevel-plugin-prefix';
 
 export default {
     name: 'ArchiveEvent',
@@ -38,6 +40,20 @@ export default {
         id: String,
         pos: Number,
     },
+
+    data() {
+        return {
+            logger: undefined,
+        };
+    },
+
+    created() {
+        this.logger = log.getLogger(this.$options.name);
+        this.logger.setLevel(this.$store.getters.log_level);
+        log_prefix.apply(this.logger,
+                         this.$store.getters.prefix_options);
+    },
+
 
     computed: {
         event_id: function() {
@@ -77,7 +93,7 @@ export default {
     methods: {
         show_event()
         {
-            console.log("Showing event: " + this.pos);
+            this.logger.debug("Showing event: " + this.pos);
             var payload = { pos: this.pos };
             this.$store.commit('set_show_archive_event', payload);
         },
@@ -108,7 +124,7 @@ span.archive_event:hover
     background-color: LightBlue !important
 
 span.active
-    background-color: LightBlue !important
+    background-color: LightGreen !important
 
 
 </style>

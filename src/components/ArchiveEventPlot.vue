@@ -34,6 +34,8 @@
 import * as d3 from "d3";
 import * as poly_util from "../polygon_util.js";
 import _ from "lodash"
+import * as log from 'loglevel';
+import * as log_prefix from 'loglevel-plugin-prefix';
 
 export default {
     name: 'ArchiveEventPlot',
@@ -41,13 +43,18 @@ export default {
     props: {
     },
 
-    mounted () {
+    created () {
+        this.logger = log.getLogger(this.$options.name)
+        this.logger.setLevel(this.$store.getters.log_level);
+        log_prefix.apply(this.logger,
+                         this.$store.getters.prefix_options);
     },
 
     data() {
         return {
             element_id: "archive_event_plot_group",
             hull_padding: 150,
+            logger: undefined,
         };
     },
 
@@ -111,7 +118,7 @@ export default {
             }
             else
             {
-              console.log("Plotting the archive event.");
+              this.logger.debug("Plotting the archive event.");
               d3.select('#current_pgv_marker').style('visibility', 'hidden');
               var plot_event = this.$store.getters.event_archive[this.map_control.show_archive_event]
               var stations = [];

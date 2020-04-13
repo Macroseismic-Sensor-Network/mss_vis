@@ -34,6 +34,8 @@
 import * as d3 from "d3";
 import * as poly_util from "../polygon_util.js";
 import _ from "lodash"
+import * as log from 'loglevel';
+import * as log_prefix from 'loglevel-plugin-prefix';
 
 export default {
     name: 'EventMonitorPlot',
@@ -41,13 +43,18 @@ export default {
     props: {
     },
 
-    mounted () {
+    created () {
+        this.logger = log.getLogger(this.$options.name)
+        this.logger.setLevel(this.$store.getters.log_level);
+        log_prefix.apply(this.logger,
+                         this.$store.getters.prefix_options);
     },
 
     data() {
         return {
             element_id: "event_monitor_plot_group",
             hull_padding: 150,
+            logger: undefined,
         };
     },
 
@@ -83,7 +90,7 @@ export default {
 
     watch: {
         current_event: function (new_value, old_value) {
-            console.log('current_event has changed.' + new_value + old_value);
+            this.logger.debug('current_event has changed.' + new_value + old_value);
             this.plot_event_monitor();
         },
 
@@ -138,13 +145,13 @@ export default {
                     }
                 }
             }
-            console.log('Stations: ', stations);
+            this.logger.debug('Stations: ', stations);
 
             // Create the vertices array of the station coordinates.
             for (const cur_station of stations) { 
                 vertices.push([cur_station.x_utm, cur_station.y_utm])
             }
-            console.log(vertices);
+            this.logger.debug(vertices);
 
             // Create the clipping path.
             hull = d3.polygonHull(vertices);
@@ -174,7 +181,7 @@ export default {
                 const cur_snl = cur_station.name + ':' + cur_station.network + ':' + cur_station.location;
                 if (Object.keys(this.current_event.max_station_pgv).includes(cur_snl))
                 {
-                    console.log("Use triggered PGV for station " + cur_snl);
+                    this.logger.debug("Use triggered PGV for station " + cur_snl);
                     max_pgv = this.current_event.max_station_pgv[cur_snl];
                     fill_opacity = 0.8;
                 }
@@ -227,7 +234,7 @@ export default {
                     for (const cur_simp_snl of cur_simp.simp_stations) {
                         const cur_simp_station_name = cur_simp_snl.split(/:/)[0]
                         const cur_station = this.stations.find(x => x.name === cur_simp_station_name);
-                        console.log("cur_station: " + cur_station.id);
+                        this.logger.debug("cur_station: " + cur_station.id);
                         simp_stations.push(cur_station);
                     }
 

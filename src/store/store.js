@@ -25,6 +25,8 @@
 import Vuex from 'vuex'
 import Vue from 'vue'
 import * as d3 from "d3";
+import * as log from 'loglevel';
+import * as moment from 'moment';
 
 Vue.use(Vuex)
 
@@ -47,33 +49,45 @@ function handle_msg_soh(msg_id, payload, state) {
 function handle_msg_data(msg_id, payload, state) {
     switch (msg_id) {
         case 'pgv':
-            console.log("Received pgv data.");
+            var time_data = [];
+            state.logger.debug("Received pgv data.");
             state.server_state = 'online'
             for (var key in payload)
             {
                 if (key in state.pgv_data)
                 {
-                    //console.log("Key found: " + key)
+                    for (let k in payload[key].time)
+                    {
+                        time_data[k] = moment.utc(payload[key].time[k]);
+                        //state.logger.debug(payload[key].time[k] + ' :: ' + time_data[k].format());
+                    }
                     state.pgv_data[key].data = state.pgv_data[key].data.concat(payload[key].data)
                     state.pgv_data[key].time = state.pgv_data[key].time.concat(payload[key].time)
+                    //state.pgv_data[key].time = state.pgv_data[key].time.concat(time_data)
 
                 }
                 else
                 {
                     // Use the Vue.set function to ensure, that the store
                     // tracks the changes of the object elements.
+                    for (let k in payload[key].time)
+                    {
+                        time_data[k] = moment.utc(payload[key].time[k]);
+                        state.logger.debug(payload[key].time[k] + ' :: ' + time_data[k]);
+                    }
                     Vue.set(state.pgv_data, key, {})
                     Vue.set(state.pgv_data[key], "data", payload[key].data)
                     Vue.set(state.pgv_data[key], "time", payload[key].time)
+                    //Vue.set(state.pgv_data[key], "time", time_data)
                 }
             }
             // Trim the data to the display range.
             trim_data(state);
-            console.log("Finished processing the pgv data.");
+            state.logger.debug("Finished processing the pgv data.");
             break;
 
         case 'pgv_archive':
-            console.log("Received pgv archive data.");
+            state.logger.debug("Received pgv archive data.");
             state.server_state = 'archive received'
             // Clear the pgv_data.
             state.pgv_data = {}
@@ -98,22 +112,22 @@ function handle_msg_data(msg_id, payload, state) {
             break;
 
         case 'detection_result':
-            console.log("Received a detection result");
+            state.logger.debug("Received a detection result");
             state.detection_result_data = payload;
             break;
 
         case 'event_data':
-            console.log("Received event data.");
+            state.logger.debug("Received event data.");
             state.event_data = payload;
             break;
 
         case 'event_warning':
-            console.log("Received event warning.");
+            state.logger.debug("Received event warning.");
             state.event_warning = payload;
             break;
 
         case 'event_archive':
-            console.log("Received an event archive.");
+            state.logger.debug("Received an event archive.");
             state.event_archive = payload;
             break;
     }
@@ -125,7 +139,6 @@ function handle_msg_data(msg_id, payload, state) {
 function trim_data(state) {
     for (var key in state.pgv_data)
     {
-        //console.log("display_range: " + display_range);
         var display_range = get_display_range(state);
         var display_start = new Date(new Date(display_range[0]) - 1000 * 10);
 
@@ -143,8 +156,6 @@ function trim_data(state) {
 
         if (crop_ind > 0)
         {
-            //console.log("First value in display range: " + state.pgv_data[key].time[crop_ind])
-            //console.log("crop_index: " + crop_ind)
             state.pgv_data[key].time = state.pgv_data[key].time.slice(crop_ind);
             state.pgv_data[key].data = state.pgv_data[key].data.slice(crop_ind);
         }
@@ -194,6 +205,8 @@ function to_isoformat(date) {
 
 export default new Vuex.Store({
     state: {
+        log_level: 'info',
+        logger: log.getLogger("store"),
         stations: [],
         station_meta: [],
         pgv_data: {},
@@ -234,9 +247,34 @@ export default new Vuex.Store({
                         show_archive_event: undefined,
                         show_archive_event_cells: true,
         },
+        prefix_options: {
+            template: '[%t] - %l - %n:',
+            levelFormatter: function (level) {
+                return level.toUpperCase();
+            },
+            nameFormatter: function (name) {
+                return name || 'root';
+            },
+            timestampFormatter: function (date) {
+                return date.toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, '$1');
+            },
+            format: undefined
+        },
     },
 
     getters: {
+        log_level: state => {
+            return state.log_level;
+        },
+
+        logger: state => {
+            return state.logger;
+        },
+
+        prefix_options: state => {
+            return state.prefix_options;
+        },
+
         server_state: state => {
             return state.server_state;
         },
@@ -251,7 +289,6 @@ export default new Vuex.Store({
         },
 
         current_pgv_by_station: (state, getters) => (station_id) => {
-            //console.log('Computing current_pgv_by_station.');
             if (station_id in state.pgv_data) {
                 var last_ind = state.pgv_data[station_id].data.length - 1;
                 var cur_pgv = state.pgv_data[station_id].data[last_ind];
@@ -270,13 +307,13 @@ export default new Vuex.Store({
 
         pgv_by_station: (state) => (station_id) => {
             //var last_ind = state.pgv_data[station_id].data.length - 1
-            console.log('Computing pgv_by_station.');
+            state.logger.debug('Computing pgv_by_station.');
             return state.pgv_data[station_id]
         },
 
         // eslint-disable-next-line
         disp_range_max_pgv_by_station: (state, getters) => (station_id) => {
-            console.log('Computing disp_range_max_pgv_by_station.');
+            state.logger.debug('Computing disp_range_max_pgv_by_station.');
             var max_pgv = undefined;
             const time_limit = new Date(new Date(getters.data_time_range[1]) - state.current_range);
             if (station_id in state.pgv_data)
@@ -474,7 +511,7 @@ export default new Vuex.Store({
             Vue.prototype.$socket = event.currentTarget;
             state.connected = true;
             state.server_state = 'connection opened'
-            console.info("Connected to websocket server.");
+            state.logger.info("Connected to websocket server.");
             //console.info("state: ", state);
             //console.info("event: ", event);
             var msg = {'class': 'control',
@@ -500,28 +537,28 @@ export default new Vuex.Store({
         SOCKET_ONCLOSE(state, event) {
             state.connected = false;
             state.server_state = 'disconnected'
-            console.info("Disconnected from server.");
+            state.logger.info("Disconnected from server.");
             console.info("event: ", event);
         },
 
         SOCKET_ONERROR(state, event) {
             state.server_state = 'error';
-            console.error("Websocket error.");
-            console.error("state: ", state);
-            console.error("event: ", event);
+            state.logger.error("Websocket error.");
+            state.logger.error("state: ", state);
+            state.logger.error("event: ", event);
         },
 
         SOCKET_RECONNECT(state, count) {
             state.server_state = 'reconnecting';
-            console.info("Reconnecting...");
-            console.info("state: ", state);
-            console.info("count: ", count);
+            state.logger.info("Reconnecting...");
+            state.logger.debug("state: ", state);
+            state.logger.info("reconnection count: ", count);
         },
 
         SOCKET_RECONNECT_ERROR(state) {
             state.server_state = 'reconnection error';
-            console.error("Error while reconnecting.");
-            console.error(state);
+            state.logger.error("Error while reconnecting.");
+            state.logger.debug(state);
         },
 
         LOAD_STATION_METADATA(state) {
@@ -534,7 +571,7 @@ export default new Vuex.Store({
                                  "pgv";
                 }
                 state.station_meta = data;
-                console.log("Store :: Station metadata loaded.");
+                state.logger.debug("Station metadata loaded.");
                 //self.plot_stations();
             });
         },
