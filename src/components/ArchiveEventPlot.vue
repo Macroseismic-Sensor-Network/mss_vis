@@ -36,6 +36,8 @@ import * as poly_util from "../polygon_util.js";
 import _ from "lodash"
 import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
+import * as concaveman from 'concaveman';
+import * as polygon_offset from 'polygon-offset';
 
 export default {
     name: 'ArchiveEventPlot',
@@ -96,6 +98,9 @@ export default {
             var line_generator = d3.line().curve(d3.curveLinearClosed)
                                           .x(function(d) { return scales.x(d[0]); })
                                           .y(function(d) { return scales.y(d[1]); });
+            var line_generator_test = d3.line().curve(d3.curveLinearClosed)
+                                          .x(function(d) { return d[0]; })
+                                          .y(function(d) { return d[1]; });
 
             var container = d3.select('#' + this.element_id);
 
@@ -136,24 +141,63 @@ export default {
                     }
                 }
                 for (const cur_station of stations) { 
-                    vertices.push([cur_station.x_utm, cur_station.y_utm])
+                    vertices.push([parseFloat(cur_station.x_utm), parseFloat(cur_station.y_utm)])
                 }
 
                 // Create the clipping path.
-                var hull = d3.polygonHull(vertices);
+                this.logger.debug('vertices: ', vertices);
+                var hull = concaveman(vertices, 3, 20000);
                 hull = _.cloneDeep(hull);
+                this.logger.debug('hull: ', _.cloneDeep(hull));
+                var test = [];
                 for (let m = 0; m < hull.length; m++)
                 {
-                    hull[m][0] = scales.x(hull[m][0]);
-                    hull[m][1] = scales.y(hull[m][1]);
+                    test[m] = []
+                    test[m][0] = scales.x(hull[m][0]);
+                    test[m][1] = scales.y(hull[m][1]);
                 }
-                hull = poly_util.rounded_hull(hull.reverse(), this.hull_padding);
+                this.logger.debug('test: ', _.cloneDeep(test));
+                hull = line_generator(hull);
+                var poly_offset = new polygon_offset();
+                var polyline = poly_offset.data(test).margin(this.hull_padding);
+                this.logger.debug('polyline: ', polyline);
+
+
+                this.logger.debug('vertices: ', vertices);
+                var convex_hull = d3.polygonHull(vertices);
+                convex_hull = _.cloneDeep(convex_hull);
+                this.logger.debug('convex hull: ', convex_hull);
+                console.log(convex_hull);
+
+                for (let m = 0; m < convex_hull.length; m++)
+                {
+                    convex_hull[m][0] = scales.x(convex_hull[m][0]);
+                    convex_hull[m][1] = scales.y(convex_hull[m][1]);
+                }
+
+                console.log(convex_hull);
+                convex_hull = poly_util.rounded_hull(convex_hull.reverse(), this.hull_padding);
+                this.logger.debug('convex hull: ', convex_hull);
                 container.append('clipPath').attr('id', 'convex_hull_clip')
-                                            .append('path').attr('d', hull);
-                container.append('path').attr('d', hull)
+                                            .append('path').attr('d', line_generator_test(polyline[0]));
+
+                /*
+                container.append('path').attr('d', convex_hull)
                                         .attr('stroke', 'black')
                                         .attr('stroke-width', 8)
                                         .attr('fill', 'none');
+                                        */
+                /*
+                container.append('path').attr('d', hull)
+                                        .attr('stroke', 'red')
+                                        .attr('stroke-width', 8)
+                                        .attr('fill', 'none');
+                container.append('path').attr('d', line_generator_test(polyline[0]))
+                                        .attr('stroke', 'green')
+                                        .attr('stroke-width', 8)
+                                        .attr('fill', 'none');
+                */
+
 
                 var voronoi = d3.voronoi();
                 voronoi.extent([[this.map_limits.x_min, this.map_limits.y_min],
