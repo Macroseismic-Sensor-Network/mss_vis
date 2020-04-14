@@ -51,9 +51,9 @@ new Vue({
     el: '#app',
     created: function() {
         log.setLevel(this.$store.getters.log_level);
-        //this.$store.getters.logger.setLevel(this.$store.getters.log_level);
-        this.$store.getters.logger.setLevel('debug');
-       
+        this.$store.getters.logger.setLevel(this.$store.getters.log_level);
+        //this.$store.getters.logger.setLevel('debug');
+
         log_prefix.reg(log);
         log_prefix.apply(this.$store.getters.logger,
                          this.$store.getters.prefix_options);
