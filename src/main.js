@@ -33,6 +33,14 @@ import * as log_prefix from 'loglevel-plugin-prefix';
 
 Vue.config.productionTip = false
 
+if (process.env.NODE_ENV === 'development') {
+    store.state.log_level = 'debug';
+}
+else
+{
+    store.state.log_level = 'info';
+}
+
 Vue.use(VueNativeSock,
         //'wss://mss.mertl-research.at/ws_vis/', 
         'ws://localhost:8100', 
