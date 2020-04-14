@@ -32,10 +32,12 @@
 
 <script>
 import * as d3 from "d3";
-import * as poly_util from "../polygon_util.js";
+//import * as poly_util from "../polygon_util.js";
 import _ from "lodash"
 import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
+import * as concaveman from 'concaveman';
+import * as polygon_offset from 'polygon-offset';
 
 export default {
     name: 'EventMonitorPlot',
@@ -53,7 +55,7 @@ export default {
     data() {
         return {
             element_id: "event_monitor_plot_group",
-            hull_padding: 150,
+            hull_offset: 5000,
             logger: undefined,
         };
     },
@@ -126,7 +128,6 @@ export default {
             var fill_color = 'none';
             var fill_opacity = 0.3;
             var vertices = [];
-            var hull;
             var voronoi;
             var polygons;
             var closed_poly;
@@ -149,24 +150,20 @@ export default {
 
             // Create the vertices array of the station coordinates.
             for (const cur_station of stations) { 
-                vertices.push([cur_station.x_utm, cur_station.y_utm])
+                vertices.push([parseFloat(cur_station.x_utm), parseFloat(cur_station.y_utm)])
             }
             this.logger.debug(vertices);
 
             // Create the clipping path.
-            hull = d3.polygonHull(vertices);
+            let hull = concaveman(vertices, 3, 20000);
             hull = _.cloneDeep(hull);
-            for (let m = 0; m < hull.length; m++)
-            {
-                hull[m][0] = scales.x(hull[m][0]);
-                hull[m][1] = scales.y(hull[m][1]);
-            }
-            hull = poly_util.rounded_hull(hull.reverse(), this.hull_padding);
-            container.append('clipPath').attr('id', 'convex_hull_clip')
-                                        .append('path').attr('d', hull);
-            container.append('path').attr('d', hull)
-                                    .attr('stroke', 'black')
-                                    .attr('stroke-width', 8)
+            let poly_offset = new polygon_offset();
+            let polyline = poly_offset.data(hull).margin(this.hull_offset);
+            container.append('clipPath').attr('id', 'event_monitor_hull_clip')
+                                        .append('path').attr('d', line_generator(polyline[0]));
+            container.append('path').attr('d', line_generator(polyline[0]))
+                                    .attr('stroke', 'Turquoise')
+                                    .attr('stroke-width', 12)
                                     .attr('fill', 'none');
 
             // Create the polygons of the Voronoi cells using the map border as 
@@ -203,7 +200,7 @@ export default {
                                         .attr('stroke-opacity', fill_opacity)
                                         .attr('fill', fill_color)
                                         .attr('fill-opacity', fill_opacity)
-                                        .attr("clip-path", "url(#convex_hull_clip)");
+                                        .attr("clip-path", "url(#event_monitor_hull_clip)");
             }
 
         },
