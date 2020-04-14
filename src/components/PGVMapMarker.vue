@@ -49,8 +49,8 @@ export default {
 
     props: {
         station_id: String,
-        x_utm: String,
-        y_utm: String,
+        x_utm: Number,
+        y_utm: Number,
         radius_limits: Array,
     },
 
