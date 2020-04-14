@@ -130,6 +130,10 @@ export default {
         this.$store.commit("LOAD_STATION_METADATA");
     },
 
+    updated() {
+        this.on_resize();
+    },
+
     computed: {
         show_event_warning: {
             get() {
@@ -275,6 +279,7 @@ export default {
                     .attr('id', 'map_image')
                     .attr("xlink:href", self.map_image_url);
                 d3.select('#map_image').lower();
+                self.on_resize();
             }
             this.logger.debug("Loading map image: " + this.map_image_url);
             this.map_image.src = this.map_image_url;
@@ -287,6 +292,7 @@ export default {
             //const height = map_container.clientHeight;
             //map_svg.attr("width", width)
             //       .attr("height", height);
+            this.logger.debug("on_resize called");
             this.$store.commit('compute_svg_scale');
         },
 
