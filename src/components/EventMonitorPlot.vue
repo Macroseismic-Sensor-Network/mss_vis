@@ -150,7 +150,7 @@ export default {
 
             // Create the vertices array of the station coordinates.
             for (const cur_station of stations) { 
-                vertices.push([parseFloat(cur_station.x_utm), parseFloat(cur_station.y_utm)])
+                vertices.push([cur_station.x_utm, cur_station.y_utm])
             }
             this.logger.debug(vertices);
 
@@ -237,8 +237,8 @@ export default {
 
                     vertices = [];
                     for (const cur_station of simp_stations) {
-                        vertices.push([parseFloat(cur_station.x_utm),
-                                       parseFloat(cur_station.y_utm)]);
+                        vertices.push([cur_station.x_utm,
+                                       cur_station.y_utm]);
                     }
 
                     fill_color = 'none';
