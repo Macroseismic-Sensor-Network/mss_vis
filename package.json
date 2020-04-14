@@ -9,6 +9,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "concaveman": "^1.1.1",
     "core-js": "^2.6.5",
     "d3": "^5.9.7",
     "dom-to-image": "^2.6.0",
@@ -16,6 +17,7 @@
     "moment": "^2.24.0",
     "node-sass": "^4.13.0",
     "plotly.js": "^1.48.3",
+    "polygon-offset": "^0.3.1",
     "sass": "^1.23.7",
     "sass-loader": "^8.0.0",
     "socket.io-client": "^2.2.0",
