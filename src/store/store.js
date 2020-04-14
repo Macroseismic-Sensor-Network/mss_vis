@@ -569,6 +569,12 @@ export default new Vuex.Store({
                                  data[k].name + "." + 
                                  data[k].location + "." +
                                  "pgv";
+                    // Convert numbers from string to float.
+                    data[k].x = parseFloat(data[k].x);
+                    data[k].y = parseFloat(data[k].y);
+                    data[k].z = parseFloat(data[k].z);
+                    data[k].x_utm = parseFloat(data[k].x_utm);
+                    data[k].y_utm = parseFloat(data[k].y_utm);
                 }
                 state.station_meta = data;
                 state.logger.debug("Station metadata loaded.");
