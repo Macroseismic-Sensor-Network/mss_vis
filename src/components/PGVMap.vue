@@ -49,9 +49,9 @@
 
         <div id="map_config">
             <input type='checkbox' v-model='show_event_monitor' />show event monitor<br>
-            <input type='checkbox' v-model='show_event_warning' />show event warning<br>
+            <!--<input type='checkbox' v-model='show_event_warning' />show event warning<br>-->
             <!--<label><input type='checkbox' v-model='show_event_detection'/>show event detection</label><br>-->
-            <input type='checkbox' v-model='show_detection_result' />show detection data<br>
+            <!--<input type='checkbox' v-model='show_detection_result' />show detection data<br>-->
         </div>
 
         <svg id="map"
