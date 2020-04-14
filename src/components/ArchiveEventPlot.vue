@@ -32,7 +32,7 @@
 
 <script>
 import * as d3 from "d3";
-import * as poly_util from "../polygon_util.js";
+//import * as poly_util from "../polygon_util.js";
 import _ from "lodash"
 import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
@@ -55,7 +55,7 @@ export default {
     data() {
         return {
             element_id: "archive_event_plot_group",
-            hull_padding: 150,
+            hull_offset: 5000,   // The outwards offset of the hull polygon [m]. 
             logger: undefined,
         };
     },
@@ -98,9 +98,6 @@ export default {
             var line_generator = d3.line().curve(d3.curveLinearClosed)
                                           .x(function(d) { return scales.x(d[0]); })
                                           .y(function(d) { return scales.y(d[1]); });
-            var line_generator_test = d3.line().curve(d3.curveLinearClosed)
-                                          .x(function(d) { return d[0]; })
-                                          .y(function(d) { return d[1]; });
 
             var container = d3.select('#' + this.element_id);
 
@@ -120,11 +117,13 @@ export default {
             if (this.map_control.show_archive_event === undefined)
             {
                 d3.select('#current_pgv_marker').style('visibility', 'visible');
+                d3.select('#event_monitor_plot_group').style('visibility', 'visible');
             }
             else
             {
               this.logger.debug("Plotting the archive event.");
               d3.select('#current_pgv_marker').style('visibility', 'hidden');
+              d3.select('#event_monitor_plot_group').style('visibility', 'hidden');
               var plot_event = this.$store.getters.event_archive[this.map_control.show_archive_event]
               var stations = [];
               var used_stations = Object.keys(plot_event.max_station_pgv_used);
@@ -144,61 +143,34 @@ export default {
                     vertices.push([parseFloat(cur_station.x_utm), parseFloat(cur_station.y_utm)])
                 }
 
-                // Create the clipping path.
-                this.logger.debug('vertices: ', vertices);
-                var hull = concaveman(vertices, 3, 20000);
+                // Create the clipping path of the Voronoi cells using a concave hull.
+                let hull = concaveman(vertices, 3, 20000);
                 hull = _.cloneDeep(hull);
-                this.logger.debug('hull: ', _.cloneDeep(hull));
-                var test = [];
-                for (let m = 0; m < hull.length; m++)
-                {
-                    test[m] = []
-                    test[m][0] = scales.x(hull[m][0]);
-                    test[m][1] = scales.y(hull[m][1]);
-                }
-                this.logger.debug('test: ', _.cloneDeep(test));
-                hull = line_generator(hull);
-                var poly_offset = new polygon_offset();
-                var polyline = poly_offset.data(test).margin(this.hull_padding);
-                this.logger.debug('polyline: ', polyline);
+                let poly_offset = new polygon_offset();
+                let polyline = poly_offset.data(hull).margin(this.hull_offset);
+                container.append('clipPath').attr('id', 'archive_event_hull_clip')
+                                            .append('path').attr('d', line_generator(polyline[0]));
+                container.append('path').attr('d', line_generator(polyline[0]))
+                                        .attr('stroke', 'LightGreen')
+                                        .attr('stroke-width', 8)
+                                        .attr('fill', 'none');
 
 
-                this.logger.debug('vertices: ', vertices);
-                var convex_hull = d3.polygonHull(vertices);
+                // Create a convex hull and offset it with rounded corners.
+                /*
+                let convex_hull = d3.polygonHull(vertices);
                 convex_hull = _.cloneDeep(convex_hull);
-                this.logger.debug('convex hull: ', convex_hull);
-                console.log(convex_hull);
-
                 for (let m = 0; m < convex_hull.length; m++)
                 {
                     convex_hull[m][0] = scales.x(convex_hull[m][0]);
                     convex_hull[m][1] = scales.y(convex_hull[m][1]);
                 }
-
-                console.log(convex_hull);
                 convex_hull = poly_util.rounded_hull(convex_hull.reverse(), this.hull_padding);
                 this.logger.debug('convex hull: ', convex_hull);
-                container.append('clipPath').attr('id', 'convex_hull_clip')
-                                            .append('path').attr('d', line_generator_test(polyline[0]));
-
-                /*
-                container.append('path').attr('d', convex_hull)
-                                        .attr('stroke', 'black')
-                                        .attr('stroke-width', 8)
-                                        .attr('fill', 'none');
-                                        */
-                /*
-                container.append('path').attr('d', hull)
-                                        .attr('stroke', 'red')
-                                        .attr('stroke-width', 8)
-                                        .attr('fill', 'none');
-                container.append('path').attr('d', line_generator_test(polyline[0]))
-                                        .attr('stroke', 'green')
-                                        .attr('stroke-width', 8)
-                                        .attr('fill', 'none');
                 */
 
 
+                // Create the Voronoi network.
                 var voronoi = d3.voronoi();
                 voronoi.extent([[this.map_limits.x_min, this.map_limits.y_min],
                                [this.map_limits.x_max, this.map_limits.y_max]]);
@@ -243,7 +215,7 @@ export default {
                                             .attr('stroke-opacity', fill_opacity)
                                             .attr('fill', fill_color)
                                             .attr('fill-opacity', fill_opacity)
-                                            .attr("clip-path", "url(#convex_hull_clip)");
+                                            .attr("clip-path", "url(#archive_event_hull_clip)");
 
                     // Add the PGV circle marker showing the max. PGV of the
                     // event.
