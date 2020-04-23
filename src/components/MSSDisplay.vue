@@ -27,7 +27,7 @@
 <template>
     <div id="mss-display-containter">
         <div id="map-container" class = "grid-x">
-            <div class="cell"><PGVMap /></div>
+            <div class="cell"><PGVMap :key="mapKey" v-on:reload-map-2="forceReloadMap()"/></div>
         </div>
     </div>
 </template>
@@ -41,9 +41,20 @@ export default {
     props: {
         title: String
     },
+	data() {
+		return {
+			mapKey:0,
+		}
+	},
     components: {
         PGVMap,
     },
+	methods: {
+		forceReloadMap() {
+			//this.mapKey+=1;
+			//$('#app').load();
+		},
+	},
     computed: {
         stations: function() {
             return this.$store.getters.station_meta;

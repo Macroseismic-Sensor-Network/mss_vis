@@ -25,12 +25,14 @@
 -->
 
 <template>
-    <g v-bind:id="element_id">
+    <g v-bind:id="element_id"
+       class="leaflet-zoom-hide markerGroup"
+       v-on:click="$emit('open-popup',station_id)">
         <circle v-bind:id="element_id + '_current'"
                 :r="pgv_radius"
                 :fill="pgv_fill"
                 :stroke="pgv_stroke"
-                :fill-opacity="current_fill_opacity"/>
+                :fill-opacity="current_fill_opacity" />
 
         <circle v-bind:id="element_id + '_max'"
                 :r="pgv_max_radius"
@@ -178,7 +180,6 @@ export default {
     },
 
     methods: {
-
         pgv_to_color(pgv) {
             // Convert the PGV value [m/s] to a color value.
             const colormap = this.$store.getters.map_config.colormap;
@@ -191,5 +192,10 @@ export default {
 
 
 <style scoped lang="sass">
+// Leaflet disables the clicking on individual svg elements.
+// Set the pointer-events to make the markers clickable.
+.leaflet-pane #current_pgv_marker > g 
+    pointer-events: auto
+    cursor: pointer
 
 </style>

@@ -1,91 +1,170 @@
 <!--
-/*****************************************************************************
- * LICENSE
- *
- * This file is part of mss_vis.
- * 
- * If you use mss_vis in any program or publication, please inform and
- * acknowledge its authors.
- * 
- * mss_vis is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * mss_vis is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with mss_vis. If not, see <http://www.gnu.org/licenses/>.
- *
- * Copyright 2019 Stefan Mertl
- *****************************************************************************/
+    /*****************************************************************************
+    * LICENSE
+    *
+    * This file is part of mss_vis.
+    * 
+    * If you use mss_vis in any program or publication, please inform and
+    * acknowledge its authors.
+    * 
+    * mss_vis is free software: you can redistribute it and/or modify
+    * it under the terms of the GNU General Public License as published by
+    * the Free Software Foundation, either version 3 of the License, or
+    * (at your option) any later version.
+    * 
+    * mss_vis is distributed in the hope that it will be useful,
+    * but WITHOUT ANY WARRANTY; without even the implied warranty of
+    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    * GNU General Public License for more details.
+    * 
+    * You should have received a copy of the GNU General Public License
+    * along with mss_vis. If not, see <http://www.gnu.org/licenses/>.
+    *
+    * Copyright 2019 Stefan Mertl
+    *****************************************************************************/
 -->
+
 
 <template>
     <!--<div id="mapcontainer" @click.ctrl="capture_map">-->
     <div id="mapcontainer">
-        <!--<svg id="map" viewBox="0 0 4000 2500" preserveAspectRatio="xMidYMid slice">-->
+        <!--
         <div id="map_info">last data: {{ data_time_range[1] }} UTC<br>
-                           first data: {{ data_time_range[0] }} UTC<br>
-                           server state: {{ server_state }}<br><br>
-                           <b>event monitor</b><br>
-                           <div id="current_event">
-                               start: {{ current_event_start }}<br>
-                               end: {{ current_event_end }}<br>
-                               state: {{ current_event_state }}<br>
-                               max PGV: {{ (current_event_max_pgv * 1000).toFixed(3) + ' mm/s'}}<br><br>
-                           </div>
+            first data: {{ data_time_range[0] }} UTC<br>
+            server state: {{ server_state }}<br><br>
+            <b>event monitor</b><br>
+            <div id="current_event">
+                start: {{ current_event_start }}<br>
+                end: {{ current_event_end }}<br>
+                state: {{ current_event_state }}<br>
+                max PGV: {{ (current_event_max_pgv * 1000).toFixed(3) + ' mm/s'}}<br><br>
+            </div>
 
-                           <b>archived events</b><br>
-                           <ArchiveEvent v-for="(cur_event, index) in event_archive"
-                                         v-bind:key="cur_event.start_time"
-                                         v-bind:id="cur_event.start_time"
-                                         v-bind:pos="index"/>
+            <b>archived events</b><br>
+            <ArchiveEvent v-for="(cur_event, index) in event_archive"
+                          v-bind:key="cur_event.start_time"
+                          v-bind:id="cur_event.start_time"
+                          v-bind:pos="index"/>
 
         </div>
+        -->
 
+        <!--
         <div id="map_config">
             <input type='checkbox' v-model='show_event_monitor' />show event monitor<br>
-            <!--<input type='checkbox' v-model='show_event_warning' />show event warning<br>-->
-            <!--<label><input type='checkbox' v-model='show_event_detection'/>show event detection</label><br>-->
-            <!--<input type='checkbox' v-model='show_detection_result' />show detection data<br>-->
+            <input type='checkbox' v-model='show_event_warning' />show event warning<br>
+            <label><input type='checkbox' v-model='show_event_detection'/>show event detection</label><br>
+            <input type='checkbox' v-model='show_detection_result' />show detection data<br>
         </div>
+        -->
 
+        <!--
         <svg id="map"
              width="100%"
              height="100%"
              viewBox="0 0 4000 2500"
              preserveAspectRatio="xMidYMid meet">
-             <ArchiveEventPlot />
-             <EventMonitorPlot />
-             <g id="current_pgv_marker">
+            <ArchiveEventPlot />
+            <EventMonitorPlot />
+            <g id="current_pgv_marker">
                 <PGVMapMarker v-for="cur_station in stations" 
                               v-bind:key="cur_station.id"
                               v-bind:station_id="cur_station.id"
                               v-bind:x_utm="cur_station.x_utm"
                               v-bind:y_utm="cur_station.y_utm"/>
-             </g>
-
-            <PGVLegend name="map_legend"/>
+            </g>
         </svg>
+        -->
+
+        <!--
+        <Settings/>
+        -->
+
+        <div id="mapid">
+
+        </div>
+
+        <!-- SVG templates are added to the leaflet SVG overlay in the mounted
+            function. -->
+        <svg id="svg_template_pgv_marker">
+            <g id="current_pgv_marker">
+                <PGVMapMarker v-on:open-popup="setPopUp($event)"
+                                 v-for="cur_station in stations"
+                                 v-bind:key="cur_station.id"
+                                 v-bind:station_id="cur_station.id"
+                                 v-bind:x="cur_station.x"
+                                 v-bind:y="cur_station.y"/>
+            </g>
+        </svg>
+
+        <svg id="svg_template_archive_plot">
+            <ArchiveEventPlot />
+        </svg>
+        <!-- End of templates. -->
+
+        <div id="popUpLayer">
+            <component v-bind:is="popUp" 
+                     v-on:close-popup="closePopUp()"
+                     v-on:add-popup="addPopUp()"
+                     v-bind:station_id="popUpData.station_id" 
+                     v-bind:name="popUpData.name" 
+                     v-bind:network="popUpData.network"
+                     v-bind:location="popUpData.location"
+                     v-bind:coords="popUpData.coords"
+                     v-bind:utm_coords="popUpData.utm_coords"
+                     v-bind:description="popUpData.description"
+             ></component>
+        </div>
+
+        <PGVPopUpPerma v-if="show_perma"
+                       v-on:close-perma="closePerma()"/>
+
+        <svg id="svg_legend" width="300px" height="140">
+            <PGVLegend name="map_legend" v-if="showLegend"/>
+        </svg>
+
+
+        <div id="map_info">last data: {{ data_time_range[1] }} UTC<br>
+            first data: {{ data_time_range[0] }} UTC<br>
+            server state: {{ server_state }}<br><br>
+            <b>event monitor</b><br>
+            <div id="current_event">
+                start: {{ current_event_start }}<br>
+                end: {{ current_event_end }}<br>
+                state: {{ current_event_state }}<br>
+                max PGV: {{ (current_event_max_pgv * 1000).toFixed(3) + ' mm/s'}}<br><br>
+            </div>
+
+            <b>archived events</b><br>
+            <ArchiveEvent v-for="(cur_event, index) in event_archive"
+                          v-bind:key="cur_event.start_time"
+                          v-bind:id="cur_event.start_time"
+                          v-bind:pos="index"/>
+
+        </div>
     </div>
+
+
 </template>
 
 
 <script>
+import $ from 'jquery';	
+import Vue from 'vue';
 import PGVMapMarker from '../components/PGVMapMarker.vue';
 import PGVLegend from '../components/PGVLegend.vue';
 //import PGVEventVoronoi from '../components/PGVEventVoronoi.vue';
-import EventMonitorPlot from '../components/EventMonitorPlot.vue';
+import Settings from '../components/Settings.vue';
+import PGVPopUpPerma from '../components/PGVPopUpPerma.vue';
 import ArchiveEvent from '../components/ArchiveEvent.vue';
 import ArchiveEventPlot from '../components/ArchiveEventPlot.vue';
+import EventMonitorPlot from '../components/EventMonitorPlot.vue';
+import * as PGVPopUp from "../components/PGVPopUp.vue";
 import * as d3 from "d3";
 import domtoimage from 'dom-to-image';
 import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
+import L from 'leaflet';
 
 export default {
     name: 'PGVMap',
@@ -96,19 +175,43 @@ export default {
 
     components: {
         PGVMapMarker,
+        // eslint-disable-next-line
         PGVLegend,
-        //PGVEventVoronoi,
+        // eslint-disable-next-line
         EventMonitorPlot,
+        // eslint-disable-next-line
         ArchiveEvent,
+        // eslint-disable-next-line
         ArchiveEventPlot,
+        // eslint-disable-next-line
+        PGVPopUp,
+        // eslint-disable-next-line
+        Settings,
+        // eslint-disable-next-line
+        PGVPopUpPerma
     },
 
     data() {
         return {
+            leaflet_map: 'undefined',
+
+            popUp: '',
+            popUpData: {
+                station_id:"",
+                name:"",
+                network:"",
+                location: "",
+                coords: "",
+                utm_coords: "",
+                description: "",
+            },
+            allOptions: 'undefined',
             map_image: 'undefined',
             //map_image_url: '/assets/vue/nrt/image/mss_map_with_stations.jpg',
             map_image_url: '/assets/vue/nrt/image/mss_map_clean.jpg',
             logger: undefined,
+            showLegend:false,	//toggles the visibility off the legend
+            show_perma:false,	//Toggles the PGVPopUpPerma Area
         };
     },
 
@@ -119,15 +222,40 @@ export default {
         this.logger = log.getLogger(this.$options.name)
         this.logger.setLevel(this.$store.getters.log_level);
         log_prefix.apply(this.logger,
-                         this.$store.getters.prefix_options);
+            this.$store.getters.prefix_options);
     },
 
     mounted() {
+        //Leaflet map initialisieren
+        this.leaflet_map=L.map("mapid");
         this.map_image = new Image;
         this.init_map();
         window.addEventListener('resize', this.on_resize);
         //this.$watch('radius', this.plot_stations);
         this.$store.commit("LOAD_STATION_METADATA");
+        const vm=this;
+        var checkExist = setInterval(function() {
+            if (vm.$store.getters.stations_imported==true) {
+                clearInterval(checkExist);
+                console.log("Stations: "+vm.$store.getters.station_meta.length);
+                vm.updateMarkers();
+            }
+        }, 100);
+
+
+        window.addEventListener('resize', this.on_resize);
+        this.leaflet_map.on("moveend", this.updateMarkers);
+        this.showLegend=this.$store.getters.settings.show_legend;
+
+        // Get the svg marker template and add it to the leaflet svg overlay.
+        $('#svg_template_pgv_marker').find('#current_pgv_marker').appendTo("#svg_overlay");
+	$('#svg_template_pgv_marker').remove();
+
+        // Get the svg archive event plot and add it to the leaflet svg overlay.
+        $('#svg_template_archive_plot').find('*').appendTo("#svg_overlay");
+	$('#svg_template_archive_plot').remove();
+
+
     },
 
     updated() {
@@ -142,7 +270,7 @@ export default {
 
             set(value) {
                 var payload = {property: 'show_event_warning',
-                               value: value}
+                    value: value}
                 this.$store.commit('set_map_control', payload);
             }
         },
@@ -154,7 +282,7 @@ export default {
 
             set(value) {
                 var payload = {property: 'show_event_detection',
-                               value: value}
+                    value: value}
                 this.$store.commit('set_map_control', payload);
             }
         },
@@ -166,7 +294,7 @@ export default {
 
             set(value) {
                 var payload = {property: 'show_event_monitor',
-                               value: value}
+                    value: value}
                 this.$store.commit('set_map_control', payload);
             }
         },
@@ -178,7 +306,7 @@ export default {
 
             set(value) {
                 var payload = {property: 'show_detection_result',
-                               value: value}
+                    value: value}
                 this.$store.commit('set_map_control', payload);
             }
         },
@@ -255,8 +383,106 @@ export default {
 
     methods: {
         init_map() {
-            this.show_image();
-            //this.on_resize();
+            var osm=L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+                maxZoom: 18,
+                attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+                '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+                'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+                id: 'mapbox/streets-v11',
+                tileSize: 512,
+                zoomOffset: -1});
+            var basemap=L.tileLayer("http://{s}.wien.gv.at/basemap/bmapoverlay/normal/google3857/{z}/{y}/{x}.png", {
+                subdomains : ['maps', 'maps1', 'maps2', 'maps3', 'maps4'],
+                attribution: '&copy; <a href="http://basemap.at">Basemap.at</a>',
+                id: 'mapbox/streets-v11',
+                tileSize: 512,
+                zoomOffset: -1,
+                maxZoom: 18,
+            })
+
+            var allOptions= {
+                "Basemap.at": basemap,
+                "Open Streetmap": osm,	
+            }
+
+            osm.addTo(this.leaflet_map);
+
+            L.control.layers(allOptions, null, {position: 'topleft', autoZIndex:false }).addTo(this.leaflet_map);
+
+            this.leaflet_map.setView([47.859,16.0457],9);
+
+            var svg=L.svg();
+            svg.addTo(this.leaflet_map);
+            //console.log("Overlays: "+d3.select(".leaflet-overlay-pane").count());
+            d3.select(".leaflet-overlay-pane")
+                .select("svg")
+                .attr("id","svg_overlay");
+
+            //Alle Elemente innerhalb des SVG Tags im oberen Template werden an ein Leaflet Overlay angehängt
+
+            //this.show_image();
+            this.on_resize();
+        },
+
+        updateMarkers() {
+            this.leaflet_map.invalidateSize();
+            var stations=this.$store.getters.station_meta;
+
+            for(var i=0;i<stations.length;i++)	{
+                var latlng=new L.LatLng(stations[i].y, stations[i].x);
+                var elementid=stations[i].id.replace(/\./g, '-');
+                var stationMax=elementid+"_max";
+                var stationCurrent=elementid+"_current";
+
+                d3.select("*[id$="+stationMax+"]").attr("cx",this.leaflet_map.latLngToLayerPoint(latlng).x);
+                d3.select("*[id$="+stationMax+"]").attr("cy",this.leaflet_map.latLngToLayerPoint(latlng).y);
+
+                d3.select("*[id$="+stationCurrent+"]").attr("cx",this.leaflet_map.latLngToLayerPoint(latlng).x);
+                d3.select("*[id$="+stationCurrent+"]").attr("cy",this.leaflet_map.latLngToLayerPoint(latlng).y);
+            }
+        },
+        setPopUp(station_id) {
+            console.log("setPopUp: "+station_id);
+
+            var curStation="undefined";
+            var stations=this.$store.getters.station_meta;
+            for(var i=0;i<this.$store.getters.station_meta.length;i++) {
+                if(stations[i].id==station_id) {
+                    curStation=stations[i];
+                }
+            }
+            console.log("Station ID: "+curStation);
+
+            this.popUpData.popUpId="pop-"+curStation.id;
+            this.popUpData.station_id=curStation.id;
+            this.popUpData.name=curStation.name;
+            this.popUpData.network=curStation.network;
+            this.popUpData.location=curStation.location;
+            this.popUpData.coords="x: "+curStation.x+" y: "+curStation.y+" z: "+curStation.z;
+            this.popUpData.utm_coords="x_utm: "+curStation.x_utm+" y_utm: "+curStation.y_utm;
+            this.popUpData.description=curStation.description;
+
+            Vue.component("popUp_1",Vue.extend(PGVPopUp.default));
+            this.popUp="popUp_1";
+        },
+
+        closePopUp() {
+            this.popUp='';	
+        },
+
+        //Hängt das offene Popup an die Perma anzeige an
+        addPopUp() {
+            this.$store.commit("add_pop_up",Vue.component(this.popUp));
+            this.showPerma();
+            this.closePopUp();
+        },
+
+        showPerma() {
+            this.show_perma=true;
+        },
+
+        closePerma() {
+            this.show_perma=false;
         },
 
         calculate_path() {
@@ -286,14 +512,33 @@ export default {
         },
 
         on_resize() {
-            //var map_container = d3.select("#mapcontainer").node();
-            //var map_svg = d3.select("#map");
+            console.log("resize");
+            var map_container = d3.select("#mapcontainer").node();
+            var map_svg = d3.select("#svg_template");
+
             //const width = map_container.clientWidth;
             //const height = map_container.clientHeight;
-            //map_svg.attr("width", width)
-            //       .attr("height", height);
-            this.logger.debug("on_resize called");
-            this.$store.commit('compute_svg_scale');
+            //console.log("Width: "+width);
+
+            var map_bounds = map_container.getBoundingClientRect();
+            map_svg.attr("width", map_bounds.width)
+                .attr("height", window.innerHeight)
+                .style("left", map_bounds.left + "px")
+                .style("top", map_bounds.top + "px");
+
+            //map_svg.attr("viewBox", "0 0 "+map_bounds.width+" "+window.innerHeight)
+
+            console.log("width attr"+ map_bounds.width);
+
+            this.updateMarkers();
+
+
+            //const scale = height / this.map_image.height;
+
+            //const map_image = d3.select("#map_image");
+            //map_image
+            //    .attr('width', this.map_image.width * scale)
+            //    .attr('height', this.map_image.height * scale)
         },
 
         capture_map() {
@@ -301,10 +546,10 @@ export default {
             this.logger.debug('Capturing the map.');
             domtoimage.toPng(document.getElementById('mapcontainer'), {height: 2000})
                 .then(function (dataUrl) {
-                     var link = document.createElement('a');
-                     link.download = 'my-image-name.png';
-                     link.href = dataUrl;
-                     link.click();
+                    var link = document.createElement('a');
+                    link.download = 'my-image-name.png';
+                    link.href = dataUrl;
+                    link.click();
                 });
         },
 
@@ -314,17 +559,40 @@ export default {
     },
 }
 </script>
+<style>
+#svg_legend {
+    background-color:rgba(181,181,181,0.62);
+    position: absolute; 
+    bottom:20px; 
+    right:5px; 
+    z-index:500;
+    border-radius: 25px;
+}
 
+#map_info{
+    background-color:rgba(181,181,181,0.62);
+    position: absolute; 
+    top:5px; 
+    right:5px; 
+    z-index:500;
+    border-radius: 25px;
+}
+</style>
 
 <style scoped lang="sass">
 $breakpoint-mobile-width: 700px
 $breakpoint-mobile-height: 350px
 
+div#mapid
+    height: 100%
+    width: 100%
+    cursor: default
+
 div#mapcontainer
     height: 100%
     position: relative
     min-width: 500px
-    min-height: 300px
+    min-height: 600px
     font-family: Helvetica, sans-serif
 
 div#map_info
@@ -333,6 +601,7 @@ div#map_info
     font-size: 10pt
     font-family: Helvetica, sans-serif
     padding: 5px
+    z-index:500
 
 div#map_config
     position: absolute
@@ -345,6 +614,6 @@ svg#map
     border: none
 
 @media (max-width: $breakpoint-mobile-width), (max-height: $breakpoint-mobile-height)
-    div#map_info
-        font-size: 8pt
+div#map_info
+    font-size: 8pt
 </style>

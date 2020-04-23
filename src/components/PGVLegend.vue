@@ -1,59 +1,62 @@
 <!--
-/*****************************************************************************
- * LICENSE
- *
- * This file is part of mss_vis.
- * 
- * If you use mss_vis in any program or publication, please inform and
- * acknowledge its authors.
- * 
- * mss_vis is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * mss_vis is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with mss_vis. If not, see <http://www.gnu.org/licenses/>.
- *
- * Copyright 2019 Stefan Mertl
- *****************************************************************************/
+    /*****************************************************************************
+    * LICENSE
+    *
+    * This file is part of mss_vis.
+    * 
+    * If you use mss_vis in any program or publication, please inform and
+    * acknowledge its authors.
+    * 
+    * mss_vis is free software: you can redistribute it and/or modify
+    * it under the terms of the GNU General Public License as published by
+    * the Free Software Foundation, either version 3 of the License, or
+    * (at your option) any later version.
+    * 
+    * mss_vis is distributed in the hope that it will be useful,
+    * but WITHOUT ANY WARRANTY; without even the implied warranty of
+    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    * GNU General Public License for more details.
+    * 
+    * You should have received a copy of the GNU General Public License
+    * along with mss_vis. If not, see <http://www.gnu.org/licenses/>.
+    *
+    * Copyright 2019 Stefan Mertl
+    *****************************************************************************/
 -->
 
 <template>
-    <g v-bind:id="element_id" :transform="legend_transform">
-        <text id="legend_title"
-              :x="legend_position.width / 2"
-              :y="-30"
-              text-anchor="middle">peak-ground-velocity [mm/s]</text>
-        <circle v-for="(cur_pgv, k) in pgv_values"
-                v-bind:key="cur_pgv"
-                :id="'pgv_legend_marker_' + k"
-                :pgv="pgv_values[k]"
-                :r="pgv_radius[k]"
-                :cx="marker_position[k].x"
-                :cy="marker_position[k].y"
-                :fill="marker_color[k]"/>
-        <text v-for="(cur_pgv, k) in pgv_values"
-              v-bind:key="'pgv_legend_label' + k"
-              :id="'pgv_legend_label' + k"
-              :x="marker_position[k].x + 30"
-              :y="marker_position[k].y"
-              text-anchor="left"
-              :transform="'rotate(90 ' + marker_position[k].x + ' ' + marker_position[k].y +')'"
-              style=""
-              class="marker_text">{{ label_pgv[k] }}
-        </text>
+    <g v-bind:id="element_id"
+    v-bind:x="this.x"
+    v-bind:y="this.y">
+    <text id="legend_title"
+          :x="legend_position.width / 2"
+          :y="30"
+          text-anchor="middle">peak-ground-velocity [mm/s]</text>
+    <circle v-for="(cur_pgv, k) in pgv_values"
+            v-bind:key="cur_pgv"
+            :id="'pgv_legend_marker_' + k"
+            :pgv="pgv_values[k]"
+            :r="pgv_radius[k]"
+            :cx="marker_position[k].x"
+            :cy="marker_position[k].y"
+            :fill="marker_color[k]"
+            :class="marker_color[k]"/>
+    <text v-for="(cur_pgv, k) in pgv_values"
+          v-bind:key="'pgv_legend_label' + k"
+          :id="'pgv_legend_label' + k"
+          :x="marker_position[k].x + 30"
+          :y="marker_position[k].y"
+          text-anchor="left"
+          :transform="'rotate(90 ' + marker_position[k].x + ' ' + marker_position[k].y +')'"
+          style=""
+          class="marker_text">{{ label_pgv[k] }}
+    </text>
     </g>
 </template>
 
 
 <script>
-//import * as d3 from "d3";
+import * as d3 from "d3";
 
 export default {
     name: 'PGVLegend',
@@ -65,25 +68,32 @@ export default {
     mounted () {
         //var markers = d3.selectAll("circle[id^='pgv_legend_marker']");
         //var self = this;
+        var map_svg = d3.select("#svg_overlay");
+
+        this.svg_matrix = map_svg.node().getScreenCTM();
 
         /*
-        markers.each(function(d, k) {
-            console.log("Processing marker " + k +".", this);
-            var cur_el = d3.select(this);
-            cur_el.attr("cx", self.$props.position.x + k * 200)
-                  .attr("cy", self.$props.position.y);
+                        markers.each(function(d, k) {
+                                console.log("Processing marker " + k +".", this);
+                                var cur_el = d3.select(this);
+                                cur_el.attr("cx", self.$props.position.x + k * 200)
+                                          .attr("cy", self.$props.position.y);
 
-        });
-        */
+                        });*/
+
 
         for (var k = 0; k < this.pgv_values.length; k++)
         {
-            this.marker_color[k] = this.pgv_to_color(this.pgv_values[k]);
+            //Macht das selbe wie this.marker_color[k]=this.pgv_to_color(this.pgv_values[k])
+            this.marker_color.splice(k,1,this.pgv_to_color(this.pgv_values[k]));
+
         }
     },
 
     data() {
         return {
+            x: 400,
+            y: 600,
             default_font_size: 12,
             marker_color: [],
         };
@@ -124,7 +134,7 @@ export default {
                 {
                     space = this.pgv_radius[k];
                     cur_pos.x = space + gap_x;
-                    cur_pos.y = 0;
+                    cur_pos.y = 60;
                 }
                 else
                 {
@@ -140,7 +150,7 @@ export default {
         legend_position: function() {
             var left_middle = {x: 0, y: 0, width: 0, height: 0};
             var width = this.marker_position[this.marker_position.length - 1].x +
-                        this.pgv_radius[this.pgv_radius.length - 1];
+                this.pgv_radius[this.pgv_radius.length - 1];
             var height = this.pgv_radius[this.pgv_radius.length - 1] + 70;
 
             if (this.config.position == 'bottom-right')
@@ -208,7 +218,7 @@ export default {
             translate_x = this.legend_position.x - (this.legend_position.width * scale - this.legend_position.width);
             translate_y = this.legend_position.y - (this.legend_position.height * scale - this.legend_position.height);
             return "translate(" + translate_x +  "," + translate_y + ")" +  
-                   "scale(" + scale + ")";
+                "scale(" + scale + ")";
         },
 
     },
@@ -251,6 +261,5 @@ $breakpoint-mobile-height: 350px
 @media (max-width: $breakpoint-mobile-width), (max-height: $breakpoint-mobile-height)
     #pgvlegend_map_legend
         visibility: hidden
-
 
 </style>
