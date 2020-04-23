@@ -87,7 +87,7 @@ export default {
 	
 	methods: {
 		setPopUpData() {
-			console.log("SETPOPUPDATA");
+			this.logger.debug("SETPOPUPDATA");
 
 		},
 	},

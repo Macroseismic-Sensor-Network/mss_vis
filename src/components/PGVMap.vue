@@ -237,11 +237,11 @@ export default {
         window.addEventListener('resize', this.on_resize);
         //this.$watch('radius', this.plot_stations);
         this.$store.commit("LOAD_STATION_METADATA");
-        const vm=this;
+        const vm = this;
         var checkExist = setInterval(function() {
-            if (vm.$store.getters.stations_imported==true) {
+            if (vm.$store.getters.stations_imported == true) {
                 clearInterval(checkExist);
-                console.log("Stations: "+vm.$store.getters.station_meta.length);
+                vm.logger.debug("Stations: " + vm.$store.getters.station_meta.length);
                 vm.updateMarkers();
             }
         }, 100);
@@ -421,7 +421,7 @@ export default {
 
             var svg=L.svg();
             svg.addTo(this.leaflet_map);
-            //console.log("Overlays: "+d3.select(".leaflet-overlay-pane").count());
+            //this.logger.debug("Overlays: "+d3.select(".leaflet-overlay-pane").count());
             d3.select(".leaflet-overlay-pane")
                 .select("svg")
                 .attr("id","svg_overlay");
@@ -450,7 +450,7 @@ export default {
             }
         },
         setPopUp(station_id) {
-            console.log("setPopUp: "+station_id);
+            this.logger.debug("setPopUp: "+station_id);
 
             var curStation="undefined";
             var stations=this.$store.getters.station_meta;
@@ -459,7 +459,7 @@ export default {
                     curStation=stations[i];
                 }
             }
-            console.log("Station ID: "+curStation);
+            this.logger.debug("Station ID: "+curStation);
 
             this.popUpData.popUpId="pop-"+curStation.id;
             this.popUpData.station_id=curStation.id;
@@ -520,13 +520,13 @@ export default {
         },
 
         on_resize() {
-            console.log("resize");
+            this.logger.debug("resize");
             var map_container = d3.select("#mapcontainer").node();
             var map_svg = d3.select("#svg_template");
 
             //const width = map_container.clientWidth;
             //const height = map_container.clientHeight;
-            //console.log("Width: "+width);
+            //this.logger.debug("Width: "+width);
 
             var map_bounds = map_container.getBoundingClientRect();
             map_svg.attr("width", map_bounds.width)
@@ -536,7 +536,7 @@ export default {
 
             //map_svg.attr("viewBox", "0 0 "+map_bounds.width+" "+window.innerHeight)
 
-            console.log("width attr"+ map_bounds.width);
+            this.logger.debug("width attr" + map_bounds.width);
 
             this.updateMarkers();
 

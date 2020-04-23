@@ -50,7 +50,7 @@ export default {
     },
 
     mounted() {
-        console.log("Length: " +this.popUpStored.length);
+        this.logger.debug("Length: " +this.popUpStored.length);
     },
 
     computed: {
