@@ -100,6 +100,10 @@
         <svg id="svg_template_archive_plot">
             <ArchiveEventPlot />
         </svg>
+
+        <svg id="svg_template_event_monitor">
+            <EventMonitorPlot />
+        </svg>
         <!-- End of templates. -->
 
         <div id="popUpLayer">
@@ -254,6 +258,10 @@ export default {
         // Get the svg archive event plot and add it to the leaflet svg overlay.
         $('#svg_template_archive_plot').find('*').appendTo("#svg_overlay");
 	$('#svg_template_archive_plot').remove();
+
+        // Get the svg event monitor plot and add it to the leaflet svg overlay.
+        $('#svg_template_event_monitor').find('*').appendTo("#svg_overlay");
+	$('#svg_template_event_monitor').remove();
 
 
     },
