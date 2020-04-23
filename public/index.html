@@ -15,7 +15,6 @@
       <strong>We're sorry but client_side doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>
     <div id="app"><mss-display></mss-display></div>
-	 
 	 <!-- <div id="mapid" style="width: 600px; height: 400px;"></div>-->
     <!--<div id="app"><mss-time-series-display></mss-time-series-display></div>-->
 
@@ -28,7 +27,7 @@
 	<!-- Bootstrap -->
   	<link rel="stylesheet" href="assets/vue/bootstrap-4.4.1-dist/css/bootstrap.min.css">
 	<script src="assets/vue/bootstrap-4.4.1-dist/js/bootstrap.min.js"></script>
-	  
+
 	<!-- LeafletJS CSS Import (online)-->    
 	<script src="assets/vue/leaflet/leaflet.js"></script>  
     <script type="text/javascript">
@@ -40,6 +39,7 @@
             var body = $('body');
             var height = window.innerHeight;
             map.css('height', height + 'px');
+            /*
             if (typeof map_image[0] != "undefined")
             {
                 var img_bbox = map_image[0].getBoundingClientRect();
@@ -58,8 +58,8 @@
             {
                 console.log("map_image not yet loaded, skipping resizing.");
             }
+            */
         }
-
         window.addEventListener("resize", resize_map);
         window.addEventListener("load", resize_map);
     </script>
