@@ -408,7 +408,17 @@ export default {
                 maxZoom: 18,
             })
 
+            var oe3d = L.tileLayer('/assets/vue/nrt/data/map/oe3d/{z}/{x}/{y}.jpg', 
+                {
+                    minZoom: 10,
+                    maxZoom: 13,
+                    tms: false,
+                    attribution: 'Map based on OE3D and OpenStreetMap. Generated with QGis.',
+
+                });
+
             var allOptions= {
+                "MSS OE3D": oe3d,
                 "Basemap.at": basemap,
                 "Open Streetmap": osm,	
             }
@@ -417,16 +427,16 @@ export default {
 
             L.control.layers(allOptions, null, {position: 'topleft', autoZIndex:false }).addTo(this.leaflet_map);
 
-            this.leaflet_map.setView([47.859,16.0457],9);
+            this.leaflet_map.setView([47.859,16.0457], 12);
 
             var svg=L.svg();
             svg.addTo(this.leaflet_map);
+
             //this.logger.debug("Overlays: "+d3.select(".leaflet-overlay-pane").count());
             d3.select(".leaflet-overlay-pane")
                 .select("svg")
                 .attr("id","svg_overlay");
 
-            //Alle Elemente innerhalb des SVG Tags im oberen Template werden an ein Leaflet Overlay angehängt
 
             //this.show_image();
             this.on_resize();
