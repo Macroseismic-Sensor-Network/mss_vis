@@ -30,6 +30,9 @@ import store from './store/store.js'
 import VueNativeSock from 'vue-native-websocket'
 import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
+import FoundationCss from 'foundation-sites/dist/css/foundation.min.css'
+import FoundationJs from 'foundation-sites'
+import $ from 'jquery'
 
 Vue.config.productionTip = false
 
@@ -48,6 +51,9 @@ Vue.use(VueNativeSock,
          format: 'json',
          reconnection: true,
          reconnectionDelay: 3000});
+
+Vue.use(FoundationCss);
+Vue.use(FoundationJs);
 
 
 Vue.component('mss-display', MSSDisplay);
@@ -68,3 +74,5 @@ new Vue({
     },
 
 });
+
+$(document).foundation()
