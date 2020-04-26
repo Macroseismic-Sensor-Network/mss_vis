@@ -328,7 +328,7 @@ export default {
             L.control.layers(allOptions, null, {position: 'topleft', autoZIndex:false }).addTo(this.leaflet_map);
             L.easyButton('<span style="width: 44px; height: 44px; display: inline-block; font-size: 44px; background-color: white;">&equiv;</span>', function(){$('#off_canvas_settings').foundation('open');}).addTo(this.leaflet_map);
 
-            this.leaflet_map.setView([47.859,16.0457], 12);
+            this.leaflet_map.setView([47.8972,16.3507], 10);
 
             var svg=L.svg();
             svg.addTo(this.leaflet_map);
