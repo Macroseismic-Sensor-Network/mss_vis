@@ -169,6 +169,7 @@ import domtoimage from 'dom-to-image';
 import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
 import L from 'leaflet';
+import 'leaflet-easybutton';
 
 export default {
     name: 'PGVMap',
@@ -271,53 +272,6 @@ export default {
     },
 
     computed: {
-        show_event_warning: {
-            get() {
-                return this.$store.getters.map_control.show_event_warning;
-            },
-
-            set(value) {
-                var payload = {property: 'show_event_warning',
-                    value: value}
-                this.$store.commit('set_map_control', payload);
-            }
-        },
-
-        show_event_detection: {
-            get() {
-                return this.$store.getters.map_control.show_event_detection;
-            },
-
-            set(value) {
-                var payload = {property: 'show_event_detection',
-                    value: value}
-                this.$store.commit('set_map_control', payload);
-            }
-        },
-
-        show_event_monitor: {
-            get() {
-                return this.$store.getters.map_control.show_event_monitor;
-            },
-
-            set(value) {
-                var payload = {property: 'show_event_monitor',
-                    value: value}
-                this.$store.commit('set_map_control', payload);
-            }
-        },
-
-        show_detection_result: {
-            get() {
-                return this.$store.getters.map_control.show_detection_result;
-            },
-
-            set(value) {
-                var payload = {property: 'show_detection_result',
-                    value: value}
-                this.$store.commit('set_map_control', payload);
-            }
-        },
 
         data_time_range: function() {
             return this.$store.getters.data_time_range;
@@ -417,6 +371,7 @@ export default {
             oe3d.addTo(this.leaflet_map);
 
             L.control.layers(allOptions, null, {position: 'topleft', autoZIndex:false }).addTo(this.leaflet_map);
+            L.easyButton('<span style="width: 44px; height: 44px; display: inline-block; font-size: 44px; background-color: white;">&equiv;</span>', function(){$('#offCanvas').foundation('open');}).addTo(this.leaflet_map);
 
             this.leaflet_map.setView([47.859,16.0457], 12);
 
