@@ -29,54 +29,6 @@
     <!--<div id="mapcontainer" @click.ctrl="capture_map">-->
     <div id="mapcontainer">
         <!--
-        <div id="map_info">last data: {{ data_time_range[1] }} UTC<br>
-            first data: {{ data_time_range[0] }} UTC<br>
-            server state: {{ server_state }}<br><br>
-            <b>event monitor</b><br>
-            <div id="current_event">
-                start: {{ current_event_start }}<br>
-                end: {{ current_event_end }}<br>
-                state: {{ current_event_state }}<br>
-                max PGV: {{ (current_event_max_pgv * 1000).toFixed(3) + ' mm/s'}}<br><br>
-            </div>
-
-            <b>archived events</b><br>
-            <ArchiveEvent v-for="(cur_event, index) in event_archive"
-                          v-bind:key="cur_event.start_time"
-                          v-bind:id="cur_event.start_time"
-                          v-bind:pos="index"/>
-
-        </div>
-        -->
-
-        <!--
-        <div id="map_config">
-            <input type='checkbox' v-model='show_event_monitor' />show event monitor<br>
-            <input type='checkbox' v-model='show_event_warning' />show event warning<br>
-            <label><input type='checkbox' v-model='show_event_detection'/>show event detection</label><br>
-            <input type='checkbox' v-model='show_detection_result' />show detection data<br>
-        </div>
-        -->
-
-        <!--
-        <svg id="map"
-             width="100%"
-             height="100%"
-             viewBox="0 0 4000 2500"
-             preserveAspectRatio="xMidYMid meet">
-            <ArchiveEventPlot />
-            <EventMonitorPlot />
-            <g id="current_pgv_marker">
-                <PGVMapMarker v-for="cur_station in stations" 
-                              v-bind:key="cur_station.id"
-                              v-bind:station_id="cur_station.id"
-                              v-bind:x_utm="cur_station.x_utm"
-                              v-bind:y_utm="cur_station.y_utm"/>
-            </g>
-        </svg>
-        -->
-
-        <!--
         <Settings/>
         -->
 
@@ -555,8 +507,6 @@ div#mapid
 div#mapcontainer
     height: 100%
     position: relative
-    min-width: 500px
-    min-height: 600px
     font-family: Helvetica, sans-serif
 
 div#map_info
