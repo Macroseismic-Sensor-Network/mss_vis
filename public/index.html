@@ -15,8 +15,16 @@
         <noscript>
             <strong>We're sorry but client_side doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
         </noscript>
-        <div id="app" >
-            <mss-display></mss-display>
+        <div id="app" class="grid-y grid-frame" >
+            <div class="cell">
+                <h1>Header</h1>
+            </div>
+            <div class="cell auto">
+                <mss-display></mss-display>
+            </div>
+            <div class="cell">
+                <h1>Footer</h1>
+            </div>
         </div>
 
         <!-- Jquery -->
@@ -28,6 +36,7 @@
 	<script src="assets/vue/nrt/js/leaflet.js"></script>  
 
         <script type="text/javascript">
+            /*
             function resize_map () {
                 var map = $("#mapcontainer");
                 var map_info = $("#map_info");
@@ -36,7 +45,6 @@
                 var body = $('body');
                 var height = window.innerHeight;
                 map.css('height', height + 'px');
-                /*
                 if (typeof map_image[0] != "undefined")
                 {
                     var img_bbox = map_image[0].getBoundingClientRect();
@@ -55,17 +63,16 @@
                 {
                     console.log("map_image not yet loaded, skipping resizing.");
                 }
-                 */
             }
-            window.addEventListener("resize", resize_map);
-            window.addEventListener("load", resize_map);
+            //window.addEventListener("resize", resize_map);
+            //window.addEventListener("load", resize_map);
+            */
         </script>
         <!-- built files will be auto injected -->
     </body>
     <style>
         body {
             margin: 0;
-            height: 100%;
             overflow: hidden;
         }
     </style>

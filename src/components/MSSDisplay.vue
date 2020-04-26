@@ -25,12 +25,9 @@
 -->
 
 <template>
-    <div id="mss-display-container">
-        <div id="map-container" class = "grid-x">
-            <div class="cell">
-                <PGVMap :key="mapKey" v-on:reload-map-2="forceReloadMap()"/>
-            </div>
-        </div>
+    <div id="mss-display-container" class="cell auto">
+        <PGVMap :key="mapKey" v-on:reload-map-2="forceReloadMap()"/>
+
         <!-- The z-index is needed to raise the offCanvas item above the map. -->
         <div class="off-canvas position-left" id="offCanvas" data-off-canvas style="z-index: 1000;">
             <!-- Your menu or Off-canvas content goes here -->
@@ -86,6 +83,7 @@ export default {
 		}
 	},
     components: {
+        // eslint-disable-next-line
         PGVMap,
     },
 	methods: {
@@ -154,5 +152,10 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style scoped lang="sass">
+
+#mss-display-container
+    height: 100%
+    width: 100%
+
 </style>
