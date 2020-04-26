@@ -399,14 +399,6 @@ export default {
                 id: 'mapbox/streets-v11',
                 tileSize: 512,
                 zoomOffset: -1});
-            var basemap=L.tileLayer("http://{s}.wien.gv.at/basemap/geolandbasemap/normal/google3857/{z}/{y}/{x}.png", {
-                subdomains : ['maps', 'maps1', 'maps2', 'maps3', 'maps4'],
-                attribution: '&copy; <a href="http://basemap.at">Basemap.at</a>',
-                id: 'mapbox/streets-v11',
-                tileSize: 512,
-                zoomOffset: -1,
-                maxZoom: 18,
-            })
 
             var oe3d = L.tileLayer('/assets/vue/nrt/data/map/oe3d/{z}/{x}/{y}.jpg', 
                 {
@@ -414,12 +406,10 @@ export default {
                     maxZoom: 13,
                     tms: false,
                     attribution: 'Map based on OE3D and OpenStreetMap. Generated with QGis.',
-
                 });
 
             var allOptions= {
                 "MSS OE3D": oe3d,
-                "Basemap.at": basemap,
                 "Open Streetmap": osm,	
             }
 
