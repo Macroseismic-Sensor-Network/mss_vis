@@ -391,6 +391,14 @@ export default {
 
     methods: {
         init_map() {
+            var oe3d = L.tileLayer('/assets/vue/nrt/data/map/oe3d/{z}/{x}/{y}.jpg', 
+                {
+                    minZoom: 10,
+                    maxZoom: 13,
+                    tms: false,
+                    attribution: 'Map based on OE3D and OpenStreetMap. Generated with QGis.',
+                });
+
             var osm=L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
                 maxZoom: 18,
                 attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
@@ -400,20 +408,13 @@ export default {
                 tileSize: 512,
                 zoomOffset: -1});
 
-            var oe3d = L.tileLayer('/assets/vue/nrt/data/map/oe3d/{z}/{x}/{y}.jpg', 
-                {
-                    minZoom: 10,
-                    maxZoom: 13,
-                    tms: false,
-                    attribution: 'Map based on OE3D and OpenStreetMap. Generated with QGis.',
-                });
 
             var allOptions= {
                 "MSS OE3D": oe3d,
                 "Open Streetmap": osm,	
             }
 
-            osm.addTo(this.leaflet_map);
+            oe3d.addTo(this.leaflet_map);
 
             L.control.layers(allOptions, null, {position: 'topleft', autoZIndex:false }).addTo(this.leaflet_map);
 
