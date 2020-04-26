@@ -69,7 +69,7 @@ export default {
 	
 	data() {
 		return {
-			close_icon_path:"/assets/vue/image/icons/close_popup.png",
+			close_icon_path:"/assets/vue/nrt/image/icons/close_popup.png",
 			attached:false,
 		}
 	},
@@ -77,10 +77,10 @@ export default {
 	computed: {
 		add_icon_path: function() {
 			if(!this.attached) {
-				return "/assets/vue/image/icons/lock_closed.png";
+				return "/assets/vue/nrt/image/icons/lock_closed.png";
 			}
 			else {
-				return "/assets/vue/image/icons/lock_open.png";
+				return "/assets/vue/nrt/image/icons/lock_open.png";
 			}
 		},
 	},

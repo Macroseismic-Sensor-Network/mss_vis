@@ -1,76 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
-    <link rel="stylesheet" href="assets/vue/nrt/style/foundation.css">
-	<!-- LeafletJS CSS Import (online)-->  
-	<link rel="stylesheet" href="assets/vue/leaflet/leaflet.css"/>
-    <title>MSS Map View</title>
-  </head>
-  <body>
-    <noscript>
-      <strong>We're sorry but client_side doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
-    </noscript>
-    <div id="app"><mss-display></mss-display></div>
-	 <!-- <div id="mapid" style="width: 600px; height: 400px;"></div>-->
-    <!--<div id="app"><mss-time-series-display></mss-time-series-display></div>-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0">
+        <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+        <link rel="stylesheet" href="assets/vue/nrt/style/foundation.css">
 
-    <script type="text/javascript" src="assets/vue/js/jquery-ui-1.12.1/external/jquery/jquery-3.3.1.js"></script>
-	<!-- Jquery Erweituerung für Drag und Drop -->
-    <script type="text/javascript" src="assets/vue/js/jquery-ui-1.12.1/jquery-ui.min.js"></script>
-	<!-- JavaScript Erweiterung, benötigt für Basemap.at -->
-	<script src="assets/vue/leaflet/leaflet.TileLayer.WMTS-masterleaflet-tilelayer-wmts.js"></script>
-	<link rel="stylesheet" href="assets/vue/js/jquery-ui-1.12.1/jquery-ui.min.css">  
-	<!-- Bootstrap -->
-  	<link rel="stylesheet" href="assets/vue/bootstrap-4.4.1-dist/css/bootstrap.min.css">
-	<script src="assets/vue/bootstrap-4.4.1-dist/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="assets/vue/nrt/style/leaflet.css"/>
+        <link rel="stylesheet" href="assets/vue/nrt/style/jquery-ui.min.css">  
+        <title>MSS Map View</title>
+    </head>
+    <body>
+        <noscript>
+            <strong>We're sorry but client_side doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+        </noscript>
+        <div id="app"><mss-display></mss-display></div>
 
-	<!-- LeafletJS CSS Import (online)-->    
-	<script src="assets/vue/leaflet/leaflet.js"></script>  
-    <script type="text/javascript">
-        function resize_map () {
-            var map = $("#mapcontainer");
-            var map_info = $("#map_info");
-            var map_config = $("#map_config");
-            var map_image = $("#map_image");
-            var body = $('body');
-            var height = window.innerHeight;
-            map.css('height', height + 'px');
-            /*
-            if (typeof map_image[0] != "undefined")
-            {
-                var img_bbox = map_image[0].getBoundingClientRect();
-                // The rectangel returned by getBoundingClientRect takes the
-                // current scrolling into account. Add it therefore to the 
-                // position value.
-                map_info.css('left', img_bbox.left - parseInt(body.css('marginLeft')) + window.scrollX + 'px');
-                map_info.css('top', img_bbox.top - parseInt(body.css('marginTop')) + window.scrollY + 'px');
-                map_info.css('width', img_bbox.width + 'px');
-                //map_info.style.width =  img_bbox.width - parseInt(mapinfo_style.paddingLeft) - parseInt(mapinfo_style.paddingRight) + 'px';
-                //map_info.style.height = img_bbox.height - parseInt(mapinfo_style.paddingTop) - parseInt(mapinfo_style.paddingBottom) + 'px';
+        <!-- Jquery -->
+        <script type="text/javascript" src="assets/vue/nrt/js/jquery-3.3.1.js"></script>
+        <!-- Jquery Erweituerung für Drag und Drop -->
+        <script type="text/javascript" src="assets/vue/nrt/js/jquery-ui.min.js"></script>
 
-                map_config.css('left', img_bbox.left - parseInt(body.css('marginLeft')) + window.scrollX + 'px');
-                map_config.css('top', img_bbox.top - parseInt(body.css('marginTop')) + window.scrollY + 'px');
+        <!-- Leaflet -->
+	<script src="assets/vue/nrt/js/leaflet.js"></script>  
+	<script src="assets/vue/nrt/js/leaflet.TileLayer.WMTS-masterleaflet-tilelayer-wmts.js"></script>
+
+
+        <script type="text/javascript">
+            function resize_map () {
+                var map = $("#mapcontainer");
+                var map_info = $("#map_info");
+                var map_config = $("#map_config");
+                var map_image = $("#map_image");
+                var body = $('body');
+                var height = window.innerHeight;
+                map.css('height', height + 'px');
+                /*
+                if (typeof map_image[0] != "undefined")
+                {
+                    var img_bbox = map_image[0].getBoundingClientRect();
+                    // The rectangel returned by getBoundingClientRect takes the
+                    // current scrolling into account. Add it therefore to the 
+                    // position value.
+                    map_info.css('left', img_bbox.left - parseInt(body.css('marginLeft')) + window.scrollX + 'px');
+                    map_info.css('top', img_bbox.top - parseInt(body.css('marginTop')) + window.scrollY + 'px');
+                    map_info.css('width', img_bbox.width + 'px');
+                    //map_info.style.width =  img_bbox.width - parseInt(mapinfo_style.paddingLeft) - parseInt(mapinfo_style.paddingRight) + 'px';
+                    //map_info.style.height = img_bbox.height - parseInt(mapinfo_style.paddingTop) - parseInt(mapinfo_style.paddingBottom) + 'px';
+
+                    map_config.css('left', img_bbox.left - parseInt(body.css('marginLeft')) + window.scrollX + 'px');
+                    map_config.css('top', img_bbox.top - parseInt(body.css('marginTop')) + window.scrollY + 'px');
+                }
+                {
+                    console.log("map_image not yet loaded, skipping resizing.");
+                }
+                 */
             }
-            {
-                console.log("map_image not yet loaded, skipping resizing.");
-            }
-            */
+            window.addEventListener("resize", resize_map);
+            window.addEventListener("load", resize_map);
+        </script>
+        <!-- built files will be auto injected -->
+    </body>
+    <style>
+        body {
+            margin: 0;
+            height: 100%;
+            overflow: hidden;
         }
-        window.addEventListener("resize", resize_map);
-        window.addEventListener("load", resize_map);
-    </script>
-    <!-- built files will be auto injected -->
-  </body>
-	<style>
-		body {
-			margin: 0;
-			height: 100%;
-			overflow: hidden;
-		}
-	</style>
-	
+    </style>
+
 </html>
