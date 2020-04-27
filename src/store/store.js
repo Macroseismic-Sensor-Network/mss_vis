@@ -559,7 +559,7 @@ export default new Vuex.Store({
             state.connected = false;
             state.server_state = 'disconnected'
             state.logger.info("Disconnected from server.");
-            this.logger.info("event: ", event);
+            state.logger.info("event: ", event);
         },
 
         SOCKET_ONERROR(state, event) {
