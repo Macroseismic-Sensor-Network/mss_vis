@@ -187,7 +187,7 @@ export default {
         this.leaflet_map=L.map("mapid");
         this.map_image = new Image;
         this.init_map();
-        window.addEventListener('resize', this.on_resize);
+        //window.addEventListener('resize', this.on_resize);
         //this.$watch('radius', this.plot_stations);
         this.$store.commit("LOAD_STATION_METADATA");
         const vm = this;
@@ -200,7 +200,7 @@ export default {
         }, 100);
 
 
-        window.addEventListener('resize', this.on_resize);
+        //window.addEventListener('resize', this.on_resize);
         this.leaflet_map.on("moveend", this.updateMarkers);
         this.showLegend=this.$store.getters.settings.show_legend;
 
@@ -220,7 +220,7 @@ export default {
     },
 
     updated() {
-        this.on_resize();
+        //this.on_resize();
     },
 
     computed: {
@@ -340,7 +340,7 @@ export default {
 
 
             //this.show_image();
-            this.on_resize();
+            //this.on_resize();
         },
 
         updateMarkers() {
@@ -424,7 +424,7 @@ export default {
                     .attr('id', 'map_image')
                     .attr("xlink:href", self.map_image_url);
                 d3.select('#map_image').lower();
-                self.on_resize();
+                //self.on_resize();
             }
             this.logger.debug("Loading map image: " + this.map_image_url);
             this.map_image.src = this.map_image_url;
