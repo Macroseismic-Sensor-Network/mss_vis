@@ -27,6 +27,7 @@ import Vue from 'vue'
 import * as d3 from "d3";
 import * as log from 'loglevel';
 import * as moment from 'moment';
+import proj4 from 'proj4';
 
 Vue.use(Vuex)
 
@@ -523,6 +524,12 @@ export default new Vuex.Store({
 
         svg_scale: (state) => {
             return state.svg_scale;
+        },
+
+        utm_to_wgs84: (state) => {
+            proj4.defs("EPSG:32633","+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs");
+            var res = proj4('EPSG:32633').inverse([578216.4071638723,5301158.131760679]);
+            state.logger.debug("proj4 result: " + res);
         },
 
     },

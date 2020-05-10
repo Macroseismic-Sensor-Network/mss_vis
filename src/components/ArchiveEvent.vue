@@ -96,6 +96,7 @@ export default {
             this.logger.debug("Showing event: " + this.pos);
             var payload = { pos: this.pos };
             this.$store.commit('set_show_archive_event', payload);
+            this.$store.getters.utm_to_wgs84;
         },
 
         pgv_to_color(pgv) {
