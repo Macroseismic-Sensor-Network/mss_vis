@@ -54,7 +54,7 @@
         </svg>
 
         <svg id="svg_template_event_monitor">
-            <EventMonitorPlot />
+            <EventMonitorPlot v-bind:leaflet_map="leaflet_map"/>
         </svg>
         <!-- End of templates. -->
 

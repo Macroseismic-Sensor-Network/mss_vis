@@ -25,7 +25,7 @@
 -->
 
 <template>
-    <g v-bind:id="element_id">
+    <g v-bind:id="element_id" class="leaflet-zoom-hide">
     </g>
 </template>
 
@@ -45,6 +45,7 @@ export default {
     name: 'EventMonitorPlot',
 
     props: {
+        leaflet_map: Object,
     },
 
     created () {
@@ -98,7 +99,7 @@ export default {
     watch: {
         current_event: function (new_value, old_value) {
             this.logger.debug('current_event has changed.' + new_value + old_value);
-            if (this.map_control.show_event_warning)
+            if (this.map_control.show_event_monitor)
             {
                 this.plot_event_monitor();
             }
@@ -109,7 +110,18 @@ export default {
         },
 
         'map_control.show_event_monitor': function() {
-            this.plot_event_monitor();
+            if (this.map_control.show_event_monitor) {
+                this.plot_event_monitor();
+            }
+            else
+            {
+                var container = d3.select('#' + this.element_id);
+                // Clear all elements in the container.
+                container.selectAll("*").remove();
+                this.pgv_polygons = [];
+                this.clip_path = undefined;
+                this.clip_path_outline = undefined;
+            }
         },
     },
 
@@ -119,6 +131,9 @@ export default {
             var container = d3.select('#' + this.element_id);
             // Clear all elements in the container.
             container.selectAll("*").remove();
+            this.pgv_polygons = [];
+            this.clip_path = undefined;
+            this.clip_path_outline = undefined;
 
             // Return if current_event is emtpy.
             if (Object.keys(this.current_event).length === 0)
@@ -127,10 +142,9 @@ export default {
             }
 
 
-            var scales= this.scales;
             var line_generator = d3.line().curve(d3.curveLinearClosed)
-                                          .x(function(d) { return scales.x(d[0]); })
-                                          .y(function(d) { return scales.y(d[1]); });
+                                          .x(function(d) { return d[0]; })
+                                          .y(function(d) { return d[1]; });
 
             var k;
 
@@ -174,7 +188,7 @@ export default {
                                                          .append('path').attr('d', line_generator(pl_leaflet));
             this.clip_path_outline = container.append('path').attr('d', line_generator(pl_leaflet))
                                                              .attr('stroke', 'Turquoise')
-                                                             .attr('stroke-width', 12)
+                                                             .attr('stroke-width', 4)
                                                              .attr('fill', 'none');
             this.clip_path.lonlat = pl_wgs;
             this.clip_path_outline.lonlat = pl_wgs;
@@ -313,14 +327,6 @@ export default {
             var line_generator = d3.line().curve(d3.curveLinearClosed)
                                           .x(function(d) { return d[0]; })
                                           .y(function(d) { return d[1]; });
-
-            // Update the PGV markers of the event.
-            for (let k = 0; k < this.pgv_markers.length; k++) {
-                let cur_marker = this.pgv_markers[k];
-                let cur_coords_leaflet = this.lonlat_to_leaflet(cur_marker.lonlat);
-                cur_marker.attr("cx", cur_coords_leaflet[0][0]);
-                cur_marker.attr("cy", cur_coords_leaflet[0][1]);
-            }
 
             // Update the Voronoi cell polygons.
             for (let k = 0; k < this.pgv_polygons.length; k++) {
