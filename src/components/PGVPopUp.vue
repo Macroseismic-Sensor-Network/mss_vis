@@ -4,9 +4,11 @@
 <template>
     <div id="popUp" class="ui-widget-content" style="position:absolute; background-color:white;" v-on:popup="setPopUpData">
         <div style="text-align:right" id="buttonsContainer">
+            <!-- This feature is not yet ready.
             <button v-on:click="$emit('add-popup')" id="addButton">
                 <img id="addIcon" v-bind:src="add_icon_path">
             </button>
+            -->
 
             <button v-on:click="$emit('close-popup')" id="closeButton">
                 <img id="closeIcon" v-bind:src="close_icon_path">
@@ -17,12 +19,14 @@
         <p><b>latest PGV:</b> {{ (pgv * 1000).toFixed(3) }} mm/s</p> 
         <p><b>max. PGV:</b> {{ (pgv_max * 1000).toFixed(3) }} mm/s</p> 
         <h3 style="background-color:LightGray"  id="content">Stationsmetadaten</h3>
-        <p id="content"><b>ID:</b> {{station_id}}</p>		
+        <p id="content"><b>ID:</b> {{station_id}}</p>
+        <p id="content"><b>Beschreibung:</b> {{description}}</p>
+        <!-- This information is currently not of interest.
         <p id="content"><b>Netzwerk</b> {{network}}</p>
         <p id="content"><b>Standort:</b> {{location}}</p>
         <p id="content"><b>Koordinaten:</b> {{coords}}</p>
         <p id="content"><b>UTM Koordinaten:</b> {{utm_coords}}</p>
-        <p id="content"><b>Beschreibung:</b> {{description}}</p>
+        -->
 
     </div>
 </template>
