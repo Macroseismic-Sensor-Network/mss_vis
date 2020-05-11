@@ -18,9 +18,9 @@
         <h2 id="popup-name">{{ name }}</h2>
         <p><b>latest PGV:</b> {{ (pgv * 1000).toFixed(3) }} mm/s</p> 
         <p><b>max. PGV:</b> {{ (pgv_max * 1000).toFixed(3) }} mm/s</p> 
-        <h3 style="background-color:LightGray"  id="popup-title">Stationsmetadaten</h3>
+        <h3 style="background-color:LightGray"  id="popup-title">Metadata</h3>
         <p id="popup-id"><b>ID:</b> {{station_id}}</p>
-        <p id="popup-description"><b>Beschreibung:</b> {{description}}</p>
+        <p id="popup-description"><b>Description:</b> {{description}}</p>
         <!--
         <p id="popup-network"><b>Netzwerk</b> {{network}}</p>
         <p id="popup-location"><b>Standort:</b> {{location}}</p>
@@ -45,7 +45,7 @@ export default {
 
     data() {
         return {
-            name: "PGV Popup",
+            name: "Station Info",
             close_icon_path: "/assets/vue/nrt/image/icons/close_popup.png",
             attached: false,
         }
