@@ -25,7 +25,7 @@
 -->
 
 <template>
-    <g v-bind:id="element_id">
+    <g v-bind:id="element_id" class="leaflet-zoom-hide">
     </g>
 </template>
 
@@ -38,11 +38,14 @@ import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
 import * as concaveman from 'concaveman';
 import * as polygon_offset from 'polygon-offset';
+import L from 'leaflet';
+import proj4 from 'proj4';
 
 export default {
     name: 'ArchiveEventPlot',
 
     props: {
+        leaflet_map: Object,
     },
 
     created () {
@@ -57,6 +60,10 @@ export default {
             element_id: "archive_event_plot_group",
             hull_offset: 5000,   // The outwards offset of the hull polygon [m]. 
             logger: undefined,
+            pgv_markers: [],
+            pgv_polygons: [],
+            clip_path: undefined,
+            clip_path_outline: undefined,
         };
     },
 
@@ -94,10 +101,15 @@ export default {
 
     methods: {
         plot_archive_event() {
+            this.pgv_markers = [];
+            this.pgv_polygons = [];
             var scales= this.scales;
+            //var line_generator = d3.line().curve(d3.curveLinearClosed)
+            //                              .x(function(d) { return scales.x(d[0]); })
+            //                              .y(function(d) { return scales.y(d[1]); });
             var line_generator = d3.line().curve(d3.curveLinearClosed)
-                                          .x(function(d) { return scales.x(d[0]); })
-                                          .y(function(d) { return scales.y(d[1]); });
+                                          .x(function(d) { return d[0]; })
+                                          .y(function(d) { return d[1]; });
 
             var container = d3.select('#' + this.element_id);
 
@@ -148,12 +160,16 @@ export default {
                 hull = _.cloneDeep(hull);
                 let poly_offset = new polygon_offset();
                 let polyline = poly_offset.data(hull).margin(this.hull_offset);
-                container.append('clipPath').attr('id', 'archive_event_hull_clip')
-                                            .append('path').attr('d', line_generator(polyline[0]));
-                container.append('path').attr('d', line_generator(polyline[0]))
-                                        .attr('stroke', 'LightGreen')
-                                        .attr('stroke-width', 8)
-                                        .attr('fill', 'none');
+                var pl_wgs = this.utm_to_wgs84(polyline[0]);
+                var pl_leaflet = this.lonlat_to_leaflet(pl_wgs);
+                this.clip_path = container.append('clipPath').attr('id', 'archive_event_hull_clip')
+                                                             .append('path').attr('d', line_generator(pl_leaflet));
+                this.clip_path_outline = container.append('path').attr('d', line_generator(pl_leaflet))
+                                                                 .attr('stroke', 'LightGreen')
+                                                                 .attr('stroke-width', 2)
+                                                                 .attr('fill', 'none');
+                this.clip_path.lonlat = pl_wgs;
+                this.clip_path_outline.lonlat = pl_wgs;
 
 
                 // Create a convex hull and offset it with rounded corners.
@@ -208,29 +224,36 @@ export default {
                     // Plot the Voronoin cell polygon.
                     closed_poly = cur_poly;
                     closed_poly.push(cur_poly[0]);
-                    container.append('path').attr('id', 'voronoi_cell_' + k)
-                                            .attr('d', line_generator(closed_poly))
+                    var cp_wgs = this.utm_to_wgs84(closed_poly);
+                    var cp_leaflet = this.lonlat_to_leaflet(cp_wgs);
+                    let cur_pgv_polygon = container.append('path').attr('id', 'voronoi_cell_' + k)
+                                            .attr('d', line_generator(cp_leaflet))
                                             .attr('stroke', fill_color)
                                             .attr('stroke-width', 1)
                                             .attr('stroke-opacity', fill_opacity)
                                             .attr('fill', fill_color)
                                             .attr('fill-opacity', fill_opacity)
                                             .attr("clip-path", "url(#archive_event_hull_clip)");
+                    cur_pgv_polygon.lonlat= cp_wgs;
+                    this.pgv_polygons.push(cur_pgv_polygon);
 
                     // Add the PGV circle marker showing the max. PGV of the
                     // event.
+                    var cur_latlon = new L.LatLng(cur_station.y, cur_station.x);
                     pgv_radius = scales.radius(max_pgv) / this.svg_scale;
-                    container.append('circle').attr('id', 'voronoi_pgv_marker_' + k)
-                                              .attr('cx', scales.x(cur_station.x_utm))
-                                              .attr('cy', scales.y(cur_station.y_utm))
+                    let cur_marker = container.append('circle').attr('id', 'voronoi_pgv_marker_' + k)
+                                              .attr('cx', this.leaflet_map.latLngToLayerPoint(cur_latlon).x)
+                                              .attr('cy', this.leaflet_map.latLngToLayerPoint(cur_latlon).y)
                                               .attr('r', pgv_radius)
                                               .attr('fill', fill_color)
                                               .attr('fill-opacity', marker_fill_opacity)
                                               .attr('stroke', 'black')
                                               .attr('stroke-opacity', marker_fill_opacity)
                                               .attr('stroke-width', 4);
-
+                    cur_marker.lonlat = [[cur_station.x, cur_station.y]];
+                    this.pgv_markers.push(cur_marker);
                 }
+                this.leaflet_map.on("zoomend", this.update_leaflet);
               }
               else
               {
@@ -278,6 +301,54 @@ export default {
             return color;
         },
 
+        utm_to_wgs84(src_coords) {
+            proj4.defs("EPSG:32633", "+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs");
+            var dst_coords = [];
+            src_coords.forEach(function(cur_coord) {
+                dst_coords.push(proj4('EPSG:32633').inverse(cur_coord));
+
+            });
+            return dst_coords;
+        },
+
+        lonlat_to_leaflet(lonlat) {
+            var xy_leaflet = []
+            for (let k = 0; k < lonlat.length; k++) {
+                let cur_latlon = new L.LatLng(lonlat[k][1], lonlat[k][0]);
+                xy_leaflet.push([this.leaflet_map.latLngToLayerPoint(cur_latlon).x,
+                                 this.leaflet_map.latLngToLayerPoint(cur_latlon).y]);
+            }
+            return xy_leaflet;
+        },
+
+        update_leaflet() {
+            this.logger.debug("update_leaflet");
+            var line_generator = d3.line().curve(d3.curveLinearClosed)
+                                          .x(function(d) { return d[0]; })
+                                          .y(function(d) { return d[1]; });
+
+            // Update the PGV markers of the event.
+            for (let k = 0; k < this.pgv_markers.length; k++) {
+                let cur_marker = this.pgv_markers[k];
+                let cur_coords_leaflet = this.lonlat_to_leaflet(cur_marker.lonlat);
+                cur_marker.attr("cx", cur_coords_leaflet[0][0]);
+                cur_marker.attr("cy", cur_coords_leaflet[0][1]);
+            }
+
+            // Update the Voronoi cell polygons.
+            for (let k = 0; k < this.pgv_polygons.length; k++) {
+                let cur_poly = this.pgv_polygons[k];
+                let cur_coords_leaflet = this.lonlat_to_leaflet(cur_poly.lonlat)
+                cur_poly.attr('d', line_generator(cur_coords_leaflet))
+            }
+
+            // Update the clip path.
+            let cur_coords_leaflet = this.lonlat_to_leaflet(this.clip_path.lonlat);
+            this.clip_path.attr('d', line_generator(cur_coords_leaflet));
+
+            // Update the clip path outline.
+            this.clip_path_outline.attr('d', line_generator(cur_coords_leaflet));
+        },
     },
 }
 </script>

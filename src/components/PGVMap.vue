@@ -50,7 +50,7 @@
         </svg>
 
         <svg id="svg_template_archive_plot">
-            <ArchiveEventPlot />
+            <ArchiveEventPlot v-bind:leaflet_map="leaflet_map"/>
         </svg>
 
         <svg id="svg_template_event_monitor">

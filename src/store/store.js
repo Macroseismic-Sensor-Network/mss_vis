@@ -231,6 +231,7 @@ export default new Vuex.Store({
         popUpStored:[],
 
         map_config: { 
+            proj_crs: "EPSG:32633",
             map_limits: {'x_min': 519685.529,
                 'y_min': 5252085.484,
                 'x_max': 672085.529,
@@ -526,10 +527,11 @@ export default new Vuex.Store({
             return state.svg_scale;
         },
 
-        utm_to_wgs84: (state) => {
-            proj4.defs("EPSG:32633","+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs");
-            var res = proj4('EPSG:32633').inverse([578216.4071638723,5301158.131760679]);
-            state.logger.debug("proj4 result: " + res);
+        // eslint-disable-next-line
+        utm_to_wgs84: (state) => (coords) => {
+            proj4.defs("EPSG:32633", "+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs");
+            state.logger.debug("coords: " + coords);
+            return proj4('EPSG:32633').inverse(coords);
         },
 
     },

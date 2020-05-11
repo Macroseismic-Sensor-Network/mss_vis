@@ -44,6 +44,7 @@
 
 
 <script>
+// eslint-disable-next-line
 import * as d3 from "d3";
 
 export default {
@@ -57,17 +58,20 @@ export default {
     },
 
     mounted () {
+        /*
         var scales = this.scales;
         var marker_svg = d3.select("#" + this.element_id + "_current");
         marker_svg.attr("cx", scales.x(this.x_utm))
                   .attr("cy", scales.y(this.y_utm))
                   .attr('stroke', 'black');
 
+
         marker_svg = d3.select("#" + this.element_id + "_max");
         marker_svg.attr("cx", scales.x(this.x_utm))
                   .attr("cy", scales.y(this.y_utm))
                   .attr('stroke', 'black');
         marker_svg.lower();
+        */
     },
 
     data() {
