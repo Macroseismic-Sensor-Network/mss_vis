@@ -103,10 +103,9 @@ export default {
         plot_archive_event() {
             this.pgv_markers = [];
             this.pgv_polygons = [];
+            this.clip_path = undefined;
+            this.clip_path_outline = undefined;
             var scales= this.scales;
-            //var line_generator = d3.line().curve(d3.curveLinearClosed)
-            //                              .x(function(d) { return scales.x(d[0]); })
-            //                              .y(function(d) { return scales.y(d[1]); });
             var line_generator = d3.line().curve(d3.curveLinearClosed)
                                           .x(function(d) { return d[0]; })
                                           .y(function(d) { return d[1]; });
