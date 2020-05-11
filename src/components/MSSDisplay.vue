@@ -58,15 +58,6 @@
                             </div>
                         </div>
                     </li>
-                    <li class="accordion-item" data-accordion-item>
-                        <!-- Accordion tab title -->
-                        <a href="#" class="accordion-title">Other</a>
-
-                        <!-- Accordion tab content: it would start in the open state due to using the `is-active` state class. -->
-                        <div class="accordion-content" data-tab-content>
-                            Content Other
-                        </div>
-                    </li>
                 </ul>
             </div>
         </div>
@@ -101,7 +92,7 @@ export default {
         stations: function() {
             return this.$store.getters.station_meta;
         },
-        
+
         show_event_monitor: {
             get() {
                 return this.$store.getters.map_control.show_event_monitor;
