@@ -249,7 +249,7 @@ export default {
                                               .attr('fill-opacity', marker_fill_opacity)
                                               .attr('stroke', 'black')
                                               .attr('stroke-opacity', marker_fill_opacity)
-                                              .attr('stroke-width', 4);
+                                              .attr('stroke-width', 1);
                     cur_marker.lonlat = [[cur_station.x, cur_station.y]];
                     this.pgv_markers.push(cur_marker);
                 }
