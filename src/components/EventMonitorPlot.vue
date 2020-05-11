@@ -38,6 +38,8 @@ import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
 import * as concaveman from 'concaveman';
 import * as polygon_offset from 'polygon-offset';
+import L from 'leaflet';
+import proj4 from 'proj4';
 
 export default {
     name: 'EventMonitorPlot',
@@ -57,6 +59,9 @@ export default {
             element_id: "event_monitor_plot_group",
             hull_offset: 5000,
             logger: undefined,
+            pgv_polygons: [],
+            clip_path: undefined,
+            clip_path_outline: undefined,
         };
     },
 
@@ -93,7 +98,10 @@ export default {
     watch: {
         current_event: function (new_value, old_value) {
             this.logger.debug('current_event has changed.' + new_value + old_value);
-            this.plot_event_monitor();
+            if (this.map_control.show_event_warning)
+            {
+                this.plot_event_monitor();
+            }
         },
 
         'map_control.show_event_warning': function() {
@@ -107,6 +115,7 @@ export default {
 
     methods: {
         plot_event_monitor() {
+            this.logger.debug("Plotting the event monitor.");
             var container = d3.select('#' + this.element_id);
             // Clear all elements in the container.
             container.selectAll("*").remove();
@@ -159,12 +168,16 @@ export default {
             hull = _.cloneDeep(hull);
             let poly_offset = new polygon_offset();
             let polyline = poly_offset.data(hull).margin(this.hull_offset);
-            container.append('clipPath').attr('id', 'event_monitor_hull_clip')
-                                        .append('path').attr('d', line_generator(polyline[0]));
-            container.append('path').attr('d', line_generator(polyline[0]))
-                                    .attr('stroke', 'Turquoise')
-                                    .attr('stroke-width', 12)
-                                    .attr('fill', 'none');
+            var pl_wgs = this.utm_to_wgs84(polyline[0]);
+            var pl_leaflet = this.lonlat_to_leaflet(pl_wgs);
+            this.clip_path = container.append('clipPath').attr('id', 'event_monitor_hull_clip')
+                                                         .append('path').attr('d', line_generator(pl_leaflet));
+            this.clip_path_outline = container.append('path').attr('d', line_generator(pl_leaflet))
+                                                             .attr('stroke', 'Turquoise')
+                                                             .attr('stroke-width', 12)
+                                                             .attr('fill', 'none');
+            this.clip_path.lonlat = pl_wgs;
+            this.clip_path_outline.lonlat = pl_wgs;
 
             // Create the polygons of the Voronoi cells using the map border as 
             // the network extent.
@@ -193,14 +206,18 @@ export default {
                 // Plot the Voronoin cell polygon.
                 closed_poly = cur_poly;
                 closed_poly.push(cur_poly[0]);
-                container.append('path').attr('id', 'voronoi_cell_' + k)
-                                        .attr('d', line_generator(closed_poly))
+                let cp_wgs = this.utm_to_wgs84(closed_poly);
+                let cp_leaflet = this.lonlat_to_leaflet(cp_wgs);
+                let cur_pgv_polygon = container.append('path').attr('id', 'voronoi_cell_' + k)
+                                        .attr('d', line_generator(cp_leaflet))
                                         .attr('stroke', fill_color)
                                         .attr('stroke-width', 1)
                                         .attr('stroke-opacity', fill_opacity)
                                         .attr('fill', fill_color)
                                         .attr('fill-opacity', fill_opacity)
                                         .attr("clip-path", "url(#event_monitor_hull_clip)");
+                cur_pgv_polygon.lonlat= cp_wgs;
+                this.pgv_polygons.push(cur_pgv_polygon);
             }
 
         },
@@ -269,6 +286,55 @@ export default {
             const colormap = this.$store.getters.map_config.colormap;
             var color = colormap(this.scales.color(pgv));
             return color;
+        },
+
+        utm_to_wgs84(src_coords) {
+            proj4.defs("EPSG:32633", "+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs");
+            var dst_coords = [];
+            src_coords.forEach(function(cur_coord) {
+                dst_coords.push(proj4('EPSG:32633').inverse(cur_coord));
+
+            });
+            return dst_coords;
+        },
+
+        lonlat_to_leaflet(lonlat) {
+            var xy_leaflet = []
+            for (let k = 0; k < lonlat.length; k++) {
+                let cur_latlon = new L.LatLng(lonlat[k][1], lonlat[k][0]);
+                xy_leaflet.push([this.leaflet_map.latLngToLayerPoint(cur_latlon).x,
+                                 this.leaflet_map.latLngToLayerPoint(cur_latlon).y]);
+            }
+            return xy_leaflet;
+        },
+
+        update_leaflet() {
+            this.logger.debug("update_leaflet");
+            var line_generator = d3.line().curve(d3.curveLinearClosed)
+                                          .x(function(d) { return d[0]; })
+                                          .y(function(d) { return d[1]; });
+
+            // Update the PGV markers of the event.
+            for (let k = 0; k < this.pgv_markers.length; k++) {
+                let cur_marker = this.pgv_markers[k];
+                let cur_coords_leaflet = this.lonlat_to_leaflet(cur_marker.lonlat);
+                cur_marker.attr("cx", cur_coords_leaflet[0][0]);
+                cur_marker.attr("cy", cur_coords_leaflet[0][1]);
+            }
+
+            // Update the Voronoi cell polygons.
+            for (let k = 0; k < this.pgv_polygons.length; k++) {
+                let cur_poly = this.pgv_polygons[k];
+                let cur_coords_leaflet = this.lonlat_to_leaflet(cur_poly.lonlat)
+                cur_poly.attr('d', line_generator(cur_coords_leaflet))
+            }
+
+            // Update the clip path.
+            let cur_coords_leaflet = this.lonlat_to_leaflet(this.clip_path.lonlat);
+            this.clip_path.attr('d', line_generator(cur_coords_leaflet));
+
+            // Update the clip path outline.
+            this.clip_path_outline.attr('d', line_generator(cur_coords_leaflet));
         },
 
     },
