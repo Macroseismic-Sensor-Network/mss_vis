@@ -165,7 +165,11 @@ export default {
 
     mounted() {
         //Leaflet map initialisieren
-        this.leaflet_map=L.map("mapid");
+        this.leaflet_map=L.map("mapid", {
+            maxBounds: [[47.1, 15.2],
+                        [48.5, 17.5]],
+            maxBoundsViscosity: 1.0,
+        });
         this.map_image = new Image;
         this.init_map();
         //window.addEventListener('resize', this.on_resize);
