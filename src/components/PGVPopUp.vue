@@ -4,7 +4,7 @@
 <template>
     <div id="popUp" class="ui-widget-content" style="position:absolute; background-color:white;" v-on:popup="setPopUpData">
         <div style="text-align:right" id="buttonsContainer">
-            <!-- This feature is not yet ready.
+            <!--
             <button v-on:click="$emit('add-popup')" id="addButton">
                 <img id="addIcon" v-bind:src="add_icon_path">
             </button>
@@ -15,17 +15,17 @@
             </button>
 
         </div>
-        <h2 id="content">{{name}}</h2>
+        <h2 id="popup-name">{{name}}</h2>
         <p><b>latest PGV:</b> {{ (pgv * 1000).toFixed(3) }} mm/s</p> 
         <p><b>max. PGV:</b> {{ (pgv_max * 1000).toFixed(3) }} mm/s</p> 
-        <h3 style="background-color:LightGray"  id="content">Stationsmetadaten</h3>
-        <p id="content"><b>ID:</b> {{station_id}}</p>
-        <p id="content"><b>Beschreibung:</b> {{description}}</p>
-        <!-- This information is currently not of interest.
-        <p id="content"><b>Netzwerk</b> {{network}}</p>
-        <p id="content"><b>Standort:</b> {{location}}</p>
-        <p id="content"><b>Koordinaten:</b> {{coords}}</p>
-        <p id="content"><b>UTM Koordinaten:</b> {{utm_coords}}</p>
+        <h3 style="background-color:LightGray"  id="popup-title">Stationsmetadaten</h3>
+        <p id="popup-id"><b>ID:</b> {{station_id}}</p>
+        <p id="popup-description"><b>Beschreibung:</b> {{description}}</p>
+        <!--
+        <p id="popup-network"><b>Netzwerk</b> {{network}}</p>
+        <p id="popup-location"><b>Standort:</b> {{location}}</p>
+        <p id="popup-coordinates"><b>Koordinaten:</b> {{coords}}</p>
+        <p id="popup-utm-coordinates"><b>UTM Koordinaten:</b> {{utm_coords}}</p>
         -->
 
     </div>
