@@ -132,25 +132,18 @@ export default {
 
     components: {
         PGVMapMarker,
-        // eslint-disable-next-line
         PGVLegend,
-        // eslint-disable-next-line
         EventMonitorPlot,
-        // eslint-disable-next-line
         ArchiveEvent,
-        // eslint-disable-next-line
         ArchiveEventPlot,
-        // eslint-disable-next-line
         PGVPopUp,
-        // eslint-disable-next-line
         Settings,
-        // eslint-disable-next-line
         PGVPopUpPerma
     },
 
     data() {
         return {
-            leaflet_map: 'undefined',
+            leaflet_map: undefined,
 
             popUp: '',
             popUpData: {
@@ -381,6 +374,7 @@ export default {
             this.popUpData.utm_coords="x_utm: "+curStation.x_utm+" y_utm: "+curStation.y_utm;
             this.popUpData.description=curStation.description;
 
+            this.logger.debug("Creating the component.");
             Vue.component("popUp_1",Vue.extend(PGVPopUp.default));
             this.popUp="popUp_1";
         },
