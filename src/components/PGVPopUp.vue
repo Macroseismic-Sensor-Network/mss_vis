@@ -1,8 +1,8 @@
-
-
-
 <template>
-    <div id="popUp" class="ui-widget-content" style="position:absolute; background-color:white;" v-on:popup="setPopUpData">
+    <div id="popUp"
+         class="ui-widget-content"
+         style="position:absolute; background-color:white;"
+         v-show="is_visible">
         <div style="text-align:right" id="buttonsContainer">
             <!--
             <button v-on:click="$emit('add-popup')" id="addButton">
@@ -10,12 +10,12 @@
             </button>
             -->
 
-            <button v-on:click="$emit('close-popup')" id="closeButton">
+            <button v-on:click="is_visible = false" id="closeButton">
                 <img id="closeIcon" v-bind:src="close_icon_path">
             </button>
 
         </div>
-        <h2 id="popup-name">{{name}}</h2>
+        <h2 id="popup-name">{{ name }}</h2>
         <p><b>latest PGV:</b> {{ (pgv * 1000).toFixed(3) }} mm/s</p> 
         <p><b>max. PGV:</b> {{ (pgv_max * 1000).toFixed(3) }} mm/s</p> 
         <h3 style="background-color:LightGray"  id="popup-title">Stationsmetadaten</h3>
@@ -36,51 +36,52 @@
 
 
 export default {
-
-
-    name:"PGVPopUp",
+    name: "PGVPopUp",
 
     props: {
-        station_id: String,
-        name: String,
-        network: String,
-        location: String,
-        coords: String,
-        utm_coords: String,
-        description: String,
-    },
-
-    mounted() {
-
-        //Jquery draggable und resizable für das PopUp aktivieren
-        // eslint-disable-next-line
-        $("#popUp").draggable({
-            scroll: false
-        });
-        if(!this.atttached) {
-            // eslint-disable-next-line
-            $( "#popUp" ).resizable({
-                lsoResize: "#content",
-                maxHeight: 600,
-                maxWidth: 500,
-                minHeight: 480,
-                minWidth: 250,
-            });
-        }
-
-
 
     },
 
 
     data() {
         return {
-            close_icon_path:"/assets/vue/nrt/image/icons/close_popup.png",
-            attached:false,
+            name: "PGV Popup",
+            close_icon_path: "/assets/vue/nrt/image/icons/close_popup.png",
+            attached: false,
         }
     },
 
     computed: {
+        station_id: function() {
+            return this.$store.getters.inspect_station;
+        },
+
+        station_meta: function() {
+            return this.$store.getters.station_meta_by_id(this.station_id);
+        },
+
+        description: function() {
+            let cur_meta = this.station_meta;
+            if (cur_meta == undefined)
+            {
+                return '';
+            }
+            else
+            {
+                return cur_meta.description;
+            }
+        },
+
+        is_visible: {
+            get() {
+                return this.$store.getters.show_inspect_station_popup;
+            },
+
+            set(value) {
+                this.$store.commit('set_show_inspect_station_popup', value);
+            }
+        },
+
         add_icon_path: function() {
             if(!this.attached) {
                 return "/assets/vue/nrt/image/icons/lock_closed.png";
@@ -91,19 +92,18 @@ export default {
         },
 
         pgv: function() {
-            return this.$store.getters.current_pgv_by_station(this.$props.station_id);
+            return this.$store.getters.current_pgv_by_station(this.station_id);
         },
 
         pgv_max: function() {
-            return this.$store.getters.disp_range_max_pgv_by_station(this.$props.station_id);
+            return this.$store.getters.disp_range_max_pgv_by_station(this.station_id);
         },
     },
 
-    methods: {
-        setPopUpData() {
-            this.logger.debug("SETPOPUPDATA");
+    watch: {
+    },
 
-        },
+    methods: {
     },
 
 }

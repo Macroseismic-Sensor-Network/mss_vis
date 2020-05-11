@@ -59,17 +59,7 @@
         <!-- End of templates. -->
 
         <div id="popUpLayer">
-            <component v-bind:is="popUp" 
-                     v-on:close-popup="closePopUp()"
-                     v-on:add-popup="addPopUp()"
-                     v-bind:station_id="popUpData.station_id" 
-                     v-bind:name="popUpData.name" 
-                     v-bind:network="popUpData.network"
-                     v-bind:location="popUpData.location"
-                     v-bind:coords="popUpData.coords"
-                     v-bind:utm_coords="popUpData.utm_coords"
-                     v-bind:description="popUpData.description"
-             ></component>
+            <PGVPopUp />
         </div>
 
         <PGVPopUpPerma v-if="show_perma"
@@ -110,12 +100,11 @@ import Vue from 'vue';
 import PGVMapMarker from '../components/PGVMapMarker.vue';
 import PGVLegend from '../components/PGVLegend.vue';
 //import PGVEventVoronoi from '../components/PGVEventVoronoi.vue';
-import Settings from '../components/Settings.vue';
 import PGVPopUpPerma from '../components/PGVPopUpPerma.vue';
 import ArchiveEvent from '../components/ArchiveEvent.vue';
 import ArchiveEventPlot from '../components/ArchiveEventPlot.vue';
 import EventMonitorPlot from '../components/EventMonitorPlot.vue';
-import * as PGVPopUp from "../components/PGVPopUp.vue";
+import PGVPopUp from "../components/PGVPopUp.vue";
 import * as d3 from "d3";
 import domtoimage from 'dom-to-image';
 import * as log from 'loglevel';
@@ -137,8 +126,7 @@ export default {
         ArchiveEvent,
         ArchiveEventPlot,
         PGVPopUp,
-        Settings,
-        PGVPopUpPerma
+        PGVPopUpPerma,
     },
 
     data() {
@@ -195,6 +183,7 @@ export default {
 
         //window.addEventListener('resize', this.on_resize);
         this.leaflet_map.on("moveend", this.updateMarkers);
+        this.leaflet_map.on("zoomend", this.updateMarkers);
         this.showLegend=this.$store.getters.settings.show_legend;
 
         // Get the svg marker template and add it to the leaflet svg overlay.
@@ -356,6 +345,7 @@ export default {
         setPopUp(station_id) {
             this.logger.debug("setPopUp: "+station_id);
 
+            /*
             var curStation="undefined";
             var stations=this.$store.getters.station_meta;
             for(var i=0;i<this.$store.getters.station_meta.length;i++) {
@@ -377,6 +367,7 @@ export default {
             this.logger.debug("Creating the component.");
             Vue.component("popUp_1",Vue.extend(PGVPopUp.default));
             this.popUp="popUp_1";
+            */
         },
 
         closePopUp() {

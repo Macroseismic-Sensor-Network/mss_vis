@@ -228,6 +228,13 @@ export default new Vuex.Store({
             show_legend:true,
             show_map_info:true,
         },
+
+        // The station to inspect in the popup window.
+        inspect_station: undefined,
+
+        // Show the inspect station popup.
+        show_inspect_station_popup: false,
+
         popUpStored:[],
 
         map_config: { 
@@ -294,8 +301,17 @@ export default new Vuex.Store({
         settings: state=>{
             return state.settings;
         },
+
         server_state: state => {
             return state.server_state;
+        },
+
+        inspect_station: state => {
+            return state.inspect_station;
+        },
+
+        show_inspect_station_popup: state => {
+            return state.show_inspect_station_popup;
         },
 
         current_pgv: state => {
@@ -417,6 +433,16 @@ export default new Vuex.Store({
 
         station_meta: (state) => {
             return state.station_meta;
+        },
+
+        station_meta_by_id: (state) => (station_id) => {
+            let found_station = undefined;
+            for(let k = 0; k < state.station_meta.length; k++) {
+                if(state.station_meta[k].id === station_id) {
+                    found_station = state.station_meta[k];
+                }
+            }
+            return found_station;
         },
 
         stations_imported: (state) => {
@@ -647,7 +673,7 @@ export default new Vuex.Store({
         },
 
         set_settings(state,payload) {
-            state.settings=payload;
+            state.settings = payload;
         },
 
         add_pop_up(state,payload) {
@@ -655,8 +681,16 @@ export default new Vuex.Store({
         },
 
         show_settings(state,payload) {
-            state.settings.show_settings=payload;
-        }
+            state.settings.show_settings = payload;
+        },
+
+        set_inspect_station(state, payload) {
+            state.inspect_station = payload;
+        },
+
+        set_show_inspect_station_popup(state, payload) {
+            state.show_inspect_station_popup = payload;
+        },
     },
 
     actions: {

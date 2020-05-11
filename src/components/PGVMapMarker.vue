@@ -27,7 +27,7 @@
 <template>
     <g v-bind:id="element_id"
        class="leaflet-zoom-hide markerGroup"
-       v-on:click="$emit('open-popup',station_id)">
+       v-on:click="inspect_station">
         <circle v-bind:id="element_id + '_current'"
                 :r="pgv_radius"
                 :fill="pgv_fill"
@@ -46,6 +46,8 @@
 <script>
 // eslint-disable-next-line
 import * as d3 from "d3";
+import * as log from 'loglevel';
+import * as log_prefix from 'loglevel-plugin-prefix';
 
 export default {
     name: 'PGVMapMarker',
@@ -55,6 +57,13 @@ export default {
         x_utm: Number,
         y_utm: Number,
         radius_limits: Array,
+    },
+
+    created() {
+        this.logger = log.getLogger(this.$options.name)
+        this.logger.setLevel(this.$store.getters.log_level);
+        log_prefix.apply(this.logger,
+            this.$store.getters.prefix_options);
     },
 
     mounted () {
@@ -78,6 +87,7 @@ export default {
         return {
             current_fill_opacity: 1.0,
             max_fill_opacity: 0.6,
+            logger: undefined,
         };
     },
 
@@ -189,6 +199,16 @@ export default {
             const colormap = this.$store.getters.map_config.colormap;
             var color = colormap(this.scales.color(pgv));
             return color;
+        },
+
+        inspect_station() {
+            let show_popup = true;
+            if (this.$store.getters.inspect_station === this.station_id)
+            {
+                show_popup = !(this.$store.getters.show_inspect_station_popup);
+            }
+            this.$store.commit('set_inspect_station', this.station_id);
+            this.$store.commit('set_show_inspect_station_popup', show_popup);
         },
     },
 }
