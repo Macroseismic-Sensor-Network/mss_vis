@@ -178,6 +178,12 @@ export default {
             if (vm.$store.getters.stations_imported == true) {
                 clearInterval(checkExist);
                 vm.logger.debug("Stations: " + vm.$store.getters.station_meta.length);
+
+                // Call invalidateSize to match the map to the container.
+                // This is a dirty solution. I guess it works because loading the stations
+                // or the interval takes some time. 
+                // invalidateSize should be called, after the site has been built, but
+                // I don't know how to do that.
             }
         }, 100);
 
@@ -199,7 +205,13 @@ export default {
         $('#svg_template_event_monitor').find('*').appendTo("#svg_overlay");
 	$('#svg_template_event_monitor').remove();
 
-
+        document.onreadystatechange = () => {
+            if (document.readyState == "complete") {
+                // Call invalidateSize after the whole document has been loaded.
+                this.logger.info('Page completed with image and files!')
+                this.leaflet_map.invalidateSize();
+            }
+        };
     },
 
     updated() {
@@ -337,6 +349,7 @@ export default {
         handle_map_zoomend() {
             this.logger.debug('handle_map_zoomend');
             this.$store.commit('toggle_leaflet_map_redraw');
+            this.leaflet_map.invalidateSize();
         },
 
         setPopUp(station_id) {
@@ -497,7 +510,7 @@ div#mapcontainer
 div#map_info
     position: absolute
     text-align: right
-    font-size: 10pt
+    font-size: 8pt
     font-family: Helvetica, sans-serif
     padding: 5px
     z-index:500
@@ -505,7 +518,7 @@ div#map_info
 div#map_config
     position: absolute
     text-align: left
-    font-size: 10pt
+    font-size: 8pt
     font-family: Helvetica, sans-serif
     padding: 5px
 
@@ -513,6 +526,10 @@ svg#map
     border: none
 
 @media (max-width: $breakpoint-mobile-width), (max-height: $breakpoint-mobile-height)
-div#map_info
-    font-size: 8pt
+    div#map_info
+        font-size: 8pt
+        visibility: hidden
+
+    #svg_legend
+        visibility: hidden
 </style>
