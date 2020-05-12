@@ -347,11 +347,14 @@ export default {
             }
 
             // Update the clip path.
-            let cur_coords_leaflet = this.lonlat_to_leaflet(this.clip_path.lonlat);
-            this.clip_path.attr('d', line_generator(cur_coords_leaflet));
+            if (this.clip_path != undefined) 
+            {
+                let cur_coords_leaflet = this.lonlat_to_leaflet(this.clip_path.lonlat);
+                this.clip_path.attr('d', line_generator(cur_coords_leaflet));
 
-            // Update the clip path outline.
-            this.clip_path_outline.attr('d', line_generator(cur_coords_leaflet));
+                // Update the clip path outline.
+                this.clip_path_outline.attr('d', line_generator(cur_coords_leaflet));
+            }
         },
 
     },
