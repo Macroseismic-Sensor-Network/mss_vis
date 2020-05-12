@@ -219,7 +219,6 @@ export default {
         },
 
         update() {
-            this.logger.debug("Update marker " + this.station_id);
             let latlon = new L.LatLng(this.lat, this.lon);
             this.leaflet_x = this.leaflet_map.latLngToLayerPoint(latlon).x;
             this.leaflet_y = this.leaflet_map.latLngToLayerPoint(latlon).y;
