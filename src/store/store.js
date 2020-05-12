@@ -237,6 +237,12 @@ export default new Vuex.Store({
 
         popUpStored:[],
 
+        // The leaflet map state.
+        leaflet_map: {
+            map_object: undefined,
+            redraw: false,
+        },
+
         map_config: { 
             proj_crs: "EPSG:32633",
             map_limits: {'x_min': 519685.529,
@@ -451,6 +457,10 @@ export default new Vuex.Store({
 
         map_config: (state) => {
             return state.map_config;
+        },
+
+        leaflet_map: (state) => {
+            return state.leaflet_map;
         },
 
         scales: (state) => {
@@ -690,6 +700,14 @@ export default new Vuex.Store({
 
         set_show_inspect_station_popup(state, payload) {
             state.show_inspect_station_popup = payload;
+        },
+
+        set_leaflet_map_object(state, payload) {
+            state.leaflet_map.map_object = payload;
+        },
+
+        toggle_leaflet_map_redraw(state) {
+            state.leaflet_map.redraw = !state.leaflet_map.redraw;
         },
     },
 

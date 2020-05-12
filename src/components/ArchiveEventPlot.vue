@@ -45,7 +45,6 @@ export default {
     name: 'ArchiveEventPlot',
 
     props: {
-        leaflet_map: Object,
     },
 
     created () {
@@ -91,11 +90,23 @@ export default {
         map_control: function() {
             return this.$store.getters.map_control;
         },
+        
+        leaflet_map: function() {
+            return this.$store.getters.leaflet_map.map_object;
+        },   
+        
+        map_redraw: function() {
+            return this.$store.getters.leaflet_map.redraw;
+        },
     },
 
     watch: {
         'map_control.show_archive_event': function () {
             this.plot_archive_event();
+        },
+        
+        'map_redraw': function() {
+            this.update_leaflet();
         },
     },
 
@@ -252,7 +263,6 @@ export default {
                     cur_marker.lonlat = [[cur_station.x, cur_station.y]];
                     this.pgv_markers.push(cur_marker);
                 }
-                this.leaflet_map.on("zoomend", this.update_leaflet);
               }
               else
               {

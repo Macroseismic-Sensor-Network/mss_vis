@@ -41,20 +41,20 @@
         <svg id="svg_template_pgv_marker">
             <g id="current_pgv_marker">
                 <PGVMapMarker v-on:open-popup="setPopUp($event)"
-                                 v-for="cur_station in stations"
-                                 v-bind:key="cur_station.id"
-                                 v-bind:station_id="cur_station.id"
-                                 v-bind:x="cur_station.x"
-                                 v-bind:y="cur_station.y"/>
+                              v-for="cur_station in stations"
+                              v-bind:key="cur_station.id"
+                              v-bind:station_id="cur_station.id"
+                              v-bind:lon="cur_station.x"
+                              v-bind:lat="cur_station.y"/>
             </g>
         </svg>
 
         <svg id="svg_template_archive_plot">
-            <ArchiveEventPlot v-bind:leaflet_map="leaflet_map"/>
+            <ArchiveEventPlot />
         </svg>
 
         <svg id="svg_template_event_monitor">
-            <EventMonitorPlot v-bind:leaflet_map="leaflet_map"/>
+            <EventMonitorPlot />
         </svg>
         <!-- End of templates. -->
 
@@ -131,8 +131,6 @@ export default {
 
     data() {
         return {
-            leaflet_map: undefined,
-
             popUp: '',
             popUpData: {
                 station_id:"",
@@ -180,14 +178,13 @@ export default {
             if (vm.$store.getters.stations_imported == true) {
                 clearInterval(checkExist);
                 vm.logger.debug("Stations: " + vm.$store.getters.station_meta.length);
-                vm.updateMarkers();
             }
         }, 100);
 
 
         //window.addEventListener('resize', this.on_resize);
-        this.leaflet_map.on("moveend", this.updateMarkers);
-        this.leaflet_map.on("zoomend", this.updateMarkers);
+        //this.leaflet_map.on("moveend", this.updateMarkers);
+        this.leaflet_map.on("zoomend", this.handle_map_zoomend);
         this.showLegend=this.$store.getters.settings.show_legend;
 
         // Get the svg marker template and add it to the leaflet svg overlay.
@@ -206,10 +203,18 @@ export default {
     },
 
     updated() {
-        //this.on_resize();
     },
 
     computed: {
+        leaflet_map: {
+            get() {
+                return this.$store.getters.leaflet_map.map_object;
+            },
+
+            set(map) {
+                this.$store.commit('set_leaflet_map_object', map);
+            }
+        },
 
         data_time_range: function() {
             return this.$store.getters.data_time_range;
@@ -329,23 +334,11 @@ export default {
             //this.on_resize();
         },
 
-        updateMarkers() {
-            this.leaflet_map.invalidateSize();
-            var stations=this.$store.getters.station_meta;
-
-            for(var i=0;i<stations.length;i++)	{
-                var latlng=new L.LatLng(stations[i].y, stations[i].x);
-                var elementid=stations[i].id.replace(/\./g, '-');
-                var stationMax=elementid+"_max";
-                var stationCurrent=elementid+"_current";
-
-                d3.select("*[id$="+stationMax+"]").attr("cx",this.leaflet_map.latLngToLayerPoint(latlng).x);
-                d3.select("*[id$="+stationMax+"]").attr("cy",this.leaflet_map.latLngToLayerPoint(latlng).y);
-
-                d3.select("*[id$="+stationCurrent+"]").attr("cx",this.leaflet_map.latLngToLayerPoint(latlng).x);
-                d3.select("*[id$="+stationCurrent+"]").attr("cy",this.leaflet_map.latLngToLayerPoint(latlng).y);
-            }
+        handle_map_zoomend() {
+            this.logger.debug('handle_map_zoomend');
+            this.$store.commit('toggle_leaflet_map_redraw');
         },
+
         setPopUp(station_id) {
             this.logger.debug("setPopUp: "+station_id);
 

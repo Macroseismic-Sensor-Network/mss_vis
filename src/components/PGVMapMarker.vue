@@ -28,17 +28,21 @@
     <g v-bind:id="element_id"
        class="leaflet-zoom-hide markerGroup"
        v-on:click="inspect_station">
-        <circle v-bind:id="element_id + '_current'"
-                :r="pgv_radius"
-                :fill="pgv_fill"
-                :stroke="pgv_stroke"
-                :fill-opacity="current_fill_opacity" />
-
         <circle v-bind:id="element_id + '_max'"
                 :r="pgv_max_radius"
                 :fill="pgv_max_fill"
                 :stroke="pgv_max_stroke"
-                :fill-opacity="max_fill_opacity"/>
+                :fill-opacity="max_fill_opacity"
+                :cx="leaflet_x"
+                :cy="leaflet_y"/>
+        <circle v-bind:id="element_id + '_current'"
+                :r="pgv_radius"
+                :fill="pgv_fill"
+                :stroke="pgv_stroke"
+                :fill-opacity="current_fill_opacity" 
+                :cx="leaflet_x"
+                :cy="leaflet_y"/>
+
     </g>
 </template>
 
@@ -48,15 +52,15 @@
 import * as d3 from "d3";
 import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
+import L from 'leaflet';
 
 export default {
     name: 'PGVMapMarker',
 
     props: {
         station_id: String,
-        x_utm: Number,
-        y_utm: Number,
-        radius_limits: Array,
+        lon: Number,
+        lat: Number,
     },
 
     created() {
@@ -67,20 +71,7 @@ export default {
     },
 
     mounted () {
-        /*
-        var scales = this.scales;
-        var marker_svg = d3.select("#" + this.element_id + "_current");
-        marker_svg.attr("cx", scales.x(this.x_utm))
-                  .attr("cy", scales.y(this.y_utm))
-                  .attr('stroke', 'black');
-
-
-        marker_svg = d3.select("#" + this.element_id + "_max");
-        marker_svg.attr("cx", scales.x(this.x_utm))
-                  .attr("cy", scales.y(this.y_utm))
-                  .attr('stroke', 'black');
-        marker_svg.lower();
-        */
+        this.update();
     },
 
     data() {
@@ -88,13 +79,29 @@ export default {
             current_fill_opacity: 1.0,
             max_fill_opacity: 0.6,
             logger: undefined,
+            leaflet_x: undefined,
+            leaflet_y: undefined,
         };
+    },
+
+    watch: {
+        map_redraw: function() {
+            this.update();
+        },
     },
 
     computed: {
         element_id: function() {
             return 'pgv_map_marker_' + this.station_id.replace(/\./g, '-');
         },
+
+        map_redraw: function() {
+            return this.$store.getters.leaflet_map.redraw;
+        },
+
+        leaflet_map: function() {
+            return this.$store.getters.leaflet_map.map_object;
+        },   
 
         svg_scale: function() {
             return this.$store.getters.svg_scale;
@@ -209,6 +216,13 @@ export default {
             }
             this.$store.commit('set_inspect_station', this.station_id);
             this.$store.commit('set_show_inspect_station_popup', show_popup);
+        },
+
+        update() {
+            this.logger.debug("Update marker " + this.station_id);
+            let latlon = new L.LatLng(this.lat, this.lon);
+            this.leaflet_x = this.leaflet_map.latLngToLayerPoint(latlon).x;
+            this.leaflet_y = this.leaflet_map.latLngToLayerPoint(latlon).y;
         },
     },
 }
