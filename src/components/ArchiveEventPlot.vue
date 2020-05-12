@@ -90,11 +90,11 @@ export default {
         map_control: function() {
             return this.$store.getters.map_control;
         },
-        
+
         leaflet_map: function() {
             return this.$store.getters.leaflet_map.map_object;
         },   
-        
+
         map_redraw: function() {
             return this.$store.getters.leaflet_map.redraw;
         },
@@ -104,7 +104,7 @@ export default {
         'map_control.show_archive_event': function () {
             this.plot_archive_event();
         },
-        
+
         'map_redraw': function() {
             this.update_leaflet();
         },
