@@ -628,7 +628,7 @@ export default new Vuex.Store({
         },
 
         LOAD_STATION_METADATA(state) {
-            d3.csv("/assets/vue/nrt/data/mss_stations_2020_062.csv").then( function(data) {
+            d3.csv("/assets/vue/nrt/data/current_mss_stations.csv").then( function(data) {
                 for (var k = 0; k < data.length; k++)
                 {
                     data[k].id = data[k].network + "." +  
