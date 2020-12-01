@@ -306,7 +306,7 @@ export default {
                     minZoom: 10,
                     maxZoom: 13,
                     tms: false,
-                    attribution: 'Map based on OE3D and OpenStreetMap. Generated with QGis.',
+                    attribution: 'Map uses data from <a href="http://www.oe3d.at/" target="blank">OE3D</a> and <a href="https://www.openstreetmap.org/">OpenStreetMap</a>. Generated with QGis.',
                 });
 
             var osm=L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw',
@@ -329,10 +329,7 @@ export default {
 
             oe3d.addTo(this.leaflet_map);
 
-            var on_export_image_click = this.map_to_image;
             L.control.layers(allOptions, null, {position: 'topleft', autoZIndex:false }).addTo(this.leaflet_map);
-            L.easyButton('<span style="width: 44px; height: 44px; display: inline-block; font-size: 44px; background-color: white;">&equiv;</span>', function(){$('#off_canvas_settings').foundation('open');}).addTo(this.leaflet_map);
-            L.easyButton('<span style="width: 44px; height: 44px; display: inline-block; font-size: 44px; background-color: white;">&equiv;</span>', function(){on_export_image_click();}).addTo(this.leaflet_map);
 
             this.leaflet_map.setView([47.8972,16.3507], 10);
 
