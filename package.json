@@ -18,6 +18,7 @@
     "jquery-ui": "^1.12.1",
     "leaflet": "^1.6.0",
     "leaflet-easybutton": "^2.4.0",
+    "leaflet-image": "^0.4.0",
     "node-sass": "^4.13.0",
     "plotly.js": "^1.48.3",
     "polygon-offset": "^0.3.1",
