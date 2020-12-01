@@ -111,6 +111,7 @@ import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
 import L from 'leaflet';
 import 'leaflet-easybutton';
+import leafletImage from "leaflet-image";
 
 export default {
     name: 'PGVMap',
@@ -328,8 +329,10 @@ export default {
 
             oe3d.addTo(this.leaflet_map);
 
+            var on_export_image_click = this.map_to_image;
             L.control.layers(allOptions, null, {position: 'topleft', autoZIndex:false }).addTo(this.leaflet_map);
             L.easyButton('<span style="width: 44px; height: 44px; display: inline-block; font-size: 44px; background-color: white;">&equiv;</span>', function(){$('#off_canvas_settings').foundation('open');}).addTo(this.leaflet_map);
+            L.easyButton('<span style="width: 44px; height: 44px; display: inline-block; font-size: 44px; background-color: white;">&equiv;</span>', function(){on_export_image_click();}).addTo(this.leaflet_map);
 
             this.leaflet_map.setView([47.8972,16.3507], 10);
 
@@ -469,6 +472,44 @@ export default {
 
         on_click() {
             this.logger.debug("Clicked the map.");
+        },
+
+        map_to_image() {
+            this.logger.debug("Exporting the map to image.");
+
+            this.save_svg($('#svg_overlay')[0], 'svg_overlay.svg');
+            this.save_svg($('#svg_legend')[0], 'svg_legend.svg');
+
+            let self = this;
+            leafletImage(this.leaflet_map, function(err, canvas) {
+                // now you have canvas
+                // example thing to do with that canvas:
+                var link = document.createElement('a');
+                var img = document.createElement('img');
+                var dimensions = self.leaflet_map.getSize();
+                img.width = dimensions.x;
+                img.height = dimensions.y;
+                img.src = canvas.toDataURL();
+                link.download = 'leaflet_map.png';
+                link.href = canvas.toDataURL();
+                link.click();
+                //document.getElementById('images').innerHTML = '';
+                //document.getElementById('images').appendChild(img);
+            });
+        },
+
+        save_svg(svgEl, name) {
+            svgEl.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+            var svgData = svgEl.outerHTML;
+            var preface = '<?xml version="1.0" standalone="no"?>\r\n';
+            var svgBlob = new Blob([preface, svgData], {type:"image/svg+xml;charset=utf-8"});
+            var svgUrl = URL.createObjectURL(svgBlob);
+            var downloadLink = document.createElement("a");
+            downloadLink.href = svgUrl;
+            downloadLink.download = name;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
         },
     },
 }
