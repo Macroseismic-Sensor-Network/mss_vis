@@ -151,7 +151,7 @@ export default {
               var used_stations = Object.keys(plot_event.max_station_pgv_used);
               vertices = [];
 
-              if (this.map_control.show_archive_event_cells != undefined)
+              if (this.map_control.show_archive_event_cells == true)
               {
                 for (const cur_snl of used_stations) {
                     for (const cur_station of this.stations) {
@@ -266,10 +266,12 @@ export default {
               }
               else
               {
+                let k = 0;
                 for (const cur_simp of plot_event.overall_trigger_data) {
                     simp_stations = []
                     for (const cur_simp_station of cur_simp.simp_stations) {
-                        cur_station = this.stations.find(x => x.name === cur_simp_station);
+                        let cur_name = cur_simp_station.split(/:/)[0]
+                        cur_station = this.stations.find(x => x.name === cur_name);
                         simp_stations.push(cur_station);
                     }
 
@@ -278,6 +280,8 @@ export default {
                         vertices.push([cur_station.x_utm,
                                        cur_station.y_utm]);
                     }
+                    let vert_wgs = this.utm_to_wgs84(vertices);
+                    let vert_leaflet = this.lonlat_to_leaflet(vert_wgs);
 
                     fill_color = 'none';
                     fill_opacity = 0.3;
@@ -286,16 +290,21 @@ export default {
                     max_pgv = Math.max.apply(null, max_pgv);
                     fill_color = this.pgv_to_color(max_pgv);
                     if (cur_simp.trigger.includes(true)) {
+                        this.logger.debug("Plotting vertices: " + vert_leaflet);
                         fill_opacity = 0.8;
                         stroke_opacity = 0.8;
 
-                        container.append('path').attr('d', line_generator(vertices))
+                        let cur_pgv_simp = container.append('path').attr('id', 'voronoi_simp_' + k)
+                                                .attr('d', line_generator(vert_leaflet))
                                                 .attr('stroke', 'DarkGray')
                                                 .attr('stroke-width', 5)
                                                 .attr('fill', fill_color)
                                                 .attr('fill-opacity', fill_opacity)
                                                 .attr('stroke-opacity', stroke_opacity);
+                        cur_pgv_simp.lonlat = vert_wgs;
+                        this.pgv_polygons.push(cur_pgv_simp);
                     }
+                    k = k + 1;
                 }
               }
             }
