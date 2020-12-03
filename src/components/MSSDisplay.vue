@@ -26,47 +26,39 @@
 
 <template>
     <div id="mss-display-container" class="cell auto">
-        <div class="off-canvas-wrapper">
-            <div class="off-canvas-content" data-off-canvas-content>
-                <PGVMap :key="mapKey" v-on:reload-map-2="forceReloadMap()"/>
-            </div>
-
-            <div class="off-canvas-absolute position-left"
-                 id="off_canvas_settings"
-                 data-off-canvas
-                 data-transition="overlap">
-                <!-- Your menu or Off-canvas content goes here -->
-                <button class="close-button" aria-label="Close menu" type="button" data-close>
-                    <span aria-hidden="true">&times;</span>
-                </button>
-                <br>
-                <ul class="accordion" data-accordion>
-                    <li class="accordion-item is-active" data-accordion-item>
-                        <!-- Accordion tab title -->
-                        <a href="#" class="accordion-title">Display</a>
-
-                        <!-- Accordion tab content: it would start in the open state due to using the `is-active` state class. -->
-                        <div class="accordion-content" data-tab-content>
-                            <div>
-                                <label>Show event monitor</label>
-                            </div>
-                            <div class="switch">
-                                <input class="switch-input" id="exampleSwitch" type="checkbox" name="exampleSwitch" v-model="show_event_monitor">
-                                <label class="switch-paddle" for="exampleSwitch">
-                                    <span class="show-for-sr">Show event monitor</span>
-                                </label>
-                            </div>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </div>
+        <splitpanes class="default-theme"
+                    horizontal
+                    @resized="on_splitpanes_resized('resized splitpanes')">
+            <pane size="0">
+                Tracks Pane
+            </pane>
+            <pane size="100">
+                <splitpanes @resized="on_splitpanes_resized('resized splitpanes')">
+                    <pane size="0">
+                        Menu Pane
+                    </pane>
+                    <pane size="100">
+                        <PGVMap :key="mapKey" v-on:reload-map-2="forceReloadMap()"/>
+                    </pane>
+                    <pane size="0">
+                        Map Information Pane
+                    </pane>
+                </splitpanes>
+            </pane>
+            <pane size="0">
+                Spreadsheet Pane
+            </pane>
+        </splitpanes>
     </div>
 </template>
 
 <script>
 
 import PGVMap from '../components/PGVMap.vue'
+import { Splitpanes, Pane } from 'splitpanes'
+import 'splitpanes/dist/splitpanes.css'
+import * as log from 'loglevel';
+import * as log_prefix from 'loglevel-plugin-prefix';
 
 export default {
     name: 'MSSDisplay',
@@ -81,13 +73,25 @@ export default {
     components: {
         // eslint-disable-next-line
         PGVMap,
+        Splitpanes,
+        Pane,
     },
-	methods: {
-		forceReloadMap() {
-			//this.mapKey+=1;
-			//$('#app').load();
-		},
-	},
+    created() {
+        this.logger = log.getLogger(this.$options.name)
+        this.logger.setLevel(this.$store.getters.log_level);
+        log_prefix.apply(this.logger,
+            this.$store.getters.prefix_options);
+    },
+    methods: {
+        forceReloadMap() {
+                //this.mapKey+=1;
+                //$('#app').load();
+        },
+
+        on_splitpanes_resized() {
+            this.$store.getters.leaflet_map.map_object.invalidateSize();
+        },
+    },
     computed: {
         stations: function() {
             return this.$store.getters.station_meta;
