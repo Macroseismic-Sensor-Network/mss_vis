@@ -31,8 +31,10 @@ import VueNativeSock from 'vue-native-websocket'
 import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
 import $ from 'jquery'
-// Comment the foundation.min.css import when building for Jekyll.
-// The foundation CSS is already provided by the Jekyll theme.
+// Comment the foundation.min.css and foundation-sites import when building for Jekyll.
+// The foundation CSS and Javascript is already provided by the Jekyll theme,
+// when adding it to the vue build, it interferes with the existing foundation
+// framework.
 // I couldn't find a quick solution for conditional imports.
 import FoundationCss from 'foundation-sites/dist/css/foundation.min.css'
 import FoundationJs from 'foundation-sites'
