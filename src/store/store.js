@@ -229,11 +229,8 @@ export default new Vuex.Store({
             show_map_info:true,
         },
 
-        // The station to inspect in the popup window.
-        inspect_station: undefined,
-
-        // Show the inspect station popup.
-        show_inspect_station_popup: false,
+        // The station to inspect in the station infow.
+        inspect_stations: [],
 
         popUpStored:[],
 
@@ -312,12 +309,8 @@ export default new Vuex.Store({
             return state.server_state;
         },
 
-        inspect_station: state => {
-            return state.inspect_station;
-        },
-
-        show_inspect_station_popup: state => {
-            return state.show_inspect_station_popup;
+        inspect_stations: state => {
+            return state.inspect_stations;
         },
 
         current_pgv: state => {
@@ -694,12 +687,12 @@ export default new Vuex.Store({
             state.settings.show_settings = payload;
         },
 
-        set_inspect_station(state, payload) {
-            state.inspect_station = payload;
+        add_inspect_station(state, payload) {
+            state.inspect_stations.push(payload);
         },
 
-        set_show_inspect_station_popup(state, payload) {
-            state.show_inspect_station_popup = payload;
+        remove_inspect_station(state, payload) {
+            state.inspect_stations.splice(state.inspect_stations.indexOf(payload), 1);
         },
 
         set_leaflet_map_object(state, payload) {

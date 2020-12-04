@@ -209,13 +209,7 @@ export default {
         },
 
         inspect_station() {
-            let show_popup = true;
-            if (this.$store.getters.inspect_station === this.station_id)
-            {
-                show_popup = !(this.$store.getters.show_inspect_station_popup);
-            }
-            this.$store.commit('set_inspect_station', this.station_id);
-            this.$store.commit('set_show_inspect_station_popup', show_popup);
+            this.$store.commit('add_inspect_station', this.station_id);
         },
 
         update() {
