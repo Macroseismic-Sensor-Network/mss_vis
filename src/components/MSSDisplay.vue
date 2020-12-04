@@ -41,7 +41,7 @@
                         <PGVMap :key="mapKey" v-on:reload-map-2="forceReloadMap()"/>
                     </pane>
                     <pane size="0">
-                        Map Information Pane
+                        <StationInfoPanel :key="stationInfoPanelKey"/>
                     </pane>
                 </splitpanes>
             </pane>
@@ -55,6 +55,7 @@
 <script>
 
 import PGVMap from '../components/PGVMap.vue'
+import StationInfoPanel from '../components/StationInfoPanel.vue'
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 import * as log from 'loglevel';
@@ -67,12 +68,14 @@ export default {
     },
 	data() {
 		return {
-			mapKey:0,
+			mapKey: 0,
+                        stationInfoPanelKey: 0,
 		}
 	},
     components: {
         // eslint-disable-next-line
         PGVMap,
+        StationInfoPanel,
         Splitpanes,
         Pane,
     },
