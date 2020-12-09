@@ -39,7 +39,10 @@
             <div class="cell auto">{{ (pgv_max * 1000).toFixed(3) }}</div>
         </div>
         <div class="grid-x grid-margin-x">
-            <div class="cell small-12"><a v-on:click="remove_from_inspect" class="button tiny float-right">close</a></div>
+            <div class="cell small-12">
+                <a v-on:click="on_show_pgv_timeseries" class="button tiny float-right">show pgv track</a>
+                <a v-on:click="on_remove_from_inspect" class="button tiny float-right">close</a>
+            </div>
         </div>
     </div>
 </template>
@@ -87,9 +90,14 @@ export default {
         },
     },
     methods: {
-        remove_from_inspect: function() {
+        on_remove_from_inspect: function() {
             this.$store.commit('remove_inspect_station', this.station_id);
         },
+
+        on_show_pgv_timeseries: function() {
+            this.$store.commit('add_track_pgv_timeseries', this.station_id);
+        },
+
     },
 }
 
