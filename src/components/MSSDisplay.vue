@@ -28,12 +28,12 @@
     <div id="mss-display-container" class="cell auto">
         <splitpanes class="default-theme"
                     horizontal
-                    @resized="on_splitpanes_resized('resized splitpanes')">
+                    @resized="on_splitpanes_resized()">
             <pane size="0">
-                Tracks Pane
+                <TracksPanel :key="tracksPanelKey"/>
             </pane>
             <pane size="100">
-                <splitpanes @resized="on_splitpanes_resized('resized splitpanes')">
+                <splitpanes @resized="on_splitpanes_resized()">
                     <pane size="0">
                         Menu Pane
                     </pane>
@@ -55,6 +55,7 @@
 <script>
 
 import PGVMap from '../components/PGVMap.vue'
+import TracksPanel from '../components/TracksPanel.vue'
 import StationInfoPanel from '../components/StationInfoPanel.vue'
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
@@ -70,12 +71,14 @@ export default {
 		return {
 			mapKey: 0,
                         stationInfoPanelKey: 0,
+                        tracksPanelKey: 0,
 		}
 	},
     components: {
         // eslint-disable-next-line
         PGVMap,
         StationInfoPanel,
+        TracksPanel,
         Splitpanes,
         Pane,
     },
@@ -93,6 +96,7 @@ export default {
 
         on_splitpanes_resized() {
             this.$store.getters.leaflet_map.map_object.invalidateSize();
+            this.$store.commit('toggle_tracks_resize');
         },
     },
     computed: {
