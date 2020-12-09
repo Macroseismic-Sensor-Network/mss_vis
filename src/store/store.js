@@ -229,6 +229,17 @@ export default new Vuex.Store({
             show_map_info:true,
         },
 
+        // The tracks dictionary.
+        tracks: {
+            realtime: {
+                pgv_timeseries: []
+            },
+            archive: {
+
+            },
+            resize_toggle: false,
+        },
+
         // The station to inspect in the station infow.
         inspect_stations: [],
 
@@ -563,6 +574,10 @@ export default new Vuex.Store({
             return proj4('EPSG:32633').inverse(coords);
         },
 
+        tracks: (state) => {
+            return state.tracks;
+        },
+
     },
 
     mutations: {
@@ -695,12 +710,20 @@ export default new Vuex.Store({
             state.inspect_stations.splice(state.inspect_stations.indexOf(payload), 1);
         },
 
+        add_track_pgv_timeseries(state, payload) {
+            state.tracks.realtime.pgv_timeseries.push(payload);
+        },
+
         set_leaflet_map_object(state, payload) {
             state.leaflet_map.map_object = payload;
         },
 
         toggle_leaflet_map_redraw(state) {
             state.leaflet_map.redraw = !state.leaflet_map.redraw;
+        },
+
+        toggle_tracks_resize(state) {
+            state.tracks.resize_toggle = !state.tracks.resize_toggle;
         },
     },
 
