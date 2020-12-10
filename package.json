@@ -34,6 +34,7 @@
     "vue-grd": "^1.2.1",
     "vue-loader": "^15.7.1",
     "vue-native-websocket": "^2.0.13",
+    "vue-resize-directive": "^1.2.0",
     "vue-socket.io": "^3.0.7",
     "vue2-leaflet": "^2.5.2",
     "vuex": "^3.1.1",
