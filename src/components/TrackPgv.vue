@@ -26,16 +26,17 @@
 
 <template>
     <div class="graph_container">
-        <div class="station_label_container">
-            <span class="station_label">{{ station }}</span>
-        </div>
-        <div class="pgv_axes" ref="pgv_axes" v-bind:id="element_id">
+        <div class="pgv_axes"
+             ref="pgv_axes"
+             v-bind:id="element_id"
+             v-resize:debounce="on_resize">
         </div>
     </div>
 </template>
 
 <script>
 
+import resize from 'vue-resize-directive'
 import Plotly from 'plotly.js/dist/plotly'
 import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
@@ -46,6 +47,9 @@ export default {
         stream_id: String,
     },
     components: {},
+    directives: {
+        resize,
+    },
     mounted() { 
         this.new_plot();
     },
@@ -56,7 +60,7 @@ export default {
                          this.$store.getters.prefix_options);
         this.$watch('plotly_data', this.update);
         this.$watch('display_range', this.update_range);
-        this.$watch('resize_toggle', this.on_resize);
+        //this.$watch('resize_toggle', this.on_resize);
     },
     data: function () {
         return {
@@ -70,7 +74,7 @@ export default {
                 //    b: 40
                 //},
                 margin: {
-                    l: 40,
+                    l: 2,
                     r: 2,
                     t: 2,
                     b: 2,
@@ -80,7 +84,8 @@ export default {
                     //range: ['2019-07-05T11:00:00', '2019-07-05T13:00:00'],
                     autorange: false,
                     fixedrange: true,
-                    showticklabels: true,
+                    showticklabels: false,
+                    ticklabelposition: 'inside',
                     mirror: 'ticks',
                     showline: true,
                     ticks: 'inside',
@@ -93,6 +98,7 @@ export default {
                     range: [-4, 1],
                     fixedrange: true,
                     showticklabels: true,
+                    ticklabelposition: 'inside',
                     showline: true,
                     mirror: 'ticks',
                     ticks: 'inside',
@@ -113,11 +119,23 @@ export default {
                             width: 0,
                         }
                     }
-                ]
+                ],
+                annotations: [
+                    {
+                        xref: 'paper',
+                        yref: 'paper',
+                        x: 0,
+                        xanchor: 'left',
+                        y: 1,
+                        yanchor: 'top',
+                        text: 'Station Lable',
+                        showarrow: false,
+                    },
+                ],
             },
 
             config: {
-                responsive: true
+                //responsive: true
             }
         }
     },
@@ -171,6 +189,7 @@ export default {
     methods: {
         new_plot() {
             //this.layout.xaxis.range = ['2019-07-05T11:30:00', this.$store.getters.max_datetime]
+            this.layout.annotations[0].text = this.station;
             Plotly.newPlot(this.element_id, this.plotly_data, this.layout, this.config);
         },
 
@@ -199,15 +218,18 @@ export default {
         },
 
         update_range() {
-            console.log('Updating the range.');
+            console.log('Updating the range.' + this.display_range);
             this.layout.xaxis.range = this.display_range;
+            Plotly.relayout(this.element_id, this.layout);
         },
 
         on_resize() {
             console.log('Resizing track ' + this.element_id);
             console.log('pgv_axes height:' + this.$refs.pgv_axes.clientHeight);
+            console.log('pgv_axes width:' + this.$refs.pgv_axes.clientWidth);
             let update = {
-                height: this.$refs.pgv_axes.clientHeight
+                height: this.$refs.pgv_axes.clientHeight,
+                width: this.$refs.pgv_axes.clientWidth,
             };
             Plotly.relayout(this.element_id, update);
         },
@@ -218,36 +240,20 @@ export default {
 
 <style scoped>
 div.graph_container {
-    margin: 10px;
+    margin: 0px;
     padding: 0px;
     background-color: Azure;
-    width: 90%;
+    width: 100%;
     height: 100%;
     overflow: visible;
-}
-
-div.station_label_container {
-    float: left;
-    padding: 0px;
-    background-color: FloralWhite;
-    overflow: hidden;
-    width: 10%;
-    height: 100%;
-    display: flex;
-    display: -webkit-flex;
-    vertical-align: middle;
-}
-
-span.station_label {
-    margin: auto;
-    font-weight: bold;
 }
 
 div.pgv_axes {
-    margin-left: 100px;
+    margin: 0px;
     padding: 0px;
-    background-color: Red;
+    background-color: Grey;
     height: 100%;
-    overflow: visible;
+    width: 100%;
+    overflow: hidden;
 }
 </style>
