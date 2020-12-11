@@ -119,9 +119,7 @@ export default {
 
     data() {
         return {
-            allOptions: 'undefined',
             map_image: 'undefined',
-            //map_image_url: '/assets/vue/nrt/image/mss_map_with_stations.jpg',
             map_image_url: '/assets/vue/nrt/image/mss_map_clean.jpg',
             logger: undefined,
             showLegend:false,	//toggles the visibility off the legend
@@ -298,7 +296,7 @@ export default {
                 });
 
 
-            var allOptions= {
+            var layer_options = {
                 "MSS OE3D": oe3d,
                 "Open Streetmap": osm,	
             }
@@ -306,7 +304,7 @@ export default {
             oe3d.addTo(this.leaflet_map);
 
             var on_export_image_click = this.map_to_image;
-            L.control.layers(allOptions, null, {position: 'topleft', autoZIndex:false }).addTo(this.leaflet_map);
+            L.control.layers(layer_options, null, {position: 'topleft', autoZIndex:false }).addTo(this.leaflet_map);
             L.easyButton('<span style="width: 44px; height: 44px; display: inline-block; font-size: 44px; background-color: white;">&equiv;</span>', function(){$('#off_canvas_settings').foundation('open');}).addTo(this.leaflet_map);
             L.easyButton('<span style="width: 44px; height: 44px; display: inline-block; font-size: 44px; background-color: white;">&equiv;</span>', function(){on_export_image_click();}).addTo(this.leaflet_map);
 
