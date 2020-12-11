@@ -338,10 +338,6 @@ export default {
                 });
         },
 
-        on_click() {
-            this.logger.debug("Clicked the map.");
-        },
-
         map_to_image() {
             this.logger.debug("Exporting the map to image.");
 
