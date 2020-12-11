@@ -26,7 +26,6 @@
 
 
 <template>
-    <!--<div id="mapcontainer" @click.ctrl="capture_map">-->
     <div id="mapcontainer">
         <!--
         <Settings/>
@@ -40,8 +39,7 @@
             function. -->
         <svg id="svg_template_pgv_marker">
             <g id="current_pgv_marker">
-                <PGVMapMarker v-on:open-popup="setPopUp($event)"
-                              v-for="cur_station in stations"
+                <PGVMapMarker v-for="cur_station in stations"
                               v-bind:key="cur_station.id"
                               v-bind:station_id="cur_station.id"
                               v-bind:lon="cur_station.x"
@@ -121,23 +119,12 @@ export default {
 
     data() {
         return {
-            popUp: '',
-            popUpData: {
-                station_id:"",
-                name:"",
-                network:"",
-                location: "",
-                coords: "",
-                utm_coords: "",
-                description: "",
-            },
             allOptions: 'undefined',
             map_image: 'undefined',
             //map_image_url: '/assets/vue/nrt/image/mss_map_with_stations.jpg',
             map_image_url: '/assets/vue/nrt/image/mss_map_clean.jpg',
             logger: undefined,
             showLegend:false,	//toggles the visibility off the legend
-            show_perma:false,	//Toggles the PGVPopUpPerma Area
         };
     },
 
@@ -342,53 +329,6 @@ export default {
             this.logger.debug('handle_map_zoomend');
             this.$store.commit('toggle_leaflet_map_redraw');
             this.leaflet_map.invalidateSize();
-        },
-
-        setPopUp(station_id) {
-            this.logger.debug("setPopUp: "+station_id);
-
-            /*
-            var curStation="undefined";
-            var stations=this.$store.getters.station_meta;
-            for(var i=0;i<this.$store.getters.station_meta.length;i++) {
-                if(stations[i].id==station_id) {
-                    curStation=stations[i];
-                }
-            }
-            this.logger.debug("Station ID: "+curStation);
-
-            this.popUpData.popUpId="pop-"+curStation.id;
-            this.popUpData.station_id=curStation.id;
-            this.popUpData.name=curStation.name;
-            this.popUpData.network=curStation.network;
-            this.popUpData.location=curStation.location;
-            this.popUpData.coords="x: "+curStation.x+" y: "+curStation.y+" z: "+curStation.z;
-            this.popUpData.utm_coords="x_utm: "+curStation.x_utm+" y_utm: "+curStation.y_utm;
-            this.popUpData.description=curStation.description;
-
-            this.logger.debug("Creating the component.");
-            Vue.component("popUp_1",Vue.extend(PGVPopUp.default));
-            this.popUp="popUp_1";
-            */
-        },
-
-        closePopUp() {
-            this.popUp='';	
-        },
-
-        //Hängt das offene Popup an die Perma anzeige an
-        addPopUp() {
-            this.$store.commit("add_pop_up",Vue.component(this.popUp));
-            this.showPerma();
-            this.closePopUp();
-        },
-
-        showPerma() {
-            this.show_perma=true;
-        },
-
-        closePerma() {
-            this.show_perma=false;
         },
 
         calculate_path() {
