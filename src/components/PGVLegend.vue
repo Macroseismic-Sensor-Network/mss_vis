@@ -164,10 +164,6 @@ export default {
             return this.$store.getters.map_config.size;  
         },
 
-        map_limits: function() {
-            return this.$store.getters.map_config.map_limits;
-        },
-
         scales: function() {
             return this.$store.getters.scales;
         },

@@ -298,8 +298,12 @@ export default {
 
             var on_export_image_click = this.map_to_image;
             L.control.layers(layer_options, null, {position: 'topleft', autoZIndex:false }).addTo(this.leaflet_map);
+
+            /* Custom buttons */
+            /*
             L.easyButton('<span style="width: 44px; height: 44px; display: inline-block; font-size: 44px; background-color: white;">&equiv;</span>', function(){$('#off_canvas_settings').foundation('open');}).addTo(this.leaflet_map);
             L.easyButton('<span style="width: 44px; height: 44px; display: inline-block; font-size: 44px; background-color: white;">&equiv;</span>', function(){on_export_image_click();}).addTo(this.leaflet_map);
+            */
 
             this.leaflet_map.setView([47.8972,16.3507], 10);
 

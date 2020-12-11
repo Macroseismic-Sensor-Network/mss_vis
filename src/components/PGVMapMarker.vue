@@ -183,16 +183,8 @@ export default {
             return cur_fill;
         },
 
-        map_limits: function() {
-            return this.$store.getters.map_config.map_limits;
-        },
-
         scales: function() {
             return this.$store.getters.scales;
-        },
-
-        pgv_limits: function() {
-            return this.$store.getters.map_config.pgv_limits;
         },
     },
 
