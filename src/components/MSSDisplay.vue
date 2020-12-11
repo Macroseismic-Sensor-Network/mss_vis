@@ -41,7 +41,17 @@
                         <PGVMap :key="mapKey" />
                     </pane>
                     <pane size="0">
-                        <StationInfoPanel :key="stationInfoPanelKey"/>
+                        <splitpanes horizontal>
+                            <pane size="100">
+                                <MapInfoPanel key="map_info_panel_key"/>
+                            </pane>
+                            <pane size="100">
+                                <ArchiveEventInfoPanel key="archive_info_panel_key"/>
+                            </pane>
+                            <pane size="0">
+                                <StationInfoPanel key="station_info_panel_key"/>
+                            </pane>
+                        </splitpanes>
                     </pane>
                 </splitpanes>
             </pane>
@@ -57,6 +67,8 @@
 import PGVMap from '../components/PGVMap.vue'
 import TracksPanel from '../components/TracksPanel.vue'
 import StationInfoPanel from '../components/StationInfoPanel.vue'
+import MapInfoPanel from '../components/MapInfoPanel.vue'
+import ArchiveEventInfoPanel from '../components/ArchiveEventInfoPanel.vue'
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 import * as log from 'loglevel';
@@ -78,6 +90,8 @@ export default {
         // eslint-disable-next-line
         PGVMap,
         StationInfoPanel,
+        MapInfoPanel,
+        ArchiveEventInfoPanel,
         TracksPanel,
         Splitpanes,
         Pane,

@@ -25,32 +25,23 @@
 -->
 
 <template>
-    <div>
-        <span id="station_info_title" class="station-info-title">Station Details</span>
-        <splitpanes horizontal>
-            <pane v-for="cur_station_id in inspect_stations"
-                  :key="cur_station_id">
-                <StationInfo :station_id="cur_station_id"/>
-            </pane>
-        </splitpanes>
+    <div class="map-info-panel">
+        <span id="map_info_title" class="map-info-title">Map Info</span>
+        <span id="map_info_last_data" class="map-info">last data: {{ data_time_range[1] }} UTC</span>
+        <span id="map_info_first_data" class="map-info">first data: {{ data_time_range[0] }} UTC</span>
+        <span id="map_info_server_state" class="map-info">server state: {{ server_state }}</span>
     </div>
 </template>
 
 <script>
 
-import StationInfo from '../components/StationInfo.vue'
-import { Splitpanes, Pane } from 'splitpanes'
-import 'splitpanes/dist/splitpanes.css'
 import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
 
 export default {
-    name: 'StationInfoPanel',
+    name: 'MapInfoPanel',
     props: {},
     components: {
-        Splitpanes,
-        Pane,
-        StationInfo,
     },
     created() {
         this.logger = log.getLogger(this.$options.name)
@@ -59,8 +50,12 @@ export default {
             this.$store.getters.prefix_options);
     },
     computed: {
-        inspect_stations: function() {
-            return this.$store.getters.inspect_stations;
+        data_time_range: function() {
+            return this.$store.getters.data_time_range;
+        },
+
+        server_state: function() {
+            return this.$store.getters.server_state;
         },
     },
 }
@@ -69,7 +64,12 @@ export default {
 
 <style scoped lang="sass">
 
-span.station-info-title
+div.map-info-panel
+    height: 100%
+    width: 100%
+    overflow: auto
+
+span.map-info-title
     margin: 0px
     margin-bottom: 5px
     padding: 2px
@@ -79,5 +79,13 @@ span.station-info-title
     font-weight: bold
     background-color: black
     color: white
+
+span.map-info
+    cursor: pointer
+    margin: 0px
+    padding: 2px
+    display: inline-block
+    text-align: left
+    width: 100%
 
 </style>

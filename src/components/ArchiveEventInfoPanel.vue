@@ -25,32 +25,26 @@
 -->
 
 <template>
-    <div>
-        <span id="station_info_title" class="station-info-title">Station Details</span>
-        <splitpanes horizontal>
-            <pane v-for="cur_station_id in inspect_stations"
-                  :key="cur_station_id">
-                <StationInfo :station_id="cur_station_id"/>
-            </pane>
-        </splitpanes>
+    <div class="archive-event-panel">
+        <span id="archive_event_info_title" class="event-info-title">Recent Events</span>
+        <ArchiveEvent v-for="(cur_event, index) in event_archive"
+                      v-bind:key="cur_event.start_time"
+                      v-bind:id="cur_event.start_time"
+                      v-bind:pos="index"/>
     </div>
 </template>
 
 <script>
 
-import StationInfo from '../components/StationInfo.vue'
-import { Splitpanes, Pane } from 'splitpanes'
-import 'splitpanes/dist/splitpanes.css'
+import ArchiveEvent from '../components/ArchiveEvent.vue';
 import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
 
 export default {
-    name: 'StationInfoPanel',
+    name: 'ArchiveEventInfoPanel',
     props: {},
     components: {
-        Splitpanes,
-        Pane,
-        StationInfo,
+        ArchiveEvent
     },
     created() {
         this.logger = log.getLogger(this.$options.name)
@@ -59,8 +53,8 @@ export default {
             this.$store.getters.prefix_options);
     },
     computed: {
-        inspect_stations: function() {
-            return this.$store.getters.inspect_stations;
+        event_archive: function() {
+            return this.$store.getters.event_archive;
         },
     },
 }
@@ -69,7 +63,7 @@ export default {
 
 <style scoped lang="sass">
 
-span.station-info-title
+span.event-info-title
     margin: 0px
     margin-bottom: 5px
     padding: 2px
@@ -79,5 +73,10 @@ span.station-info-title
     font-weight: bold
     background-color: black
     color: white
+
+div.archive-event-panel
+    height: 100%
+    width: 100%
+    overflow: auto
 
 </style>

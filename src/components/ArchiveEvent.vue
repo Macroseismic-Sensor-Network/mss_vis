@@ -114,12 +114,17 @@ export default {
 
 div.archive_event
     margin-bottom: 5px
+    width: 100%
 
 span.archive_event
     cursor: pointer
-    margin-bottom: 5px
+    margin: 0px
     padding: 2px
     border-radius: 4px
+    display: inline-block
+    text-align: center
+    width: 100%
+
 
 span.archive_event:hover
     background-color: LightBlue !important

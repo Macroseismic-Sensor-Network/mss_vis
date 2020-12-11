@@ -61,9 +61,7 @@
         </svg>
 
 
-        <div id="map_info">last data: {{ data_time_range[1] }} UTC<br>
-            first data: {{ data_time_range[0] }} UTC<br>
-            server state: {{ server_state }}<br><br>
+        <div id="map_info">
             <b>event monitor</b><br>
             <div id="current_event">
                 start: {{ current_event_start }}<br>
@@ -71,13 +69,6 @@
                 state: {{ current_event_state }}<br>
                 max PGV: {{ (current_event_max_pgv * 1000).toFixed(3) + ' mm/s'}}<br><br>
             </div>
-
-            <b>archived events</b><br>
-            <ArchiveEvent v-for="(cur_event, index) in event_archive"
-                          v-bind:key="cur_event.start_time"
-                          v-bind:id="cur_event.start_time"
-                          v-bind:pos="index"/>
-
         </div>
     </div>
 
