@@ -38,7 +38,7 @@
                         Menu Pane
                     </pane>
                     <pane size="100">
-                        <PGVMap :key="mapKey" v-on:reload-map-2="forceReloadMap()"/>
+                        <PGVMap :key="mapKey" />
                     </pane>
                     <pane size="0">
                         <StationInfoPanel :key="stationInfoPanelKey"/>
@@ -89,14 +89,8 @@ export default {
             this.$store.getters.prefix_options);
     },
     methods: {
-        forceReloadMap() {
-                //this.mapKey+=1;
-                //$('#app').load();
-        },
-
         on_splitpanes_resized() {
             this.$store.getters.leaflet_map.map_object.invalidateSize();
-            this.$store.commit('toggle_tracks_resize');
         },
     },
     computed: {
