@@ -117,8 +117,6 @@ export default {
 
     data() {
         return {
-            map_image: 'undefined',
-            map_image_url: '/assets/vue/nrt/image/mss_map_clean.jpg',
             logger: undefined,
             showLegend:false,	//toggles the visibility off the legend
         };
@@ -141,9 +139,7 @@ export default {
                         [48.5, 17.5]],
             maxBoundsViscosity: 1.0,
         });
-        this.map_image = new Image;
         this.init_map();
-        //window.addEventListener('resize', this.on_resize);
         //this.$watch('radius', this.plot_stations);
         this.$store.commit("LOAD_STATION_METADATA");
         const vm = this;
@@ -161,7 +157,6 @@ export default {
         }, 100);
 
 
-        //window.addEventListener('resize', this.on_resize);
         //this.leaflet_map.on("moveend", this.updateMarkers);
         this.leaflet_map.on("zoomend", this.handle_map_zoomend);
         this.showLegend=this.$store.getters.settings.show_legend;
@@ -315,10 +310,6 @@ export default {
             d3.select(".leaflet-overlay-pane")
                 .select("svg")
                 .attr("id","svg_overlay");
-
-
-            //this.show_image();
-            //this.on_resize();
         },
 
         handle_map_zoomend() {
@@ -333,54 +324,6 @@ export default {
                 .x((d, i) => scale.x(i))
                 .y(d => scale.y(d));
             this.line = path(this.data)
-        },
-
-        show_image() {
-            let self = this;
-            var map_svg = d3.select("#map");
-            this.map_image.onload = function()
-            {
-                self.logger.debug("Map image loaded.")
-                map_svg.append("svg:image")
-                    .attr('width', 4000)
-                    .attr('height', 2500)
-                    .attr('id', 'map_image')
-                    .attr("xlink:href", self.map_image_url);
-                d3.select('#map_image').lower();
-                //self.on_resize();
-            }
-            this.logger.debug("Loading map image: " + this.map_image_url);
-            this.map_image.src = this.map_image_url;
-        },
-
-        on_resize() {
-            this.logger.debug("resize");
-            var map_container = d3.select("#mapcontainer").node();
-            var map_svg = d3.select("#svg_template");
-
-            //const width = map_container.clientWidth;
-            //const height = map_container.clientHeight;
-            //this.logger.debug("Width: "+width);
-
-            var map_bounds = map_container.getBoundingClientRect();
-            map_svg.attr("width", map_bounds.width)
-                .attr("height", window.innerHeight)
-                .style("left", map_bounds.left + "px")
-                .style("top", map_bounds.top + "px");
-
-            //map_svg.attr("viewBox", "0 0 "+map_bounds.width+" "+window.innerHeight)
-
-            this.logger.debug("width attr" + map_bounds.width);
-
-            this.updateMarkers();
-
-
-            //const scale = height / this.map_image.height;
-
-            //const map_image = d3.select("#map_image");
-            //map_image
-            //    .attr('width', this.map_image.width * scale)
-            //    .attr('height', this.map_image.height * scale)
         },
 
         capture_map() {
