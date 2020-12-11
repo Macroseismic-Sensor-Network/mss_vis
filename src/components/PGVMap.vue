@@ -87,10 +87,8 @@
 
 <script>
 import $ from 'jquery';	
-import Vue from 'vue';
 import PGVMapMarker from '../components/PGVMapMarker.vue';
 import PGVLegend from '../components/PGVLegend.vue';
-//import PGVEventVoronoi from '../components/PGVEventVoronoi.vue';
 import ArchiveEvent from '../components/ArchiveEvent.vue';
 import ArchiveEventPlot from '../components/ArchiveEventPlot.vue';
 import EventMonitorPlot from '../components/EventMonitorPlot.vue';
