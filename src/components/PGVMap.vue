@@ -58,13 +58,6 @@
         </svg>
         <!-- End of templates. -->
 
-        <div id="popUpLayer">
-            <PGVPopUp />
-        </div>
-
-        <PGVPopUpPerma v-if="show_perma"
-                       v-on:close-perma="closePerma()"/>
-
         <svg id="svg_legend" width="300px" height="140">
             <PGVLegend name="map_legend" v-if="showLegend"/>
         </svg>
@@ -100,11 +93,9 @@ import Vue from 'vue';
 import PGVMapMarker from '../components/PGVMapMarker.vue';
 import PGVLegend from '../components/PGVLegend.vue';
 //import PGVEventVoronoi from '../components/PGVEventVoronoi.vue';
-import PGVPopUpPerma from '../components/PGVPopUpPerma.vue';
 import ArchiveEvent from '../components/ArchiveEvent.vue';
 import ArchiveEventPlot from '../components/ArchiveEventPlot.vue';
 import EventMonitorPlot from '../components/EventMonitorPlot.vue';
-import PGVPopUp from "../components/PGVPopUp.vue";
 import * as d3 from "d3";
 import domtoimage from 'dom-to-image';
 import * as log from 'loglevel';
@@ -126,8 +117,6 @@ export default {
         EventMonitorPlot,
         ArchiveEvent,
         ArchiveEventPlot,
-        PGVPopUp,
-        PGVPopUpPerma,
     },
 
     data() {
