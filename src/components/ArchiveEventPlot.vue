@@ -71,10 +71,6 @@ export default {
             return this.$store.getters.station_meta;
         },
 
-        svg_scale: function() {
-            return this.$store.getters.svg_scale;
-        },
-
         scales: function() {
             return this.$store.getters.scales;
         },
@@ -250,7 +246,7 @@ export default {
                     // Add the PGV circle marker showing the max. PGV of the
                     // event.
                     var cur_latlon = new L.LatLng(cur_station.y, cur_station.x);
-                    pgv_radius = scales.radius(max_pgv) / this.svg_scale;
+                    pgv_radius = scales.radius(max_pgv);
                     let cur_marker = container.append('circle').attr('id', 'voronoi_pgv_marker_' + k)
                                               .attr('cx', this.leaflet_map.latLngToLayerPoint(cur_latlon).x)
                                               .attr('cy', this.leaflet_map.latLngToLayerPoint(cur_latlon).y)

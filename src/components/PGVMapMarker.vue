@@ -103,10 +103,6 @@ export default {
             return this.$store.getters.leaflet_map.map_object;
         },   
 
-        svg_scale: function() {
-            return this.$store.getters.svg_scale;
-        },
-
         pgv: function() {
             return this.$store.getters.current_pgv_by_station(this.$props.station_id);
         },
@@ -123,7 +119,7 @@ export default {
                 radius = scales.radius(this.pgv);
             }
 
-            return radius / this.svg_scale;
+            return radius;
         },
 
         pgv_max_radius: function() {
@@ -134,7 +130,7 @@ export default {
                 radius = scales.radius(this.pgv_max);
             }
 
-            return radius / this.svg_scale;
+            return radius;
         },
 
         pgv_fill: function() {

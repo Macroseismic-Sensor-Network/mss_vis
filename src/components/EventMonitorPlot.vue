@@ -70,10 +70,6 @@ export default {
             return this.$store.getters.station_meta;
         },
 
-        svg_scale: function() {
-            return this.$store.getters.svg_scale;
-        },
-
         scales: function() {
             return this.$store.getters.scales;
         },

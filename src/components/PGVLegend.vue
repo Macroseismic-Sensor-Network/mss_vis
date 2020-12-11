@@ -104,10 +104,6 @@ export default {
             return 'pgvlegend_' + this.name;
         },
 
-        svg_scale: function() {
-            return this.$store.getters.svg_scale;
-        },
-
         pgv_radius: function() {
             var radius = [];
 
@@ -209,18 +205,6 @@ export default {
         config: function() {
             return this.$store.getters.map_config.legend;
         },
-
-        legend_transform: function() {
-            var translate_x = this.legend_position.x - this.legend_position.width / this.svg_scale;
-            var translate_y = this.legend_position.y - this.legend_position.height / this.svg_scale;
-
-            var scale = 1/this.svg_scale;
-            translate_x = this.legend_position.x - (this.legend_position.width * scale - this.legend_position.width);
-            translate_y = this.legend_position.y - (this.legend_position.height * scale - this.legend_position.height);
-            return "translate(" + translate_x +  "," + translate_y + ")" +  
-                "scale(" + scale + ")";
-        },
-
     },
 
     methods: {

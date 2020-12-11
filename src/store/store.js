@@ -222,7 +222,6 @@ export default new Vuex.Store({
         server_state: '',
         current_range: 60000,
         display_period: 600000,
-        svg_scale: 1,
         settings: {
             show_settings: false,
             show_legend:true,
@@ -563,10 +562,6 @@ export default new Vuex.Store({
             }
         },
 
-        svg_scale: (state) => {
-            return state.svg_scale;
-        },
-
         // eslint-disable-next-line
         utm_to_wgs84: (state) => (coords) => {
             proj4.defs("EPSG:32633", "+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs");
@@ -677,17 +672,6 @@ export default new Vuex.Store({
             {
                 state.map_control.show_archive_event = payload.pos;
             }
-        },
-
-        compute_svg_scale(state) {
-            var scale = 1;
-            var map_svg = d3.select("#map");
-            var svg_matrix = map_svg.node().getScreenCTM();
-            if (svg_matrix.a)
-            {
-                scale = svg_matrix.a
-            }
-            state.svg_scale = scale;
         },
 
         set_settings(state,payload) {
