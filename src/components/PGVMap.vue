@@ -80,7 +80,6 @@
 import $ from 'jquery';	
 import PGVMapMarker from '../components/PGVMapMarker.vue';
 import PGVLegend from '../components/PGVLegend.vue';
-import ArchiveEvent from '../components/ArchiveEvent.vue';
 import ArchiveEventPlot from '../components/ArchiveEventPlot.vue';
 import EventMonitorPlot from '../components/EventMonitorPlot.vue';
 import * as d3 from "d3";
@@ -102,7 +101,6 @@ export default {
         PGVMapMarker,
         PGVLegend,
         EventMonitorPlot,
-        ArchiveEvent,
         ArchiveEventPlot,
     },
 
@@ -287,7 +285,7 @@ export default {
 
             oe3d.addTo(this.leaflet_map);
 
-            var on_export_image_click = this.map_to_image;
+            //var on_export_image_click = this.map_to_image;
             L.control.layers(layer_options, null, {position: 'topleft', autoZIndex:false }).addTo(this.leaflet_map);
 
             /* Custom buttons */

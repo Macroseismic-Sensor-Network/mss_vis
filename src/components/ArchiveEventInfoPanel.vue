@@ -26,7 +26,6 @@
 
 <template>
     <div class="archive-event-panel">
-        <span id="archive_event_info_title" class="event-info-title">Recent Events</span>
         <ArchiveEvent v-for="(cur_event, index) in event_archive"
                       v-bind:key="cur_event.start_time"
                       v-bind:id="cur_event.start_time"

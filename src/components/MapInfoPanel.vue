@@ -26,7 +26,6 @@
 
 <template>
     <div class="map-info-panel">
-        <span id="map_info_title" class="map-info-title">Map Info</span>
         <span id="map_info_last_data" class="map-info">last data: {{ data_time_range[1] }} UTC</span>
         <span id="map_info_first_data" class="map-info">first data: {{ data_time_range[0] }} UTC</span>
         <span id="map_info_server_state" class="map-info">server state: {{ server_state }}</span>

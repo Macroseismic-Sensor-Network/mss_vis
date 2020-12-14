@@ -29,33 +29,66 @@
         <splitpanes class="default-theme"
                     horizontal
                     @resized="on_splitpanes_resized()">
-            <pane size="0">
+            <pane :size="layout.panes.tracks.size"
+                  v-if="layout.panes.tracks.visible">
                 <TracksPanel :key="tracksPanelKey"/>
             </pane>
-            <pane size="100">
+            <pane :size="layout.panes.map_container.size">
                 <splitpanes @resized="on_splitpanes_resized()">
-                    <pane size="0">
+                    <pane :size="layout.panes.map_container.menu.size"
+                          v-if="layout.panes.map_container.menu.visible">
                         Menu Pane
                     </pane>
-                    <pane size="100">
+                    <pane :size="layout.panes.map_container.map.size"
+                          v-if="layout.panes.map_container.map.visible">
                         <PGVMap :key="mapKey" />
                     </pane>
-                    <pane size="0">
-                        <splitpanes horizontal>
-                            <pane size="100">
+                    <pane :size="layout.panes.map_container.info.size"
+                          v-if="layout.panes.map_container.info.visible">
+                        <!--
+                        <splitpanes horizontal
+                                    @resized="on_map_container_info_splitpanes_resized($event)">
+                            <pane :size="layout.panes.map_container.info.map_info.size"
+                                  v-if="layout.panes.map_container.info.map_info.visible">
                                 <MapInfoPanel key="map_info_panel_key"/>
                             </pane>
-                            <pane size="100">
+                            <pane :size="layout.panes.map_container.info.archive_event_info.size"
+                                  v-if="layout.panes.map_container.info.archive_event_info.visible">
                                 <ArchiveEventInfoPanel key="archive_info_panel_key"/>
                             </pane>
-                            <pane size="0">
+                            <pane :size="layout.panes.map_container.info.station_info.size"
+                                  v-if="layout.panes.map_container.info.station_info.visible">
                                 <StationInfoPanel key="station_info_panel_key"/>
                             </pane>
                         </splitpanes>
+                        -->
+                        <div style="height: calc(100vh); overflow: scroll;">
+                            <ul class="accordion" data-accordion>
+                                <li class="accordion-item" data-accordion-item>
+                                    <a href="#" class="accordion-title">Map Info</a>
+                                    <div class="accordion-content" data-tab-content>
+                                        <MapInfoPanel key="map_info_panel_key"/>
+                                    </div>
+                                </li>
+                                <li class="accordion-item" data-accordion-item>
+                                    <a href="#" class="accordion-title">Recent Events</a>
+                                    <div class="accordion-content" data-tab-content>
+                                        <ArchiveEventInfoPanel key="archive_info_panel_key"/>
+                                    </div>
+                                </li>
+                                <li class="accordion-item" data-accordion-item>
+                                    <a href="#" class="accordion-title">Station Info</a>
+                                    <div class="accordion-content" data-tab-content>
+                                        <StationInfoPanel key="station_info_panel_key"/>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
                     </pane>
                 </splitpanes>
             </pane>
-            <pane size="0">
+            <pane :size="layout.panes.content.size"
+                  v-if="layout.panes.content.visible">
                 Spreadsheet Pane
             </pane>
         </splitpanes>
@@ -66,9 +99,9 @@
 
 import PGVMap from '../components/PGVMap.vue'
 import TracksPanel from '../components/TracksPanel.vue'
-import StationInfoPanel from '../components/StationInfoPanel.vue'
 import MapInfoPanel from '../components/MapInfoPanel.vue'
 import ArchiveEventInfoPanel from '../components/ArchiveEventInfoPanel.vue'
+import StationInfoPanel from '../components/StationInfoPanel.vue'
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 import * as log from 'loglevel';
@@ -89,9 +122,9 @@ export default {
     components: {
         // eslint-disable-next-line
         PGVMap,
-        StationInfoPanel,
         MapInfoPanel,
         ArchiveEventInfoPanel,
+        StationInfoPanel,
         TracksPanel,
         Splitpanes,
         Pane,
@@ -106,10 +139,18 @@ export default {
         on_splitpanes_resized() {
             this.$store.getters.leaflet_map.map_object.invalidateSize();
         },
+
+        on_map_container_info_splitpanes_resized(sp_event) {
+            this.$store.commit("update_map_container_info_layout", sp_event);
+        },
     },
     computed: {
         stations: function() {
             return this.$store.getters.station_meta;
+        },
+
+        layout: function() {
+            return this.$store.getters.layout;
         },
 
         show_event_monitor: {
@@ -136,7 +177,7 @@ export default {
             }
         },
 
-        show_event_detection: {
+        ehow_event_detection: {
             get() {
                 return this.$store.getters.map_control.show_event_detection;
             },
