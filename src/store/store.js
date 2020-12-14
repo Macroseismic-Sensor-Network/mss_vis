@@ -522,21 +522,11 @@ export default new Vuex.Store({
         },
 
         archive_event_max_pgv: (state) => (pos) =>  {
-            var trigger_data ;
-            var cur_pgv;
             var max_pgv = [];
-            if (state.event_archive[pos].overall_trigger_data)
+
+            if (state.event_archive[pos].max_station_pgv)
             {
-                trigger_data = state.event_archive[pos].overall_trigger_data;
-                for (var k = 0; k < trigger_data.length; k++)
-                {
-                    cur_pgv = trigger_data[k].pgv;
-                    for (var m = 0; m < cur_pgv.length; m++)
-                    {
-                        max_pgv.push(Math.max.apply(null, cur_pgv[m]));
-                    }
-                }
-                max_pgv = Math.max.apply(null, max_pgv);
+                max_pgv = Math.max.apply(null, Object.values(state.event_archive[pos].max_station_pgv));
             }
 
             if (max_pgv.length === 0)
