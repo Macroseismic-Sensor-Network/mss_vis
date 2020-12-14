@@ -239,6 +239,48 @@ export default new Vuex.Store({
             resize_toggle: false,
         },
 
+        // The GUI Layout
+        layout: {
+            panes: {
+                tracks: {
+                    size: 0,
+                    visible: false,
+                },
+                map_container: {
+                    size: 100,
+                    visible: true,
+                    menu: {
+                        size: 0,
+                        visible: false,
+                    },
+                    map: {
+                        size: 80,
+                        visible: true,
+                    },
+                    info: {
+                        size:20,
+                        visible: true,
+                        map_info: {
+                            size: 20,
+                            visible: true,
+                        },
+                        archive_event_info: {
+                            size: 80,
+                            visible: true,
+                        },
+                        station_info: {
+                            size: 0,
+                            visible: false,
+                        }
+                    },
+                },
+                content: {
+                    size: 0,
+                    visible: false,
+                },
+            }
+        },
+
         // The station to inspect in the station infow.
         inspect_stations: [],
 
@@ -275,6 +317,7 @@ export default new Vuex.Store({
             show_archive_event: undefined,
             show_archive_event_cells: true,
         },
+
         prefix_options: {
             template: '[%t] - %l - %n:',
             levelFormatter: function (level) {
@@ -321,6 +364,10 @@ export default new Vuex.Store({
 
         inspect_stations: state => {
             return state.inspect_stations;
+        },
+
+        layout: state => {
+            return state.layout;
         },
 
         current_pgv: state => {
@@ -563,6 +610,16 @@ export default new Vuex.Store({
             return state.tracks;
         },
 
+        pgv_timeseries_shown: (state) => (station_id) => {
+            if (state.tracks.realtime.pgv_timeseries.includes(station_id))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        },
     },
 
     mutations: {
@@ -678,14 +735,44 @@ export default new Vuex.Store({
 
         add_inspect_station(state, payload) {
             state.inspect_stations.push(payload);
+            if (state.inspect_stations.length == 1)
+            {
+                state.layout.panes.map_container.info.station_info.size = 40;
+                state.layout.panes.map_container.info.station_info.visible = true;
+                state.layout.panes.map_container.info.archive_event_info.size =  100 - (state.layout.panes.map_container.info.map_info.size + state.layout.panes.map_container.info.station_info.size);
+            }
         },
 
         remove_inspect_station(state, payload) {
             state.inspect_stations.splice(state.inspect_stations.indexOf(payload), 1);
+            if (state.inspect_stations.length == 0)
+            {
+                state.layout.panes.map_container.info.station_info.size = 0;
+                state.layout.panes.map_container.info.station_info.visible = false;
+                state.layout.panes.map_container.info.archive_event_info.size = 100 - state.layout.panes.map_container.info.map_info.size;
+            }
         },
 
         add_track_pgv_timeseries(state, payload) {
             state.tracks.realtime.pgv_timeseries.push(payload);
+            let n_realtime_tracks = state.tracks.realtime.pgv_timeseries.length
+            if (n_realtime_tracks == 1)
+            {
+                state.layout.panes.tracks.visible = true;
+                state.layout.panes.tracks.size = 15;
+                state.layout.panes.map_container.size = 100 - state.layout.panes.tracks.size - state.layout.panes.content.size;
+            }
+        },
+
+        remove_track_pgv_timeseries(state, payload) {
+            state.tracks.realtime.pgv_timeseries.splice(state.tracks.realtime.pgv_timeseries.indexOf(payload), 1);
+            let n_realtime_tracks = state.tracks.realtime.pgv_timeseries.length
+            if (n_realtime_tracks == 0)
+            {
+                state.layout.panes.tracks.visible = false;
+                state.layout.panes.tracks.size = 0;
+                state.layout.panes.map_container.size = 100 - state.layout.panes.tracks.size - state.layout.panes.content.size;
+            }
         },
 
         set_leaflet_map_object(state, payload) {
@@ -698,6 +785,15 @@ export default new Vuex.Store({
 
         toggle_tracks_resize(state) {
             state.tracks.resize_toggle = !state.tracks.resize_toggle;
+        },
+
+        update_map_container_info_layout(state, payload) {
+            state.layout.panes.map_container.info.map_info.size = payload[0].size
+            state.layout.panes.map_container.info.archive_event_info.size = payload[1].size
+            if (payload.lengh == 3)
+            {
+                state.layout.panes.map_container.info.station_info.size = payload[2].size
+            }
         },
     },
 
