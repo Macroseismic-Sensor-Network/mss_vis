@@ -45,11 +45,12 @@
     </div>
     -->
     <div style="width: 100%;">
-        <div class="station-info-item"><b>{{ station_id }}</b></div>
+        <div class="station-info-item"><b>{{ name }}</b></div>
         <div class="station-info-item"><i>{{ description }}</i></div>
+        <div class="station-info-item"><i>{{ station_id }}</i></div>
         <div class="station-info-item"><span class="text-right station-info-attribute">latest PGV [mm/s]:</span>{{ (pgv * 1000).toFixed(3) }}</div>
         <div class="station-info-item"><span class="text-right station-info-attribute">  max. PGV [mm/s]:</span>{{ (pgv_max * 1000).toFixed(3) }}</div>
-        <div class="station-info-item">
+        <div class="station-info-item" style="display: inline-block;">
             <a v-on:click="on_show_pgv_timeseries" class="button tiny float-right">{{ pgv_track_label }}</a>
             <a v-on:click="on_remove_from_inspect" class="button tiny float-right">close</a>
         </div>
@@ -84,6 +85,19 @@ export default {
 
         station_meta: function() {
             return this.$store.getters.station_meta_by_id(this.station_id);
+        },
+
+        name: function() {
+            let cur_meta = this.station_meta;
+            if (cur_meta == undefined)
+            {
+                return '';
+            }
+            else
+            {
+                return cur_meta.name;
+            }
+
         },
 
         description: function() {
@@ -148,13 +162,16 @@ export default {
 
 div.station-info-item
     width: 100%
-    display: inline-block
     font-size: 10pt
 
+    a
+        margin-left: 5px
+        margin-top: 2px
+
 span.station-info-attribute
-    display: inline-block
     min-width: 9rem
     margin-right: 4px
     font-size: 10pt
+    display: inline-block
 
 </style>
