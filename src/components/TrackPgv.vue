@@ -190,6 +190,7 @@ export default {
         new_plot() {
             //this.layout.xaxis.range = ['2019-07-05T11:30:00', this.$store.getters.max_datetime]
             this.layout.annotations[0].text = this.station;
+            this.layout.xaxis.range = this.display_range;
             Plotly.newPlot(this.element_id, this.plotly_data, this.layout, this.config);
         },
 
