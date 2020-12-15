@@ -59,17 +59,6 @@
         <svg id="svg_legend" width="300px" height="140">
             <PGVLegend name="map_legend" v-if="showLegend"/>
         </svg>
-
-
-        <div id="map_info">
-            <b>event monitor</b><br>
-            <div id="current_event">
-                start: {{ current_event_start }}<br>
-                end: {{ current_event_end }}<br>
-                state: {{ current_event_state }}<br>
-                max PGV: {{ (current_event_max_pgv * 1000).toFixed(3) + ' mm/s'}}<br><br>
-            </div>
-        </div>
     </div>
 
 
@@ -199,59 +188,6 @@ export default {
 
         scales: function() {
             return this.$store.getters.scales;
-        },
-
-        current_event: function() {
-            return this.$store.getters.current_event;
-        },
-
-        current_event_max_pgv: function() {
-            var max_pgv = this.$store.getters.current_event_max_pgv;
-            if (max_pgv)
-            {
-                return max_pgv;
-            }
-            else
-            {
-                return 0;
-            }
-        },
-
-        current_event_start: function() {
-            if ('start_time' in this.current_event)
-            {
-                return this.current_event.start_time;
-            }
-            else
-            {
-                return "";
-            }
-        },
-
-        current_event_end: function() {
-            if ('end_time' in this.current_event)
-            {
-                return this.current_event.end_time;
-            }
-            else
-            {
-                return "";
-            }
-        },
-
-        current_event_state: function() {
-            if ('state' in this.current_event)
-            {
-                return this.current_event.state;
-            }
-            else
-            {
-                return "No active event.";
-            }
-        },
-
-        event_archive: function() {
-            return this.$store.getters.event_archive;
         },
     },
 

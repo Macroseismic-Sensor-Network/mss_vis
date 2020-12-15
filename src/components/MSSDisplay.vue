@@ -63,6 +63,16 @@
                                     </div>
                                 </li>
                                 <li class="accordion-item is-active"
+                                    id="accordion_event_monitor"
+                                    data-accordion-item>
+                                    <a href="#" class="accordion-title">
+                                        Event Monitor
+                                    </a>
+                                    <div class="accordion-content" data-tab-content>
+                                        <EventMonitorPanel key="event_monitor_panel_key"/>
+                                    </div>
+                                </li>
+                                <li class="accordion-item is-active"
                                     id="accordion_recent_events"
                                     data-accordion-item>
                                     <a href="#" class="accordion-title">
@@ -100,6 +110,7 @@
 import PGVMap from '../components/PGVMap.vue'
 import TracksPanel from '../components/TracksPanel.vue'
 import MapInfoPanel from '../components/MapInfoPanel.vue'
+import EventMonitorPanel from '../components/EventMonitorPanel.vue'
 import ArchiveEventInfoPanel from '../components/ArchiveEventInfoPanel.vue'
 import StationInfoPanel from '../components/StationInfoPanel.vue'
 import { Splitpanes, Pane } from 'splitpanes'
@@ -124,6 +135,7 @@ export default {
         // eslint-disable-next-line
         PGVMap,
         MapInfoPanel,
+        EventMonitorPanel,
         ArchiveEventInfoPanel,
         StationInfoPanel,
         TracksPanel,
