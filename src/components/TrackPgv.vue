@@ -191,6 +191,14 @@ export default {
             //this.layout.xaxis.range = ['2019-07-05T11:30:00', this.$store.getters.max_datetime]
             this.layout.annotations[0].text = this.station;
             this.layout.xaxis.range = this.display_range;
+            if (Math.max.apply(null, this.plotly_data[0].y) >= 0.1)
+            {
+                this.plotly_data[0].line.color = 'SandyBrown';
+            }
+            else
+            {
+                this.plotly_data[0].line.color = 'LightSkyBlue';
+            }
             Plotly.newPlot(this.element_id, this.plotly_data, this.layout, this.config);
         },
 
