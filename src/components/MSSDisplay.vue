@@ -44,25 +44,39 @@
                         <PGVMap :key="mapKey" />
                     </pane>
                     <pane :size="layout.panes.map_container.info.size"
-                          v-if="layout.panes.map_container.info.visible">
-                        <div style="height: calc(100vh); overflow: scroll;">
+                          v-if="layout.panes.map_container.info.visible"
+                          ref="map_info_pane">
+                        <div style="overflow: scroll; height: 100%">
                             <ul class="accordion"
+                                id="accordion_menu"
                                 data-accordion
                                 data-multi-expand="true"
                                 data-allow-all-closed="true">
-                                <li class="accordion-item" data-accordion-item>
+                                <li class="accordion-item"
+                                    id="accordion_map_info"
+                                    data-accordion-item
+                                    v-bind:class="{ 'is-active': tab_state.map_info.expanded }"
+                                    v-on:click="on_accordion_clicked('map_info')">
                                     <a href="#" class="accordion-title">Map Info</a>
                                     <div class="accordion-content" data-tab-content>
                                         <MapInfoPanel key="map_info_panel_key"/>
                                     </div>
                                 </li>
-                                <li class="accordion-item" data-accordion-item>
+                                <li class="accordion-item"
+                                    id="accordion_recent_events"
+                                    data-accordion-item
+                                    v-bind:class="{ 'is-active': tab_state.archive_event_info.expanded }"
+                                    v-on:click="on_accordion_clicked('archive_event_info')">
                                     <a href="#" class="accordion-title">Recent Events</a>
                                     <div class="accordion-content" data-tab-content>
                                         <ArchiveEventInfoPanel key="archive_info_panel_key"/>
                                     </div>
                                 </li>
-                                <li class="accordion-item" data-accordion-item>
+                                <li class="accordion-item"
+                                    id="accordion_station_info"
+                                    data-accordion-item
+                                    v-bind:class="{ 'is-active': tab_state.station_info.expanded }"
+                                    v-on:click="on_accordion_clicked('station_info')">
                                     <a href="#" class="accordion-title">Station Info</a>
                                     <div class="accordion-content" data-tab-content>
                                         <StationInfoPanel key="station_info_panel_key"/>
@@ -92,19 +106,20 @@ import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
+import resize from 'vue-resize-directive'
 
 export default {
     name: 'MSSDisplay',
     props: {
         title: String
     },
-	data() {
-		return {
-			mapKey: 0,
-                        stationInfoPanelKey: 0,
-                        tracksPanelKey: 0,
-		}
-	},
+    data() {
+            return {
+                    mapKey: 0,
+                    stationInfoPanelKey: 0,
+                    tracksPanelKey: 0,
+            }
+    },
     components: {
         // eslint-disable-next-line
         PGVMap,
@@ -115,11 +130,18 @@ export default {
         Splitpanes,
         Pane,
     },
+    directives: {
+        resize,
+    },
     created() {
         this.logger = log.getLogger(this.$options.name)
         this.logger.setLevel(this.$store.getters.log_level);
         log_prefix.apply(this.logger,
             this.$store.getters.prefix_options);
+    },
+    mounted() {
+    },
+    beforeDestroy() {
     },
     methods: {
         on_splitpanes_resized() {
@@ -128,6 +150,10 @@ export default {
 
         on_map_container_info_splitpanes_resized(sp_event) {
             this.$store.commit("update_map_container_info_layout", sp_event);
+        },
+
+        on_accordion_clicked(element) {
+            this.$store.commit("toggle_map_info_accordion", element);
         },
     },
     computed: {
@@ -188,6 +214,13 @@ export default {
             }
         },
 
+        tab_state: function() {
+            return this.$store.getters.accordion_info;
+        },
+
+        accordion_info_height: function() {
+            return '400px';
+        }
     }
 }
 

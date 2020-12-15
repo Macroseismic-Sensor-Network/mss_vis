@@ -266,7 +266,22 @@ export default new Vuex.Store({
                     size: 0,
                     visible: false,
                 },
-            }
+            },
+        },
+
+        // The accordion menus.
+        accordion : {
+            info: {
+                map_info: {
+                    expanded: true,
+                },
+                archive_event_info: {
+                    expanded: true,
+                },
+                station_info: {
+                    expanded: false,
+                },
+            },
         },
 
         // The station to inspect in the station infow.
@@ -608,6 +623,10 @@ export default new Vuex.Store({
                 return false;
             }
         },
+
+        accordion_info: (state) => {
+            return state.accordion.info;
+        }
     },
 
     mutations: {
@@ -779,6 +798,20 @@ export default new Vuex.Store({
             if (payload.lengh == 3)
             {
                 state.layout.panes.map_container.info.station_info.size = payload[2].size
+            }
+        },
+
+        toggle_map_info_accordion(state, payload) {
+            switch (payload) {
+                case 'map_info':
+                    state.accordion.info.map_info.expanded = !state.accordion.info.map_info.expanded;
+                    break;
+                case 'archive_event_info':
+                    state.accordion.info.archive_event_info.expanded = !state.accordion.info.archive_event_info.expanded;
+                    break;
+                case 'station_info':
+                    state.accordion.info.station_info.expanded = !state.accordion.info.station_info.expanded;
+                    break;
             }
         },
     },
