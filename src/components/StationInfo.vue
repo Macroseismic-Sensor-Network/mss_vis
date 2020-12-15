@@ -149,10 +149,12 @@ export default {
 div.station-info-item
     width: 100%
     display: inline-block
+    font-size: 10pt
 
 span.station-info-attribute
     display: inline-block
     min-width: 9rem
     margin-right: 4px
+    font-size: 10pt
 
 </style>

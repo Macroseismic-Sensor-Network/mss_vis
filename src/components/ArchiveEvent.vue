@@ -124,6 +124,7 @@ span.archive_event
     display: inline-block
     text-align: center
     width: 100%
+    font-size: 10pt
 
 
 span.archive_event:hover

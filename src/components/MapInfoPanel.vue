@@ -86,5 +86,6 @@ span.map-info
     display: inline-block
     text-align: left
     width: 100%
+    font-size: 10pt
 
 </style>
