@@ -46,7 +46,7 @@
                     <pane :size="layout.panes.map_container.info.size"
                           v-if="layout.panes.map_container.info.visible"
                           ref="map_info_pane">
-                        <div style="overflow: scroll; height: 100%">
+                        <div style="overflow: scroll; height: 100%; background-color: white;">
                             <ul class="accordion"
                                 id="accordion_info"
                                 data-accordion
