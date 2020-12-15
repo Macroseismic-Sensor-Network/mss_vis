@@ -28,6 +28,7 @@ import * as d3 from "d3";
 import * as log from 'loglevel';
 import * as moment from 'moment';
 import proj4 from 'proj4';
+import $ from 'jquery';	
 
 Vue.use(Vuex)
 
@@ -265,21 +266,6 @@ export default new Vuex.Store({
                 content: {
                     size: 0,
                     visible: false,
-                },
-            },
-        },
-
-        // The accordion menus.
-        accordion : {
-            info: {
-                map_info: {
-                    expanded: true,
-                },
-                archive_event_info: {
-                    expanded: true,
-                },
-                station_info: {
-                    expanded: false,
                 },
             },
         },
@@ -623,10 +609,6 @@ export default new Vuex.Store({
                 return false;
             }
         },
-
-        accordion_info: (state) => {
-            return state.accordion.info;
-        }
     },
 
     mutations: {
@@ -741,21 +723,21 @@ export default new Vuex.Store({
         },
 
         add_inspect_station(state, payload) {
-            state.inspect_stations.push(payload);
-            /*
-            if (state.inspect_stations.length == 1)
+            if (!state.inspect_stations.includes(payload))
             {
+                state.inspect_stations.push(payload);
+                if (state.inspect_stations.length == 1)
+                {
+                    $('#accordion_info').foundation('toggle', $('#accordion_station_info .accordion-content'));
+                }
             }
-            */
         },
 
         remove_inspect_station(state, payload) {
-            state.inspect_stations.splice(state.inspect_stations.indexOf(payload), 1);
-            /*
-            if (state.inspect_stations.length == 0)
+            if (state.inspect_stations.includes(payload))
             {
+                state.inspect_stations.splice(state.inspect_stations.indexOf(payload), 1);
             }
-            */
         },
 
         add_track_pgv_timeseries(state, payload) {
@@ -798,20 +780,6 @@ export default new Vuex.Store({
             if (payload.lengh == 3)
             {
                 state.layout.panes.map_container.info.station_info.size = payload[2].size
-            }
-        },
-
-        toggle_map_info_accordion(state, payload) {
-            switch (payload) {
-                case 'map_info':
-                    state.accordion.info.map_info.expanded = !state.accordion.info.map_info.expanded;
-                    break;
-                case 'archive_event_info':
-                    state.accordion.info.archive_event_info.expanded = !state.accordion.info.archive_event_info.expanded;
-                    break;
-                case 'station_info':
-                    state.accordion.info.station_info.expanded = !state.accordion.info.station_info.expanded;
-                    break;
             }
         },
     },
