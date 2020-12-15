@@ -46,7 +46,10 @@
                     <pane :size="layout.panes.map_container.info.size"
                           v-if="layout.panes.map_container.info.visible">
                         <div style="height: calc(100vh); overflow: scroll;">
-                            <ul class="accordion" data-accordion>
+                            <ul class="accordion"
+                                data-accordion
+                                data-multi-expand="true"
+                                data-allow-all-closed="true">
                                 <li class="accordion-item" data-accordion-item>
                                     <a href="#" class="accordion-title">Map Info</a>
                                     <div class="accordion-content" data-tab-content>
