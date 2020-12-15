@@ -728,7 +728,7 @@ export default new Vuex.Store({
                 state.inspect_stations.push(payload);
                 if (state.inspect_stations.length == 1)
                 {
-                    $('#accordion_info').foundation('toggle', $('#accordion_station_info .accordion-content'));
+                    $('#accordion_info').foundation('down', $('#accordion_station_info .accordion-content'));
                 }
             }
         },
