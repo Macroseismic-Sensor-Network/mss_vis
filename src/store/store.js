@@ -260,18 +260,6 @@ export default new Vuex.Store({
                     info: {
                         size:20,
                         visible: true,
-                        map_info: {
-                            size: 20,
-                            visible: true,
-                        },
-                        archive_event_info: {
-                            size: 80,
-                            visible: true,
-                        },
-                        station_info: {
-                            size: 0,
-                            visible: false,
-                        }
                     },
                 },
                 content: {
@@ -735,22 +723,20 @@ export default new Vuex.Store({
 
         add_inspect_station(state, payload) {
             state.inspect_stations.push(payload);
+            /*
             if (state.inspect_stations.length == 1)
             {
-                state.layout.panes.map_container.info.station_info.size = 40;
-                state.layout.panes.map_container.info.station_info.visible = true;
-                state.layout.panes.map_container.info.archive_event_info.size =  100 - (state.layout.panes.map_container.info.map_info.size + state.layout.panes.map_container.info.station_info.size);
             }
+            */
         },
 
         remove_inspect_station(state, payload) {
             state.inspect_stations.splice(state.inspect_stations.indexOf(payload), 1);
+            /*
             if (state.inspect_stations.length == 0)
             {
-                state.layout.panes.map_container.info.station_info.size = 0;
-                state.layout.panes.map_container.info.station_info.visible = false;
-                state.layout.panes.map_container.info.archive_event_info.size = 100 - state.layout.panes.map_container.info.map_info.size;
             }
+            */
         },
 
         add_track_pgv_timeseries(state, payload) {

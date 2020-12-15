@@ -45,23 +45,6 @@
                     </pane>
                     <pane :size="layout.panes.map_container.info.size"
                           v-if="layout.panes.map_container.info.visible">
-                        <!--
-                        <splitpanes horizontal
-                                    @resized="on_map_container_info_splitpanes_resized($event)">
-                            <pane :size="layout.panes.map_container.info.map_info.size"
-                                  v-if="layout.panes.map_container.info.map_info.visible">
-                                <MapInfoPanel key="map_info_panel_key"/>
-                            </pane>
-                            <pane :size="layout.panes.map_container.info.archive_event_info.size"
-                                  v-if="layout.panes.map_container.info.archive_event_info.visible">
-                                <ArchiveEventInfoPanel key="archive_info_panel_key"/>
-                            </pane>
-                            <pane :size="layout.panes.map_container.info.station_info.size"
-                                  v-if="layout.panes.map_container.info.station_info.visible">
-                                <StationInfoPanel key="station_info_panel_key"/>
-                            </pane>
-                        </splitpanes>
-                        -->
                         <div style="height: calc(100vh); overflow: scroll;">
                             <ul class="accordion" data-accordion>
                                 <li class="accordion-item" data-accordion-item>
