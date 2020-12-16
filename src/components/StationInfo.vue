@@ -50,10 +50,16 @@
         <div class="station-info-item"><i>{{ station_id }}</i></div>
         <div class="station-info-item"><span class="text-right station-info-attribute">latest PGV [mm/s]:</span>{{ (pgv * 1000).toFixed(3) }}</div>
         <div class="station-info-item"><span class="text-right station-info-attribute">  max. PGV [mm/s]:</span>{{ (pgv_max * 1000).toFixed(3) }}</div>
-        <div class="station-info-item" style="display: inline-block;">
-            <a v-on:click="on_show_pgv_timeseries" class="button tiny float-right">{{ pgv_track_label }}</a>
-            <a v-on:click="on_remove_from_inspect" class="button tiny float-right">close</a>
-        </div>
+        <w-flex class="wrap">
+            <w-button class="ma1" 
+                      v-on:click="on_show_pgv_timeseries">
+                {{ pgv_track_label }}
+            </w-button>
+            <w-button class="ma1"
+                      v-on:click="on_remove_from_inspect">
+                close
+            </w-button>
+        </w-flex>
     </div>
 </template>
 

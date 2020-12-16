@@ -25,84 +25,49 @@
 -->
 
 <template>
-    <div id="mss-display-container" class="cell auto">
-        <splitpanes class="default-theme"
-                    horizontal
-                    @resized="on_splitpanes_resized()">
-            <pane :size="layout.panes.tracks.size"
-                  v-if="layout.panes.tracks.visible">
-                <TracksPanel :key="tracksPanelKey"/>
-            </pane>
-            <pane :size="layout.panes.map_container.size">
-                <splitpanes @resized="on_splitpanes_resized()">
-                    <pane :size="layout.panes.map_container.menu.size"
-                          v-if="layout.panes.map_container.menu.visible">
-                        Menu Pane
-                    </pane>
-                    <pane :size="layout.panes.map_container.map.size"
-                          v-if="layout.panes.map_container.map.visible">
-                        <PGVMap :key="mapKey" />
-                    </pane>
-                    <pane :size="layout.panes.map_container.info.size"
-                          v-if="layout.panes.map_container.info.visible"
-                          ref="map_info_pane">
-                        <div style="overflow: scroll; height: 100%; background-color: white;">
-                            <ul class="accordion"
-                                id="accordion_info"
-                                data-accordion
-                                data-multi-expand="true"
-                                data-allow-all-closed="true">
-                                <li class="accordion-item is-active"
-                                    id="accordion_map_info"
-                                    data-accordion-item>
-                                    <a href="#" class="accordion-title">
-                                        Map Info
-                                    </a>
-                                    <div class="accordion-content" data-tab-content>
-                                        <MapInfoPanel key="map_info_panel_key"/>
-                                    </div>
-                                </li>
-                                <li class="accordion-item is-active"
-                                    id="accordion_event_monitor"
-                                    data-accordion-item>
-                                    <a href="#" class="accordion-title">
-                                        Event Monitor
-                                    </a>
-                                    <div class="accordion-content" data-tab-content>
-                                        <EventMonitorPanel key="event_monitor_panel_key"/>
-                                    </div>
-                                </li>
-                                <li class="accordion-item is-active"
-                                    id="accordion_recent_events"
-                                    data-accordion-item>
-                                    <a href="#" class="accordion-title">
-                                        Recent Events
-                                    </a>
-                                    <div class="accordion-content" data-tab-content>
-                                        <ArchiveEventInfoPanel key="archive_info_panel_key"/>
-                                    </div>
-                                </li>
-                                <li class="accordion-item"
-                                    id="accordion_station_info"
-                                    data-accordion-item>
-                                    <a href="#" class="accordion-title">
-                                        Station Info
-                                    </a>
-                                    <div class="accordion-content" data-tab-content>
-                                        <StationInfoPanel key="station_info_panel_key"/>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
-                    </pane>
-                </splitpanes>
-            </pane>
-            <pane :size="layout.panes.content.size"
-                  v-if="layout.panes.content.visible">
-                Spreadsheet Pane
-            </pane>
-        </splitpanes>
-    </div>
+    <w-app id="mss-display-container" class="cell auto">
+            <splitpanes class="default-theme"
+                        horizontal
+                        @resized="on_splitpanes_resized()">
+                <pane :size="layout.panes.tracks.size"
+                      v-if="layout.panes.tracks.visible">
+                    <TracksPanel :key="tracksPanelKey"/>
+                </pane>
+                <pane :size="layout.panes.map_container.size">
+                    <splitpanes @resized="on_splitpanes_resized()">
+                        <pane :size="layout.panes.map_container.menu.size"
+                              v-if="layout.panes.map_container.menu.visible">
+                            Menu Pane
+                        </pane>
+                        <pane :size="layout.panes.map_container.map.size"
+                              v-if="layout.panes.map_container.map.visible">
+                            <PGVMap :key="mapKey" />
+                        </pane>
+                        <pane :size="layout.panes.map_container.info.size"
+                              v-if="layout.panes.map_container.info.visible"
+                              ref="map_info_pane">
+                            <div style="overflow: scroll; height: 100%; background-color: white;">
+                                <w-accordion :items="4"
+                                    v-model="map_info_accordion_expanded">
+                                    <template #item-title.1="">Map Info</template>
+                                    <template #item-content.1=""><MapInfoPanel key="map_info_panel_key"/></template>
+                                    <template #item-title.2="">Event Monitor</template>
+                                    <template #item-content.2=""><EventMonitorPanel key="event_monitor_panel_key"/></template>
+                                    <template #item-title.3="">Recent Events</template>
+                                    <template #item-content.3=""><ArchiveEventInfoPanel key="archive_info_panel_key"/></template>
+                                    <template #item-title.4="">Station Info</template>
+                                    <template #item-content.4=""><StationInfoPanel key="station_info_panel_key"/></template>
+                                </w-accordion>
+                            </div>
+                        </pane>
+                    </splitpanes>
+                </pane>
+                <pane :size="layout.panes.content.size"
+                      v-if="layout.panes.content.visible">
+                    Spreadsheet Pane
+                </pane>
+            </splitpanes>
+    </w-app>
 </template>
 
 <script>
@@ -173,6 +138,23 @@ export default {
             return this.$store.getters.layout;
         },
 
+        map_info_accordion: function() {
+            return this.$store.getters.map_info_accordion;
+        },
+
+        map_info_accordion_expanded: {
+            get() {
+                return [this.map_info_accordion.map_info.expanded,
+                        this.map_info_accordion.event_monitor.expanded,
+                        this.map_info_accordion.recent_events.expanded,
+                        this.map_info_accordion.station_info.expanded];
+            },
+
+            set(value) {
+                this.$store.commit('set_map_info_accordion_expanded', value);
+            },
+        },
+
         show_event_monitor: {
             get() {
                 return this.$store.getters.map_control.show_event_monitor;
@@ -232,6 +214,7 @@ export default {
 #mss-display-container
     height: 100%
     width: 100%
+    min-height: 100%
 
     //The z-index is needed to raise the offCanvas item above the map.
     #off_canvas_settings
@@ -244,5 +227,6 @@ export default {
         .off-canvas-content
             height: 100%
             width: 100%
+
 
 </style>

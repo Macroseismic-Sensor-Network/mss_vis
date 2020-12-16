@@ -26,9 +26,9 @@
 
 <template>
     <div class="map-info-panel">
-        <span id="map_info_last_data" class="map-info">last data: {{ data_time_range[1] }} UTC</span>
-        <span id="map_info_first_data" class="map-info">first data: {{ data_time_range[0] }} UTC</span>
-        <span id="map_info_server_state" class="map-info">server state: {{ server_state }}</span>
+        <span id="map_info_server_state" class="map-info"><b>server state:</b> {{ server_state }}</span>
+        <span id="map_info_last_data" class="map-info" v-if="!!data_time_range[1]"><b>last data:</b> {{ data_time_range[1] }} UTC</span>
+        <span id="map_info_first_data" class="map-info" v-if="!!data_time_range[0]"><b>first data:</b> {{ data_time_range[0] }} UTC</span>
     </div>
 </template>
 

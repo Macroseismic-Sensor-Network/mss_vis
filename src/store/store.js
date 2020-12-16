@@ -28,7 +28,6 @@ import * as d3 from "d3";
 import * as log from 'loglevel';
 import * as moment from 'moment';
 import proj4 from 'proj4';
-import $ from 'jquery';	
 
 Vue.use(Vuex)
 
@@ -197,6 +196,9 @@ function to_isoformat(date) {
         return s;
     }
 
+    if (date == null)
+        return null;
+
     // The month is zero-based (January = 0). Add 1 to the month.
     var isoformat_string  = date.getUTCFullYear() + '-' + (date.getUTCMonth() + 1).pad(2) + '-' + (date.getUTCDate()).pad(2) + 'T' + (date.getUTCHours()).pad(2) + ':' + (date.getUTCMinutes()).pad(2) + ':' + (date.getUTCSeconds()).pad(2) + '.' + (date.getUTCMilliseconds()).pad(6);
     return isoformat_string;
@@ -267,6 +269,22 @@ export default new Vuex.Store({
                     size: 0,
                     visible: false,
                 },
+            },
+        },
+
+        // The map info accordion state.
+        map_info_accordion: {
+            map_info: {
+                expanded: true,
+            },
+            event_monitor: {
+                expanded: true,
+            },
+            recent_events: {
+                expanded: true,
+            },
+            station_info: {
+                expanded: false,
             },
         },
 
@@ -470,10 +488,16 @@ export default new Vuex.Store({
             var start_timestamp = Math.min.apply(null, first_dates);
             var end_timestamp = Math.max.apply(null, last_dates);
 
-            var start_date = new Date(start_timestamp);
-            var end_date = new Date(end_timestamp);
+            var start_date = null;
+            var end_date = null;
+            if (start_timestamp != Infinity)
+                start_date = to_isoformat(new Date(start_timestamp));
+            
+            if (end_timestamp != -Infinity)
+                end_date = to_isoformat(new Date(end_timestamp));
 
-            return [to_isoformat(start_date), to_isoformat(end_date)]
+            state.logger.debug("start_timestamp: " + start_timestamp);
+            return [start_date, end_date]
         },
 
         station_meta: (state) => {
@@ -609,6 +633,10 @@ export default new Vuex.Store({
                 return false;
             }
         },
+        
+        map_info_accordion(state) {
+            return state.map_info_accordion;
+        },
     },
 
     mutations: {
@@ -728,7 +756,7 @@ export default new Vuex.Store({
                 state.inspect_stations.push(payload);
                 if (state.inspect_stations.length == 1)
                 {
-                    $('#accordion_info').foundation('down', $('#accordion_station_info .accordion-content'));
+                    state.map_info_accordion.station_info.expanded = true;
                 }
             }
         },
@@ -782,6 +810,14 @@ export default new Vuex.Store({
                 state.layout.panes.map_container.info.station_info.size = payload[2].size
             }
         },
+
+        set_map_info_accordion_expanded(state, payload) {
+            state.map_info_accordion.map_info.expanded = payload[0];
+            state.map_info_accordion.event_monitor.expanded = payload[1];
+            state.map_info_accordion.recent_events.expanded = payload[2];
+            state.map_info_accordion.station_info.expanded = payload[3];
+        },
+
     },
 
     actions: {

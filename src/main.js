@@ -29,12 +29,8 @@ import store from './store/store.js'
 import VueNativeSock from 'vue-native-websocket'
 import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
-import $ from 'jquery'
-// Comment the foundation.min.css import when building for Jekyll.
-// The foundation CSS is already provided by the Jekyll theme.
-// I couldn't find a quick solution for conditional imports.
-import FoundationCss from 'foundation-sites/dist/css/foundation.min.css'
-import FoundationJs from 'foundation-sites'
+import WaveUI from 'wave-ui'
+import 'wave-ui/dist/wave-ui.css'
 
 Vue.config.productionTip = false
 
@@ -54,17 +50,19 @@ Vue.use(VueNativeSock,
          reconnection: true,
          reconnectionDelay: 3000});
 
-// Comment the use of FoundationCSS when building for Jekyll.
-// The foundation CSS is already provided by the Jekyll theme.
-Vue.use(FoundationCss);
-Vue.use(FoundationJs);
-
-
 Vue.component('mss-display', MSSDisplay);
 Vue.component('lwz-display', LWZDisplay);
 
+Vue.use(WaveUI)
+const waveui = new WaveUI(
+    {
+        // Some Wave UI options.
+    }
+);
+
 new Vue({
     store,
+    waveui,
     el: '#app',
     created: function() {
         log.setLevel(this.$store.getters.log_level);
@@ -77,5 +75,3 @@ new Vue({
     },
 
 });
-
-$(document).foundation();
