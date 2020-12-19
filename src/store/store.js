@@ -582,6 +582,9 @@ export default new Vuex.Store({
         },
 
         archive_event_max_pgv: (state) => (pos) =>  {
+            return state.event_archive[pos].max_pgv
+
+            /*
             var max_pgv = [];
 
             if (state.event_archive[pos].max_station_pgv)
@@ -594,6 +597,7 @@ export default new Vuex.Store({
                 max_pgv = undefined;
             }
             return max_pgv;
+            */
         },
 
         map_control: (state) => {
