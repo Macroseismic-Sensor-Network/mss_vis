@@ -27,8 +27,12 @@
 <template>
     <div class="archive-event-panel">
         <ArchiveEvent v-for="(cur_event, index) in event_archive"
-                      v-bind:key="cur_event.start_time"
-                      v-bind:id="cur_event.start_time"
+                      v-bind:key="cur_event.public_id"
+                      v-bind:public_id = "cur_event.public_id"
+                      v-bind:db_id="cur_event.db_id"
+                      v-bind:start_time="cur_event.start_time"
+                      v-bind:end_time="cur_event.end_time"
+                      v-bind:max_pgv="cur_event.max_pgv"
                       v-bind:pos="index"/>
     </div>
 </template>

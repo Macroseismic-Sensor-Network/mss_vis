@@ -27,11 +27,18 @@
 
 <template>
     <div id="mapcontainer">
+
         <!--
         <Settings/>
         -->
 
         <div id="mapid">
+            <w-menu v-model="show_display_menu" z-index="600" align-right="align-right">
+                <template #activator="{ on }">
+                    <w-button v-on="on" color="black" lg="lg" bg-color="white" class="display-menu">{{ display_mode_selection }}</w-button>
+                </template>
+                <w-list class="white--bg" v-model="display_mode_selection" :items="display_menu_items" @item-select="on_select_display_mode"></w-list>
+            </w-menu>
 
         </div>
 
@@ -47,13 +54,17 @@
             </g>
         </svg>
 
+        <!--
         <svg id="svg_template_archive_plot">
             <ArchiveEventPlot />
         </svg>
+        -->
 
+        <!--
         <svg id="svg_template_event_monitor">
             <EventMonitorPlot />
         </svg>
+        -->
         <!-- End of templates. -->
 
         <svg id="svg_legend" width="300px" height="140">
@@ -69,8 +80,8 @@
 import $ from 'jquery';	
 import PGVMapMarker from '../components/PGVMapMarker.vue';
 import PGVLegend from '../components/PGVLegend.vue';
-import ArchiveEventPlot from '../components/ArchiveEventPlot.vue';
-import EventMonitorPlot from '../components/EventMonitorPlot.vue';
+//import ArchiveEventPlot from '../components/ArchiveEventPlot.vue';
+//import EventMonitorPlot from '../components/EventMonitorPlot.vue';
 import * as d3 from "d3";
 import domtoimage from 'dom-to-image';
 import * as log from 'loglevel';
@@ -89,14 +100,20 @@ export default {
     components: {
         PGVMapMarker,
         PGVLegend,
-        EventMonitorPlot,
-        ArchiveEventPlot,
+        //EventMonitorPlot,
+        //ArchiveEventPlot,
     },
 
     data() {
         return {
             logger: undefined,
             showLegend:false,	//toggles the visibility off the legend
+            display_menu_items: [
+                    { label: 'realtime' },
+                    { label: 'archive' },
+                ],
+            display_mode_selection: 'realtime',
+            show_display_menu: false,
         };
     },
 
@@ -304,6 +321,12 @@ export default {
             downloadLink.click();
             document.body.removeChild(downloadLink);
         },
+
+        on_select_display_mode() {
+            this.show_display_menu = false;
+            let payload = { mode: this.display_mode_selection }
+            this.$store.dispatch('set_display_mode', payload);
+        },
     },
 }
 </script>
@@ -341,13 +364,14 @@ div#mapcontainer
     position: relative
     font-family: Helvetica, sans-serif
 
-div#map_info
-    position: absolute
-    text-align: right
-    font-size: 8pt
-    font-family: Helvetica, sans-serif
-    padding: 5px
-    z-index:500
+.display-menu
+    position: relative
+    float: right
+    z-index: 500
+    font-size: 14pt
+    font-weight: bold
+    margin-top: 10px
+    margin-right: 10px
 
 div#map_config
     position: absolute

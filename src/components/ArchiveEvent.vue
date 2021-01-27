@@ -30,7 +30,7 @@
               v-bind:class="{ active: is_active }"
               v-bind:style="{backgroundColor: color}"
               v-on:click="show_event">
-                {{ event_id }} ({{ (max_pgv * 1000).toFixed(3) }} mm/s)
+                {{ event_time }} ({{ (max_pgv * 1000).toFixed(3) }} mm/s)
         </span>
         <br>
     </div>
@@ -45,7 +45,11 @@ export default {
     name: 'ArchiveEvent',
 
     props: {
-        id: String,
+        public_id: String,
+        db_id: Number,
+        start_time: String,
+        end_time: String,
+        max_pgv: Number,
         pos: Number,
     },
 
@@ -64,12 +68,8 @@ export default {
 
 
     computed: {
-        event_id: function() {
-            return this.id.slice(0, -7);
-        },
-
-        max_pgv: function() {
-            return this.$store.getters.archive_event_max_pgv(this.pos);
+        event_time: function() {
+            return this.start_time.slice(0, -7);
         },
 
         color: function() {
@@ -101,10 +101,12 @@ export default {
     methods: {
         show_event()
         {
-            this.logger.debug("Showing event: " + this.pos);
-            var payload = { pos: this.pos };
+            this.logger.debug("Showing event: " + this.public_id);
+            var payload = { public_id: this.public_id };
             this.$store.commit('set_show_archive_event', payload);
-            this.$store.getters.utm_to_wgs84;
+            payload = { mode: 'archive' }
+            this.$store.dispatch('set_display_mode', payload);
+            //this.$store.getters.utm_to_wgs84;
         },
 
         pgv_to_color(pgv) {

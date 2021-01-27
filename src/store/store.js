@@ -264,6 +264,10 @@ export default new Vuex.Store({
                         size:20,
                         visible: true,
                     },
+                    event_info: {
+                        size: 0,
+                        visible: false,
+                    },
                 },
                 content: {
                     size: 0,
@@ -285,6 +289,19 @@ export default new Vuex.Store({
             },
             station_info: {
                 expanded: false,
+            },
+        },
+
+        // The state of the display.
+        display: {
+            // The current mode of the display (realtime, archive)
+            mode: 'realtime',
+            settings: {
+                realtime: {
+                },
+                archive: {
+                    active_event: undefined,
+                },
             },
         },
 
@@ -637,7 +654,7 @@ export default new Vuex.Store({
                 return false;
             }
         },
-        
+
         map_info_accordion(state) {
             return state.map_info_accordion;
         },
@@ -732,14 +749,7 @@ export default new Vuex.Store({
         },
 
         set_show_archive_event(state, payload) {
-            if (payload.pos === state.map_control.show_archive_event)
-            {
-                state.map_control.show_archive_event = undefined;
-            }
-            else
-            {
-                state.map_control.show_archive_event = payload.pos;
-            }
+            state.display.settings.archive.active_event = payload.public_id;
         },
 
         set_settings(state,payload) {
@@ -815,6 +825,11 @@ export default new Vuex.Store({
             }
         },
 
+        set_map_container_right_pane_size(state, payload) {
+            state.layout.panes.map_container.info.size = payload['map_info_size']
+            state.layout.panes.map_container.event_info.size = payload['map_info_size']
+        },
+
         set_map_info_accordion_expanded(state, payload) {
             state.map_info_accordion.map_info.expanded = payload[0];
             state.map_info_accordion.event_monitor.expanded = payload[1];
@@ -822,9 +837,46 @@ export default new Vuex.Store({
             state.map_info_accordion.station_info.expanded = payload[3];
         },
 
+
+        activate_realtime_mode(state) {
+            state.layout.panes.map_container.info.visible = true
+            state.display.mode = 'realtime'
+        },
+
+        deactivate_realtime_mode(state) {
+            state.layout.panes.map_container.info.visible = false
+        },
+
+        activate_archive_mode(state) {
+            state.layout.panes.map_container.event_info.visible = true
+            state.display.mode = 'archive'
+        },
+
+        deactivate_archive_mode(state) {
+            state.layout.panes.map_container.event_info.visible = false
+        },
+
+
     },
 
     actions: {
+        set_display_mode({ commit, state }, payload) {
+            if (payload.mode != state.display.mode)
+            {
+                switch(payload.mode)
+                {
+                    case 'realtime':
+                        commit('deactivate_archive_mode');
+                        commit('activate_realtime_mode');
+                        break;
 
+                    case 'archive':
+                        commit('deactivate_realtime_mode');
+                        commit('activate_archive_mode');
+                        break;
+
+                }
+            }
+        },
     }
 });

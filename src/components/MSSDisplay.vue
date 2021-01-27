@@ -60,6 +60,18 @@
                                 </w-accordion>
                             </div>
                         </pane>
+                        <pane :size="layout.panes.map_container.event_info.size"
+                              v-if="layout.panes.map_container.event_info.visible"
+                              ref="event_info_pane">
+                            <div style="overflow: scroll; height: 100%; background-color: white;">
+                                <w-accordion :items="1"
+                                    v-model="map_info_accordion_expanded">
+                                    <template #item-title.1="">Event Summary</template>
+                                    <template #item-content.1="">The event summary.</template>
+                                </w-accordion>
+                            </div>
+
+                        </pane>
                     </splitpanes>
                 </pane>
                 <pane :size="layout.panes.content.size"
@@ -123,6 +135,9 @@ export default {
     methods: {
         on_splitpanes_resized() {
             this.$store.getters.leaflet_map.map_object.invalidateSize();
+            this.logger.debug(this.$refs.map_info_pane.style.width);
+            let payload = {'map_info_size': this.$refs.map_info_pane.style.width};
+            this.$store.commit('set_map_container_right_pane_size', payload);
         },
 
         on_map_container_info_splitpanes_resized(sp_event) {
