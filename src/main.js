@@ -31,6 +31,7 @@ import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
 import WaveUI from 'wave-ui'
 import 'wave-ui/dist/wave-ui.css'
+import pako from 'pako';
 
 Vue.config.productionTip = false
 
@@ -43,12 +44,48 @@ else
 }
 
 Vue.use(VueNativeSock,
-        'wss://mss.mertl-research.at/ws_vis/', 
-        //'ws://localhost:8100', 
-        {store: store,
-         format: 'json',
-         reconnection: true,
-         reconnectionDelay: 3000});
+        //'wss://mss.mertl-research.at/ws_vis/', 
+        'ws://localhost:8100', 
+        {
+            store: store,
+            format: 'json',
+            reconnection: true,
+            reconnectionDelay: 3000,
+            passToStoreHandler: function (event_name, event) {
+                console.log('Preprocessing the websocket data.')
+                console.log('event data:', event.data);
+                let method = 'commit';
+                let target = event_name.toUpperCase();
+                let msg = event;
+
+                if (event.data) {
+                    console.log('Handling an event with data.');
+                    //let self = this;
+                    if (typeof event.data === 'string')
+                    {
+                        console.log('Handling uncompressed data.');
+                        msg = JSON.parse(event.data);
+                        this.store[method](target, msg);
+                    }
+                    else {
+                        console.log('Handling compressed data.');
+                        let self = this;
+                        new Response(event.data).arrayBuffer().then(function(buffer) {
+                            let inflate_msg = pako.inflate(buffer, {to: 'string'});
+                            console.log('uncompressed:', inflate_msg);
+                            inflate_msg = JSON.parse(inflate_msg);
+                            console.log('json parsed message:', inflate_msg);
+                            self.store[method](target, inflate_msg);
+                        });
+                    }
+                }
+                else {
+                    console.log('Handling a NO DATA event.');
+                    this.store[method](target, msg);
+                }
+            },
+        }
+);
 
 Vue.component('mss-display', MSSDisplay);
 Vue.component('lwz-display', LWZDisplay);
