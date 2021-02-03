@@ -86,7 +86,7 @@ export default {
         },
 
         pgv_max: function() {
-            return this.$store.getters.disp_range_max_pgv_by_station(this.station_id);
+            return this.$store.getters.transparent_range_max_pgv_by_station(this.station_id);
         },
 
         station_meta: function() {

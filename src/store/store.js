@@ -50,36 +50,24 @@ function handle_msg_soh(msg_id, payload, state) {
 function handle_msg_data(msg_id, payload, state) {
     switch (msg_id) {
         case 'pgv':
-            var time_data = [];
             state.logger.debug("Received pgv data.");
-            state.server_state = 'online'
-            for (var key in payload)
+            state.server_state = 'online';
+            for (let key in payload)
             {
                 if (key in state.pgv_data)
                 {
-                    for (let k in payload[key].time)
-                    {
-                        time_data[k] = moment.utc(payload[key].time[k]);
-                        //state.logger.debug(payload[key].time[k] + ' :: ' + time_data[k].format());
-                    }
+                    state.logger.debug('Replacing the existing data.')
                     state.pgv_data[key].data = state.pgv_data[key].data.concat(payload[key].data)
                     state.pgv_data[key].time = state.pgv_data[key].time.concat(payload[key].time)
-                    //state.pgv_data[key].time = state.pgv_data[key].time.concat(time_data)
-
                 }
                 else
                 {
+                    state.logger.debug('Creating a new pgv data key.')
                     // Use the Vue.set function to ensure, that the store
                     // tracks the changes of the object elements.
-                    for (let k in payload[key].time)
-                    {
-                        time_data[k] = moment.utc(payload[key].time[k]);
-                        state.logger.debug(payload[key].time[k] + ' :: ' + time_data[k]);
-                    }
                     Vue.set(state.pgv_data, key, {})
                     Vue.set(state.pgv_data[key], "data", payload[key].data)
                     Vue.set(state.pgv_data[key], "time", payload[key].time)
-                    //Vue.set(state.pgv_data[key], "time", time_data)
                 }
             }
             // Trim the data to the display range.
@@ -92,24 +80,30 @@ function handle_msg_data(msg_id, payload, state) {
             state.server_state = 'archive received'
             // Clear the pgv_data.
             state.pgv_data = {}
-            for (key in payload)
+            for (let key in payload)
             {
                 if (key in state.pgv_data)
                 {
-                    state.pgv_data[key].time = payload[key].time
+                    state.logger.debug('Replacing the existing data.')
                     state.pgv_data[key].data = payload[key].data
+                    state.pgv_data[key].time = payload[key].time
+                    //state.pgv_data[key].time = time_utc
                 }
                 else
                 {
                     // Use the Vue.set function to ensure, that the store
                     // tracks the changes of the object elements.
+                    state.logger.debug('Creating a new pgv data key.')
                     Vue.set(state.pgv_data, key, {})
                     Vue.set(state.pgv_data[key], "data", payload[key].data)
                     Vue.set(state.pgv_data[key], "time", payload[key].time)
+                    //Vue.set(state.pgv_data[key], "time", time_utc)
+                    state.logger.debug('Done.');
                 }
             }
             // Trim the data to the display range.
             trim_data(state);
+            state.logger.debug('Finished processing the pgv archive..')
             break;
 
         case 'detection_result':
@@ -136,19 +130,21 @@ function handle_msg_data(msg_id, payload, state) {
 
 }
 
-
+// eslint-disable-next-line
 function trim_data(state) {
-    for (var key in state.pgv_data)
-    {
-        var display_range = get_display_range(state);
-        var display_start = new Date(new Date(display_range[0]) - 1000 * 10);
+    // eslint-disable-next-line
+    let display_range = get_display_range(state);
+    let display_start = display_range[0].unix();
+    state.logger.debug("display_start: ", display_start)   
 
+    // eslint-disable-next-line
+    for (let key in state.pgv_data)
+    {
         // Crop the data to the needed length. Drop old data.
         var crop_ind = -1;
         for (var k = 0; k < state.pgv_data[key].time.length; k++)
         {
-            var cur_time = new Date(state.pgv_data[key].time[k]);
-            if (cur_time >= display_start)
+            if (state.pgv_data[key].time[k] >= display_start)
             {
                 crop_ind = k;
                 break;
@@ -159,36 +155,30 @@ function trim_data(state) {
         {
             state.pgv_data[key].time = state.pgv_data[key].time.slice(crop_ind);
             state.pgv_data[key].data = state.pgv_data[key].data.slice(crop_ind);
+
+            //state.logger.debug('length time: ', state.pgv_data[key].time.length);
+        }
+        else
+        {
+            state.logger.debug('No crop index definde.');
         }
     }
 }
 
 
 function get_display_range(state) {
-    var display_period = state.display_period;
-    var last_dates = [];
-    for (var key in state.pgv_data) {
-        var last_ind = state.pgv_data[key].time.length - 1;
-        var cur_date = state.pgv_data[key].time[last_ind];
-        var res = cur_date.split(/[:T-]/);
-        for (var k = 0; k < res.length; k++)
-        {
-            res[k] = parseInt(res[k]);
-        }
-        // Convert the month to zero-based month (January = 0).
-        res[1] = res[1] - 1;
-        last_dates.push(Date.UTC(res[0], res[1], res[2], res[3], res[4], res[5]));
-    }
-    var end_timestamp = Math.max.apply(null, last_dates);
-    var start_timestamp = end_timestamp - display_period;
+    let end_date = moment.utc(state.server_time)
+    let start_date = moment.utc(end_date).subtract(state.display_period, 'seconds')
 
-    var start_date = new Date(start_timestamp);
-    var end_date = new Date(end_timestamp);
+    state.logger.debug('server_time: ', state.server_time.toISOString());
+    state.logger.debug('start_date: ', start_date.toISOString());
+    state.logger.debug('end_date: ', end_date.toISOString());
 
-    return [to_isoformat(start_date), to_isoformat(end_date)]
+    return [start_date, end_date]
 }
 
 
+/*
 function to_isoformat(date) {
     Number.prototype.pad = function(size) {
         var s = String(this);
@@ -202,8 +192,8 @@ function to_isoformat(date) {
     // The month is zero-based (January = 0). Add 1 to the month.
     var isoformat_string  = date.getUTCFullYear() + '-' + (date.getUTCMonth() + 1).pad(2) + '-' + (date.getUTCDate()).pad(2) + 'T' + (date.getUTCHours()).pad(2) + ':' + (date.getUTCMinutes()).pad(2) + ':' + (date.getUTCSeconds()).pad(2) + '.' + (date.getUTCMilliseconds()).pad(6);
     return isoformat_string;
-
 }
+*/
 
 
 
@@ -223,8 +213,9 @@ export default new Vuex.Store({
         message: '',
         server_id: '',
         server_state: '',
-        current_range: 60000,
-        display_period: 600000,
+        server_time: undefined,
+        transparent_period: 60,
+        display_period: 600,
         settings: {
             show_settings: false,
             show_legend:true,
@@ -404,18 +395,23 @@ export default new Vuex.Store({
         },
 
         current_pgv_by_station: (state, getters) => (station_id) => {
-            if (station_id in state.pgv_data) {
-                var last_ind = state.pgv_data[station_id].data.length - 1;
-                var cur_pgv = state.pgv_data[station_id].data[last_ind];
-                var cur_time = new Date(state.pgv_data[station_id].time[last_ind]);
-                const cur_time_limit = new Date(new Date(getters.data_time_range[1]) - state.current_range);
-                if (cur_time < cur_time_limit)
+            if (station_id in state.pgv_data) 
+            {
+                let last_ind = state.pgv_data[station_id].data.length - 1;
+                let cur_pgv = state.pgv_data[station_id].data[last_ind];
+                let cur_time = state.pgv_data[station_id].time[last_ind];
+                let time_range = getters.display_time_range;
+                let time_limit = time_range[0].clone();
+                time_limit.subtract(state.transparent_period, 'seconds');
+                time_limit = time_limit.valueOf() / 1000;
+                if (cur_time < time_limit)
                 {
                     cur_pgv = undefined;
                 }
                 return cur_pgv;
             }
-            else {
+            else 
+            {
                 return undefined;
             }
         },
@@ -427,27 +423,36 @@ export default new Vuex.Store({
         },
 
         // eslint-disable-next-line
-        disp_range_max_pgv_by_station: (state, getters) => (station_id) => {
-            state.logger.debug('Computing disp_range_max_pgv_by_station.');
-            var max_pgv = undefined;
-            const time_limit = new Date(new Date(getters.data_time_range[1]) - state.current_range);
-            if (station_id in state.pgv_data)
+        transparent_range_max_pgv_by_station: (state, getters) => (station_id) => {
+            state.logger.debug('Computing transparent_range_max_pgv_by_station.');
+            let max_pgv = undefined;
+            let time_range = getters.display_time_range;
+
+            if (time_range[0] != undefined)
             {
-                for (let j = 0; j < 2; j++)
+                let time_limit = time_range[0].clone();
+                time_limit.subtract(state.transparent_period, 'seconds');
+                time_limit = time_limit.valueOf() / 1000;
+                if (station_id in state.pgv_data)
                 {
-                    var cur_data = []
-                    for (var k = 0; k < state.pgv_data[station_id].time.length; k++)
+                    let cur_data = []
+                    // Search maximal the number of samples fitting the
+                    // transparent_period. SPS of 1 second is assumed.
+                    let start_index = state.pgv_data[station_id].time.length - state.transparent_period;
+                    for (var k = start_index; k < state.pgv_data[station_id].time.length; k++)
                     {
-                        var cur_time = new Date(state.pgv_data[station_id].time[k]);
+                        var cur_time = state.pgv_data[station_id].time[k];
                         if (cur_time >= time_limit)
                         {
                             cur_data.push(state.pgv_data[station_id].data[k]);
                         }
                     }
                     //max_pgv = Math.max(...state.pgv_data[station_id].data);
+                    max_pgv = Math.max(...cur_data);
                 }
-                max_pgv = Math.max(...cur_data);
             }
+            //state.logger.debug('max_pgv: ', max_pgv);
+
             return max_pgv;
         },
 
@@ -456,27 +461,23 @@ export default new Vuex.Store({
         },
 
         display_time_range: (state) => {
-            var display_period = state.display_period;
-            var last_dates = [];
-            for (var key in state.pgv_data) {
-                var last_ind = state.pgv_data[key].time.length - 1;
-                var cur_date = state.pgv_data[key].time[last_ind];
-                var res = cur_date.split(/[:T-]/);
-                for (var k = 0; k < res.length; k++)
-                {
-                    res[k] = parseInt(res[k]);
-                }
-                // Convert the month to zero-based month (January = 0).
-                res[1] = res[1] - 1;
-                last_dates.push(Date.UTC(res[0], res[1], res[2], res[3], res[4], res[5]));
+            if (state.server_time === undefined)
+            {
+                return [undefined, undefined];
             }
-            var end_timestamp = Math.max.apply(null, last_dates);
-            var start_timestamp = end_timestamp - display_period;
+            else 
+            {
+                let end_date = state.server_time.clone()
+                let start_date = end_date.clone().subtract(state.display_period, 'seconds')
 
-            var start_date = new Date(start_timestamp);
-            var end_date = new Date(end_timestamp);
+                /*
+                state.logger.debug('server_time: ', state.server_time.toISOString());
+                state.logger.debug('start_date: ', start_date.toISOString());
+                state.logger.debug('end_date: ', end_date.toISOString());
+                */
 
-            return [to_isoformat(start_date), to_isoformat(end_date)]
+                return [start_date, end_date]
+            }
         },
 
         data_time_range: (state) => {
@@ -485,38 +486,14 @@ export default new Vuex.Store({
             for (var key in state.pgv_data) {
                 // Get the first date of the data.
                 var cur_date = state.pgv_data[key].time[0];
-                var res = cur_date.split(/[:T-]/);
-                for (var k = 0; k < res.length; k++)
-                {
-                    res[k] = parseInt(res[k]);
-                }
-                // Convert the month to zero-based month (January = 0).
-                res[1] = res[1] - 1;
-                first_dates.push(Date.UTC(res[0], res[1], res[2], res[3], res[4], res[5]));
+                first_dates.push(cur_date);
 
                 var last_ind = state.pgv_data[key].time.length - 1;
                 cur_date = state.pgv_data[key].time[last_ind];
-                res = cur_date.split(/[:T-]/);
-                for (k = 0; k < res.length; k++)
-                {
-                    res[k] = parseInt(res[k]);
-                }
-                // Convert the month to zero-based month (January = 0).
-                res[1] = res[1] - 1;
-                last_dates.push(Date.UTC(res[0], res[1], res[2], res[3], res[4], res[5]));
+                last_dates.push(cur_date);
             }
-            var start_timestamp = Math.min.apply(null, first_dates);
-            var end_timestamp = Math.max.apply(null, last_dates);
-
-            var start_date = null;
-            var end_date = null;
-            if (start_timestamp != Infinity)
-                start_date = to_isoformat(new Date(start_timestamp));
-            
-            if (end_timestamp != -Infinity)
-                end_date = to_isoformat(new Date(end_timestamp));
-
-            state.logger.debug("start_timestamp: " + start_timestamp);
+            var start_date = Math.min.apply(null, first_dates);
+            var end_date = Math.max.apply(null, last_dates);
             return [start_date, end_date]
         },
 
@@ -544,6 +521,10 @@ export default new Vuex.Store({
 
         leaflet_map: (state) => {
             return state.leaflet_map;
+        },
+
+        server_time: (state) => {
+            return state.server_time;
         },
 
         scales: (state) => {
@@ -688,6 +669,7 @@ export default new Vuex.Store({
 
     mutations: {
         SOCKET_ONOPEN(state, event) {
+            state.logger.debug('SOCKET_ONOPEN event: ', event);
             Vue.prototype.$socket = event.currentTarget;
             state.connected = true;
             state.server_state = 'connection opened'
@@ -695,14 +677,15 @@ export default new Vuex.Store({
             //console.info("state: ", state);
             //console.info("event: ", event);
             var msg = {'class': 'control',
-                'id': 'mode',
-                'payload': 'pgv'};
+                       'id': 'mode',
+                       'payload': 'pgv'};
             Vue.prototype.$socket.send(JSON.stringify(msg));
         },
 
         SOCKET_ONMESSAGE(state, payload) {
             var msg_class = payload.class
             var msg_id = payload.id
+            state.server_time = moment.utc(payload.server_time);
 
             switch (msg_class) {
                 case 'soh':

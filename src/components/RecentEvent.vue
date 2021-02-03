@@ -105,6 +105,7 @@ export default {
             this.$store.commit('set_show_archive_event', payload);
             payload = { mode: 'archive' }
             this.$store.dispatch('set_display_mode', payload);
+            this.$store.commit('load_event_supplement');
             //this.$store.getters.utm_to_wgs84;
         },
 

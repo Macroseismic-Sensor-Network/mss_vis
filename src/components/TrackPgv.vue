@@ -151,8 +151,9 @@ export default {
             if (typeof pgv_data != 'undefined') {
                 // Convert to mm/s.
                 var data_mm = pgv_data.data.map(function(x) {return x * 1000});
+                var data_ms = pgv_data.time.map(function(x) {return x * 1000});
                 var trace = {
-                    x: pgv_data.time,
+                    x: data_ms,
                     y: data_mm,
                     type: 'scatter',
                     mode: 'lines',
@@ -174,7 +175,12 @@ export default {
         },
 
         display_range: function() {
-            return this.$store.getters.display_time_range;
+            let range = this.$store.getters.display_time_range;
+            this.logger.debug("range[0]: ", range[0].toISOString());
+            this.logger.debug("range[1]: ", range[1].toISOString());
+            this.logger.debug("server_time: ", this.$store.getters.server_time.toISOString());
+            range = [range[0].valueOf(), range[1].valueOf()];
+            return range;
         },
 
         station: function() {
@@ -203,7 +209,7 @@ export default {
         },
 
         update() {
-            console.log('Updating Graph ' + this.element_id);
+            this.logger.debug('Updating Graph ' + this.element_id);
             //var layout = this.layout;
             //this.layout.xaxis.range = ['2019-07-05T11:30:00', '2019-07-05T14:00']
             //this.layout.xaxis.range = this.display_range;
@@ -227,7 +233,7 @@ export default {
         },
 
         update_range() {
-            console.log('Updating the range.' + this.display_range);
+            this.logger.debug('Updating the range.' + this.display_range);
             this.layout.xaxis.range = this.display_range;
             Plotly.relayout(this.element_id, this.layout);
         },
