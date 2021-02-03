@@ -135,8 +135,13 @@ export default {
     methods: {
         on_splitpanes_resized() {
             this.$store.getters.leaflet_map.map_object.invalidateSize();
-            this.logger.debug(this.$refs.map_info_pane.style.width);
-            let payload = {'map_info_size': this.$refs.map_info_pane.style.width};
+            let payload = undefined;
+            if (this.layout.panes.map_container.info.visible === true) {
+                payload = {'map_info_size': this.$refs.map_info_pane.style.width};
+            }
+            else {
+                payload = {'event_info_size': this.$refs.event_info_pane.style.width};
+            }
             this.$store.commit('set_map_container_right_pane_size', payload);
         },
 
