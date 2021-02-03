@@ -45,7 +45,8 @@
         <!-- SVG templates are added to the leaflet SVG overlay in the mounted
             function. -->
         <svg id="svg_template_pgv_marker">
-            <g id="current_pgv_marker">
+            <g id="current_pgv_marker"
+               v-if="is_realtime">
                 <PGVMapMarker v-for="cur_station in stations"
                               v-bind:key="cur_station.id"
                               v-bind:station_id="cur_station.id"
@@ -205,6 +206,10 @@ export default {
 
         scales: function() {
             return this.$store.getters.scales;
+        },
+
+        is_realtime: function() {
+            return this.$store.getters.is_realtime; 
         },
     },
 
