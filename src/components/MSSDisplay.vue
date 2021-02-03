@@ -54,7 +54,7 @@
                                     <template #item-title.2="">Event Monitor</template>
                                     <template #item-content.2=""><EventMonitorPanel key="event_monitor_panel_key"/></template>
                                     <template #item-title.3="">Recent Events</template>
-                                    <template #item-content.3=""><ArchiveEventInfoPanel key="archive_info_panel_key"/></template>
+                                    <template #item-content.3=""><RecentEventInfoPanel key="archive_info_panel_key"/></template>
                                     <template #item-title.4="">Station Info</template>
                                     <template #item-content.4=""><StationInfoPanel key="station_info_panel_key"/></template>
                                 </w-accordion>
@@ -88,7 +88,7 @@ import PGVMap from '../components/PGVMap.vue'
 import TracksPanel from '../components/TracksPanel.vue'
 import MapInfoPanel from '../components/MapInfoPanel.vue'
 import EventMonitorPanel from '../components/EventMonitorPanel.vue'
-import ArchiveEventInfoPanel from '../components/ArchiveEventInfoPanel.vue'
+import RecentEventInfoPanel from '../components/RecentEventInfoPanel.vue'
 import StationInfoPanel from '../components/StationInfoPanel.vue'
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
@@ -113,7 +113,7 @@ export default {
         PGVMap,
         MapInfoPanel,
         EventMonitorPanel,
-        ArchiveEventInfoPanel,
+        RecentEventInfoPanel,
         StationInfoPanel,
         TracksPanel,
         Splitpanes,
