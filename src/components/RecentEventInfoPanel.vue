@@ -26,28 +26,27 @@
 
 <template>
     <div class="archive-event-panel">
-        <ArchiveEvent v-for="(cur_event, index) in event_archive"
-                      v-bind:key="cur_event.public_id"
-                      v-bind:public_id = "cur_event.public_id"
-                      v-bind:db_id="cur_event.db_id"
-                      v-bind:start_time="cur_event.start_time"
-                      v-bind:end_time="cur_event.end_time"
-                      v-bind:max_pgv="cur_event.max_pgv"
-                      v-bind:pos="index"/>
+        <RecentEvent v-for="cur_event in event_archive"
+                     v-bind:key="cur_event.public_id"
+                     v-bind:public_id = "cur_event.public_id"
+                     v-bind:db_id="cur_event.db_id"
+                     v-bind:start_time="cur_event.start_time"
+                     v-bind:end_time="cur_event.end_time"
+                     v-bind:max_pgv="cur_event.max_pgv"/>
     </div>
 </template>
 
 <script>
 
-import ArchiveEvent from '../components/ArchiveEvent.vue';
+import RecentEvent from '../components/RecentEvent.vue';
 import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
 
 export default {
-    name: 'ArchiveEventInfoPanel',
+    name: 'RecentEventInfoPanel',
     props: {},
     components: {
-        ArchiveEvent
+        RecentEvent
     },
     created() {
         this.logger = log.getLogger(this.$options.name)
