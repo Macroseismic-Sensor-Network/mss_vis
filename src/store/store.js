@@ -433,16 +433,19 @@ export default new Vuex.Store({
             const time_limit = new Date(new Date(getters.data_time_range[1]) - state.current_range);
             if (station_id in state.pgv_data)
             {
-                var cur_data = []
-                for (var k = 0; k < state.pgv_data[station_id].time.length; k++)
+                for (let j = 0; j < 2; j++)
                 {
-                    var cur_time = new Date(state.pgv_data[station_id].time[k]);
-                    if (cur_time >= time_limit)
+                    var cur_data = []
+                    for (var k = 0; k < state.pgv_data[station_id].time.length; k++)
                     {
-                        cur_data.push(state.pgv_data[station_id].data[k]);
+                        var cur_time = new Date(state.pgv_data[station_id].time[k]);
+                        if (cur_time >= time_limit)
+                        {
+                            cur_data.push(state.pgv_data[station_id].data[k]);
+                        }
                     }
+                    //max_pgv = Math.max(...state.pgv_data[station_id].data);
                 }
-                //max_pgv = Math.max(...state.pgv_data[station_id].data);
                 max_pgv = Math.max(...cur_data);
             }
             return max_pgv;
@@ -633,6 +636,18 @@ export default new Vuex.Store({
             }
         },
 
+        active_archive_event: (state) => {
+            if (state.display.settings.archive.active_event != undefined)
+            {
+                return state.event_archive[state.display.settings.archive.active_event];
+            }
+            else
+            {
+                return undefined;
+            }
+
+        },
+
         // eslint-disable-next-line
         utm_to_wgs84: (state) => (coords) => {
             proj4.defs("EPSG:32633", "+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs");
@@ -657,6 +672,17 @@ export default new Vuex.Store({
 
         map_info_accordion(state) {
             return state.map_info_accordion;
+        },
+
+        is_realtime(state) {
+            if (state.display.mode === 'realtime')
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         },
     },
 
@@ -855,6 +881,14 @@ export default new Vuex.Store({
         deactivate_archive_mode(state) {
             state.layout.panes.map_container.event_info.visible = false
         },
+
+        load_event_supplement(state) {
+            state.logger.debug('before');
+            setTimeout(function() {
+                state.logger.debug('after');
+                }, 2000);
+        },
+
 
 
     },
