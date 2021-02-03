@@ -25,10 +25,17 @@
 -->
 
 <template>
-    <div class="map-info-panel">
-        <span id="map_info_server_state" class="map-info"><b>server state:</b> {{ server_state }}</span>
-        <span id="map_info_last_data" class="map-info" v-if="!!data_time_range[1]"><b>last data:</b> {{ data_time_range[1] }} UTC</span>
-        <span id="map_info_first_data" class="map-info" v-if="!!data_time_range[0]"><b>first data:</b> {{ data_time_range[0] }} UTC</span>
+    <div class="event-details-panel">
+        <div class="event-details-panel"
+             v-if="active_event === undefined">
+            <span class="event-info">Please select an event to display.</span>
+        </div>
+        <div class="event-details-panel"
+             v-if="active_event != undefined">
+            <span class="event-info"><b>public id:</b> {{ public_id }}</span>
+            <span class="event-info"><b>event start:</b> {{ event_start }}</span>
+            <span class="event-info"><b>event end:</b> {{ event_end }}</span>
+        </div>
     </div>
 </template>
 
@@ -38,7 +45,7 @@ import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
 
 export default {
-    name: 'MapInfoPanel',
+    name: 'EventDetailsPanel',
     props: {},
     components: {
     },
@@ -49,12 +56,41 @@ export default {
             this.$store.getters.prefix_options);
     },
     computed: {
-        data_time_range: function() {
-            return this.$store.getters.data_time_range;
+        public_id: function() {
+            if (this.active_event)
+            {
+                return this.active_event.public_id;
+            }
+            else
+            {
+                return undefined;
+            }
         },
 
-        server_state: function() {
-            return this.$store.getters.server_state;
+        active_event: function() {
+            return this.$store.getters.active_archive_event;
+        },
+
+        event_start: function() {
+            if (this.active_event)
+            {
+                return this.active_event.start_time;
+            }
+            else
+            {
+                return undefined;
+            }
+        },
+
+        event_end: function() {
+            if (this.active_event)
+            {
+                return this.active_event.end_time;
+            }
+            else
+            {
+                return undefined;
+            }
         },
     },
 }
@@ -63,24 +99,12 @@ export default {
 
 <style scoped lang="sass">
 
-div.map-info-panel
+div.event-details-panel
     height: 100%
     width: 100%
     overflow: auto
 
-span.map-info-title
-    margin: 0px
-    margin-bottom: 5px
-    padding: 2px
-    display: inline-block
-    text-align: center
-    width: 100%
-    font-weight: bold
-    background-color: black
-    color: white
-
-span.map-info
-    cursor: pointer
+span.event-info
     margin: 0px
     padding: 2px
     display: inline-block

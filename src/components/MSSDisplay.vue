@@ -66,8 +66,8 @@
                             <div style="overflow: scroll; height: 100%; background-color: white;">
                                 <w-accordion :items="1"
                                     v-model="map_info_accordion_expanded">
-                                    <template #item-title.1="">Event Summary</template>
-                                    <template #item-content.1="">The event summary.</template>
+                                    <template #item-title.1="">Event Details</template>
+                                    <template #item-content.1=""><EventDetailsPanel key="event_details_panel_key"/></template>
                                 </w-accordion>
                             </div>
 
@@ -88,6 +88,7 @@ import PGVMap from '../components/PGVMap.vue'
 import TracksPanel from '../components/TracksPanel.vue'
 import MapInfoPanel from '../components/MapInfoPanel.vue'
 import EventMonitorPanel from '../components/EventMonitorPanel.vue'
+import EventDetailsPanel from '../components/EventDetailsPanel.vue'
 import RecentEventInfoPanel from '../components/RecentEventInfoPanel.vue'
 import StationInfoPanel from '../components/StationInfoPanel.vue'
 import { Splitpanes, Pane } from 'splitpanes'
@@ -113,6 +114,7 @@ export default {
         PGVMap,
         MapInfoPanel,
         EventMonitorPanel,
+        EventDetailsPanel,
         RecentEventInfoPanel,
         StationInfoPanel,
         TracksPanel,
