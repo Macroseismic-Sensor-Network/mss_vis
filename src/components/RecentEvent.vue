@@ -42,7 +42,7 @@ import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
 
 export default {
-    name: 'ArchiveEvent',
+    name: 'RecentEvent',
 
     props: {
         public_id: String,
@@ -50,7 +50,6 @@ export default {
         start_time: String,
         end_time: String,
         max_pgv: Number,
-        pos: Number,
     },
 
     data() {
@@ -87,7 +86,7 @@ export default {
         is_active: function() {
             var active_event_pos = this.$store.getters.map_control.show_archive_event;
 
-            if (this.pos === active_event_pos)
+            if (this.public_id === active_event_pos)
             {
                 return true;
             }
