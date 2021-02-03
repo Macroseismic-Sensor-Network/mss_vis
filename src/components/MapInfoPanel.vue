@@ -80,7 +80,6 @@ span.map-info-title
     color: white
 
 span.map-info
-    cursor: pointer
     margin: 0px
     padding: 2px
     display: inline-block
