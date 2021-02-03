@@ -52,35 +52,39 @@ Vue.use(VueNativeSock,
             reconnection: true,
             reconnectionDelay: 3000,
             passToStoreHandler: function (event_name, event) {
-                console.log('Preprocessing the websocket data.')
-                console.log('event data:', event.data);
+                let logger = log.getLogger("websocket")
+                logger.setLevel(this.store.getters.log_level)
+                log_prefix.apply(logger,
+                                 this.store.getters.prefix_options)
+                logger.debug('Preprocessing the websocket data.')
+                logger.debug('event data:', event.data);
                 let method = 'commit';
                 let target = event_name.toUpperCase();
                 let msg = event;
 
                 if (event.data) {
-                    console.log('Handling an event with data.');
+                    logger.debug('Handling an event with data.');
                     //let self = this;
                     if (typeof event.data === 'string')
                     {
-                        console.log('Handling uncompressed data.');
+                        logger.debug('Handling uncompressed data.');
                         msg = JSON.parse(event.data);
                         this.store[method](target, msg);
                     }
                     else {
-                        console.log('Handling compressed data.');
+                        logger.debug('Handling compressed data.');
                         let self = this;
                         new Response(event.data).arrayBuffer().then(function(buffer) {
                             let inflate_msg = pako.inflate(buffer, {to: 'string'});
-                            console.log('uncompressed:', inflate_msg);
+                            logger.debug('uncompressed:', inflate_msg);
                             inflate_msg = JSON.parse(inflate_msg);
-                            console.log('json parsed message:', inflate_msg);
+                            logger.debug('json parsed message:', inflate_msg);
                             self.store[method](target, inflate_msg);
                         });
                     }
                 }
                 else {
-                    console.log('Handling a NO DATA event.');
+                    logger.debug('Handling a NO DATA event.');
                     this.store[method](target, msg);
                 }
             },
