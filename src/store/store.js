@@ -993,5 +993,28 @@ export default new Vuex.Store({
                 }
             }
         },
+
+        view_event_in_archive({dispatch, commit}, payload) {
+            
+            let action_payload = { mode: 'archive' }
+            dispatch('set_display_mode', action_payload)
+
+            let mutation_payload = { public_id: payload.public_id };
+            commit('set_show_archive_event', mutation_payload);
+            
+            dispatch('request_event_supplement', payload)
+        },
+
+        request_event_supplement({state}, payload) {
+
+            
+            let msg_payload = {'public_id': payload.public_id}
+            let msg = {'class': 'request',
+                       'id': 'event_supplement',
+                       'payload': msg_payload};
+
+            Vue.prototype.$socket.send(JSON.stringify(msg));
+            state.logger.debug("Sent websocket message: ", msg);
+        },
     }
 });
