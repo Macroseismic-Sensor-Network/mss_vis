@@ -102,10 +102,10 @@ export default {
         {
             this.logger.debug("Showing event: " + this.public_id);
             var payload = { public_id: this.public_id };
-            this.$store.commit('set_show_archive_event', payload);
-            payload = { mode: 'archive' }
-            this.$store.dispatch('set_display_mode', payload);
-            this.$store.commit('load_event_supplement');
+            this.$store.dispatch('view_event_in_archive', payload);
+            //payload = { mode: 'archive' }
+            //this.$store.dispatch('set_display_mode', payload);
+            //this.$store.dispatch('load_event_supplement');
             //this.$store.getters.utm_to_wgs84;
         },
 
