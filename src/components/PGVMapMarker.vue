@@ -27,7 +27,8 @@
 <template>
     <g v-bind:id="element_id"
        class="leaflet-zoom-hide markerGroup"
-       v-on:click="inspect_station">
+       v-on:click="inspect_station"
+       v-if="is_realtime">
         <circle v-bind:id="element_id + '_max'"
                 :r="pgv_history_radius"
                 :fill="pgv_history_fill"
@@ -194,6 +195,10 @@ export default {
 
         scales: function() {
             return this.$store.getters.scales;
+        },
+
+        is_realtime: function() {
+            return this.$store.getters.is_realtime; 
         },
     },
 

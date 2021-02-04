@@ -45,8 +45,7 @@
         <!-- SVG templates are added to the leaflet SVG overlay in the mounted
             function. -->
         <svg id="svg_template_pgv_marker">
-            <g id="current_pgv_marker"
-               v-if="is_realtime">
+            <g id="current_pgv_marker">
                 <PGVMapMarker v-for="cur_station in stations"
                               v-bind:key="cur_station.id"
                               v-bind:station_id="cur_station.id"
@@ -68,7 +67,7 @@
         -->
         <!-- End of templates. -->
 
-        <svg id="svg_legend" width="300px" height="140">
+        <svg id="svg_legend" width="300px" height="140" v-if="is_realtime">
             <PGVLegend name="map_legend" v-if="showLegend"/>
         </svg>
     </div>
