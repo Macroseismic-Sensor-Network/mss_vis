@@ -35,6 +35,7 @@ function handle_msg_soh(msg_id, payload, state) {
     switch (msg_id) {
         case 'connection':
             state.server_id = payload.server_id
+            state.utc_offset = payload.utc_offset
             if (payload.state == 'registered')
             {
                 state.server_state = 'waiting for data';
@@ -49,6 +50,12 @@ function handle_msg_soh(msg_id, payload, state) {
 
 function handle_msg_data(msg_id, payload, state) {
     switch (msg_id) {
+        case 'current_pgv':
+            state.logger.debug('Received current pgv data.');
+            state.server_state = 'online';
+            state.mssds_data.current_pgv = payload;
+            break;
+
         case 'pgv':
             state.logger.debug("Received pgv data.");
             state.server_state = 'online';
@@ -201,6 +208,7 @@ export default new Vuex.Store({
     state: {
         log_level: 'info',
         logger: log.getLogger("store"),
+        language: 'de',
         stations: [],
         station_meta: [],
         stations_imported:false,
@@ -213,6 +221,7 @@ export default new Vuex.Store({
         message: '',
         server_id: '',
         server_state: '',
+        utc_offset: undefined,
         server_time: undefined,
         transparent_period: 60,
         display_period: 600,
@@ -220,6 +229,12 @@ export default new Vuex.Store({
             show_settings: false,
             show_legend:true,
             show_map_info:true,
+        },
+
+        // The data received from the mss_dataserver.
+        mssds_data: {
+            history_period: undefined,
+            current_pgv: {},
         },
 
         // The tracks dictionary.
@@ -377,6 +392,19 @@ export default new Vuex.Store({
             return state.server_state;
         },
 
+        server_time: state => {
+            return moment.utc(state.server_time);
+        },
+
+        server_time_local: state => {
+            return moment.utc(state.server_time).utcOffset(state.utc_offset / 60);
+        },
+
+        utc_offset: state => {
+            // The UTC offset in minutes.
+            return state.utc_offset / 60;
+        },
+
         inspect_stations: state => {
             return state.inspect_stations;
         },
@@ -394,7 +422,29 @@ export default new Vuex.Store({
             return tmp
         },
 
-        current_pgv_by_station: (state, getters) => (station_id) => {
+        current_pgv_by_station: (state) => (station_id) => {
+            if (state.mssds_data.current_pgv.pgv_data != undefined)
+            {
+                if (station_id in state.mssds_data.current_pgv.pgv_data) 
+                {
+                    return state.mssds_data.current_pgv.pgv_data[station_id];
+                }
+                else 
+                {
+                    return {'pgv_history': undefined,
+                            'latest_pgv': undefined,
+                            'latest_time': undefined};
+                }
+            }
+            else
+            {
+                return {'pgv_history': undefined,
+                        'latest_pgv': undefined,
+                        'latest_time': undefined};
+            }
+        },
+
+        current_pgv_by_station_old: (state, getters) => (station_id) => {
             if (station_id in state.pgv_data) 
             {
                 let last_ind = state.pgv_data[station_id].data.length - 1;
@@ -481,6 +531,52 @@ export default new Vuex.Store({
         },
 
         data_time_range: (state) => {
+            let max_time = undefined;
+            let min_time = undefined;
+            if (state.mssds_data.current_pgv.pgv_data != undefined)
+            {
+                let pgv_data = state.mssds_data.current_pgv.pgv_data
+                for (let key in pgv_data)
+                {
+                    let cur_time = pgv_data[key].latest_time
+                    if (max_time === undefined)
+                    {
+                        max_time = cur_time;
+                    }
+                    else if (cur_time > max_time)
+                    {
+                        max_time = cur_time;
+                    }
+
+                    if (min_time === undefined)
+                    {
+                        min_time = cur_time;
+                    }
+                    else if (cur_time < min_time)
+                    {
+                        min_time = cur_time;
+                    }
+                }
+            }
+            state.logger.debug('min_time: ', min_time)
+            state.logger.debug('max_time: ', max_time)
+
+            if (min_time)
+            {
+                min_time = moment.unix(min_time).utc().utcOffset(state.utc_offset / 60);
+            }
+
+            if (max_time)
+            {
+                max_time = moment.unix(max_time).utc().utcOffset(state.utc_offset / 60);
+            }
+
+            let time_range ={'min_time': min_time,
+                             'max_time': max_time};
+            return time_range;
+        },
+
+        data_time_range_old: (state) => {
             var first_dates = [];
             var last_dates = [];
             for (var key in state.pgv_data) {
@@ -521,10 +617,6 @@ export default new Vuex.Store({
 
         leaflet_map: (state) => {
             return state.leaflet_map;
-        },
-
-        server_time: (state) => {
-            return state.server_time;
         },
 
         scales: (state) => {
@@ -724,7 +816,7 @@ export default new Vuex.Store({
             state.logger.debug(state);
         },
 
-        LOAD_STATION_METADATA(state) {
+        load_station_metadata(state) {
             d3.csv("/assets/vue/nrt/data/current_mss_stations.csv").then( function(data) {
                 for (var k = 0; k < data.length; k++)
                 {
@@ -877,6 +969,12 @@ export default new Vuex.Store({
     },
 
     actions: {
+        init_store({commit, state}) {
+            state.logger.debug('Initializing the store.');
+            commit('load_station_metadata');
+            moment.locale(state.language);
+        },
+
         set_display_mode({ commit, state }, payload) {
             if (payload.mode != state.display.mode)
             {

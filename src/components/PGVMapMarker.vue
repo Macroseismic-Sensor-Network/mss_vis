@@ -29,9 +29,9 @@
        class="leaflet-zoom-hide markerGroup"
        v-on:click="inspect_station">
         <circle v-bind:id="element_id + '_max'"
-                :r="pgv_max_radius"
-                :fill="pgv_max_fill"
-                :stroke="pgv_max_stroke"
+                :r="pgv_history_radius"
+                :fill="pgv_history_fill"
+                :stroke="pgv_history_stroke"
                 :fill-opacity="max_fill_opacity"
                 :cx="leaflet_x"
                 :cy="leaflet_y"/>
@@ -53,6 +53,7 @@ import * as d3 from "d3";
 import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
 import L from 'leaflet';
+import * as moment from 'moment';
 
 export default {
     name: 'PGVMapMarker',
@@ -103,12 +104,20 @@ export default {
             return this.$store.getters.leaflet_map.map_object;
         },   
 
-        pgv: function() {
+        current_pgv: function() {
             return this.$store.getters.current_pgv_by_station(this.$props.station_id);
         },
 
-        pgv_max: function() {
-            return this.$store.getters.transparent_range_max_pgv_by_station(this.$props.station_id);
+        pgv: function() {
+            return this.current_pgv.latest_pgv;
+        },
+
+        pgv_history: function() {
+            return this.current_pgv.pgv_history;
+        },
+
+        latest_time: function() {
+            return moment.unix(this.current_pgv.latest_time).utc().format();
         },
 
         pgv_radius: function() {
@@ -122,12 +131,12 @@ export default {
             return radius;
         },
 
-        pgv_max_radius: function() {
+        pgv_history_radius: function() {
             var radius = 0;
 
-            if (this.pgv_max) {
+            if (this.pgv_history) {
                 const scales = this.scales;
-                radius = scales.radius(this.pgv_max);
+                radius = scales.radius(this.pgv_history);
             }
 
             return radius;
@@ -144,12 +153,12 @@ export default {
             return cur_fill;
         },
 
-        pgv_max_fill: function() {
+        pgv_history_fill: function() {
             var cur_fill = 'grey';
 
-            if (this.pgv_max)
+            if (this.pgv_history)
             {
-                cur_fill = this.pgv_to_color(this.pgv_max);
+                cur_fill = this.pgv_to_color(this.pgv_history);
             }
 
             return cur_fill;
@@ -169,12 +178,12 @@ export default {
             return cur_fill;
         },
 
-        pgv_max_stroke: function() {
+        pgv_history_stroke: function() {
             var cur_fill = 'black';
 
-            if (this.pgv_max)
+            if (this.pgv_history)
             {
-                if (this.pgv_max >= 1e-4)
+                if (this.pgv_history >= 1e-4)
                 {
                     cur_fill = 'red';
                 }

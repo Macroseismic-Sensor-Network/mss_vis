@@ -33,7 +33,7 @@
             <div class="cell small-6"><span class="float-right text-right" style="min-width: 9rem;">latest PGV [mm/s]:</span></div>
             <div class="cell small-6">{{ (pgv * 1000).toFixed(3) }}</div>
             <div class="cell small-6"><span class="float-right text-right" style="min-width: 9rem;">  max. PGV [mm/s]:</span></div>
-            <div class="cell small-6">{{ (pgv_max * 1000).toFixed(3) }}</div>
+            <div class="cell small-6">{{ (pgv_history * 1000).toFixed(3) }}</div>
             <div class="cell auto"></div>
             <div class="cell shrink">
                 <a v-on:click="on_show_pgv_timeseries" class="button tiny float-right">{{ pgv_track_label }}</a>
@@ -48,8 +48,9 @@
         <div class="station-info-item"><b>{{ name }}</b></div>
         <div class="station-info-item"><i>{{ description }}</i></div>
         <div class="station-info-item"><i>{{ station_id }}</i></div>
-        <div class="station-info-item"><span class="text-right station-info-attribute">latest PGV [mm/s]:</span>{{ (pgv * 1000).toFixed(3) }}</div>
-        <div class="station-info-item"><span class="text-right station-info-attribute">  max. PGV [mm/s]:</span>{{ (pgv_max * 1000).toFixed(3) }}</div>
+        <div class="station-info-item"><span class="text-right station-info-attribute">  akt. PGV:</span>{{ (pgv * 1000).toFixed(3) }} mm/s</div>
+        <div class="station-info-item"><span class="text-right station-info-attribute">   max.PGV:</span>{{ (pgv_history * 1000).toFixed(3) }} mm/s</div>
+        <div class="station-info-item"><span class="text-right station-info-attribute">      Verzögerung:</span>{{ delay }} s</div>
         <w-flex class="wrap">
             <w-button class="ma1" 
                       v-on:click="on_show_pgv_timeseries">
@@ -67,6 +68,7 @@
 
 import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
+import * as moment from 'moment';
 
 export default {
     name: 'StationInfo',
@@ -81,12 +83,29 @@ export default {
             this.$store.getters.prefix_options);
     },
     computed: {
-        pgv: function() {
-            return this.$store.getters.current_pgv_by_station(this.station_id);
+        current_pgv: function() {
+            return this.$store.getters.current_pgv_by_station(this.$props.station_id);
         },
 
-        pgv_max: function() {
-            return this.$store.getters.transparent_range_max_pgv_by_station(this.station_id);
+        pgv: function() {
+            return this.current_pgv.latest_pgv;
+        },
+
+        pgv_history: function() {
+            return this.current_pgv.pgv_history;
+        },
+
+        latest_time: function() {
+            return moment.unix(this.current_pgv.latest_time).utc();
+        },
+
+        server_time_local: function() {
+            return this.$store.getters.server_time_local;
+        },
+
+        delay: function() {
+            let time_diff = this.server_time_local.diff(this.latest_time, 'seconds');
+            return time_diff;
         },
 
         station_meta: function() {

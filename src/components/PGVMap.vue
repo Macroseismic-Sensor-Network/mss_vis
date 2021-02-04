@@ -137,7 +137,7 @@ export default {
         });
         this.init_map();
         //this.$watch('radius', this.plot_stations);
-        this.$store.commit("LOAD_STATION_METADATA");
+        //this.$store.commit("LOAD_STATION_METADATA");
         const vm = this;
         var checkExist = setInterval(function() {
             if (vm.$store.getters.stations_imported == true) {

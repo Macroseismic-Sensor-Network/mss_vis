@@ -129,6 +129,8 @@ export default {
         this.logger.setLevel(this.$store.getters.log_level);
         log_prefix.apply(this.logger,
             this.$store.getters.prefix_options);
+        
+        this.$store.dispatch("init_store");
     },
     mounted() {
     },
