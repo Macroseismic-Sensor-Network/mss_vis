@@ -64,10 +64,12 @@
                               v-if="layout.panes.map_container.event_info.visible"
                               ref="event_info_pane">
                             <div style="overflow: scroll; height: 100%; background-color: white;">
-                                <w-accordion :items="1"
+                                <w-accordion :items="2"
                                     v-model="map_info_accordion_expanded">
                                     <template #item-title.1="">Event Details</template>
                                     <template #item-content.1=""><EventDetailsPanel key="event_details_panel_key"/></template>
+                                    <template #item-title.2="">Supplement Data</template>
+                                    <template #item-content.2=""><EventSupplementPanel key="event_supplement_panel_key"/></template>
                                 </w-accordion>
                             </div>
 
@@ -89,6 +91,7 @@ import TracksPanel from '../components/TracksPanel.vue'
 import MapInfoPanel from '../components/MapInfoPanel.vue'
 import EventMonitorPanel from '../components/EventMonitorPanel.vue'
 import EventDetailsPanel from '../components/EventDetailsPanel.vue'
+import EventSupplementPanel from '../components/EventSupplementPanel.vue'
 import RecentEventInfoPanel from '../components/RecentEventInfoPanel.vue'
 import StationInfoPanel from '../components/StationInfoPanel.vue'
 import { Splitpanes, Pane } from 'splitpanes'
@@ -115,6 +118,7 @@ export default {
         MapInfoPanel,
         EventMonitorPanel,
         EventDetailsPanel,
+        EventSupplementPanel,
         RecentEventInfoPanel,
         StationInfoPanel,
         TracksPanel,
@@ -129,7 +133,7 @@ export default {
         this.logger.setLevel(this.$store.getters.log_level);
         log_prefix.apply(this.logger,
             this.$store.getters.prefix_options);
-        
+
         this.$store.dispatch("init_store");
     },
     mounted() {

@@ -28,6 +28,7 @@ import * as d3 from "d3";
 import * as log from 'loglevel';
 import * as moment from 'moment';
 import proj4 from 'proj4';
+import L from 'leaflet';
 
 Vue.use(Vuex)
 
@@ -54,6 +55,13 @@ function handle_msg_data(msg_id, payload, state) {
             state.logger.debug('Received current pgv data.');
             state.server_state = 'online';
             state.mssds_data.current_pgv = payload;
+            break;
+
+        case 'supplement':
+            state.logger.debug('Received event supplement data.');
+            var public_id = payload.public_id;
+            state.event_supplement[public_id] = {};
+            state.event_supplement[public_id] = payload;
             break;
 
         case 'pgv':
@@ -311,6 +319,9 @@ export default new Vuex.Store({
             },
         },
 
+        // The event supplement data. Keys are the public_id of the event.
+        event_supplement: {},
+
         // The station to inspect in the station infow.
         inspect_stations: [],
 
@@ -320,6 +331,9 @@ export default new Vuex.Store({
         leaflet_map: {
             map_object: undefined,
             redraw: false,
+            layer_groups: { 
+                event_supplement: L.layerGroup(),
+            },
         },
 
         map_config: { 
@@ -757,6 +771,17 @@ export default new Vuex.Store({
                 return false;
             }
         },
+
+        get_event_supplement: (state) => (public_id) => {
+            if (public_id in state.event_supplement)
+            {
+                return state.event_supplement[public_id];
+            }
+            else
+            {
+                return undefined;
+            }
+        },
     },
 
     mutations: {
@@ -950,11 +975,13 @@ export default new Vuex.Store({
 
         activate_archive_mode(state) {
             state.layout.panes.map_container.event_info.visible = true
-            state.display.mode = 'archive'
+            state.leaflet_map.layer_groups.event_supplement.addTo(state.leaflet_map.map_object);
+            state.display.mode = 'archive';
         },
 
         deactivate_archive_mode(state) {
-            state.layout.panes.map_container.event_info.visible = false
+            state.layout.panes.map_container.event_info.visible = false;
+            state.leaflet_map.layer_groups.event_supplement.remove();
         },
 
         load_event_supplement(state) {
@@ -994,15 +1021,19 @@ export default new Vuex.Store({
             }
         },
 
-        view_event_in_archive({dispatch, commit}, payload) {
+        view_event_in_archive({dispatch, commit, state}, payload) {
             
             let action_payload = { mode: 'archive' }
             dispatch('set_display_mode', action_payload)
 
-            let mutation_payload = { public_id: payload.public_id };
-            commit('set_show_archive_event', mutation_payload);
+            if (payload.public_id != state.display.settings.archive.active_event)
+            {
+                state.leaflet_map.layer_groups.event_supplement.clearLayers();
+                let mutation_payload = { public_id: payload.public_id };
+                commit('set_show_archive_event', mutation_payload);
             
-            dispatch('request_event_supplement', payload)
+                dispatch('request_event_supplement', payload)
+            }
         },
 
         request_event_supplement({state}, payload) {
