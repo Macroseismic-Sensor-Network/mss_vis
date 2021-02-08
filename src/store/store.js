@@ -60,8 +60,16 @@ function handle_msg_data(msg_id, payload, state) {
         case 'supplement':
             state.logger.debug('Received event supplement data.');
             var public_id = payload.public_id;
-            state.event_supplement[public_id] = {};
-            state.event_supplement[public_id] = payload;
+            if ('data' in state.event_supplement[public_id])
+            {
+                state.event_supplement[public_id].data = payload;
+            }
+            else
+            {
+                Vue.set(state.event_supplement[public_id], 'data', payload);
+
+            }
+            state.event_supplement[public_id].state = 'loaded';
             break;
 
         case 'pgv':
@@ -238,6 +246,7 @@ export default new Vuex.Store({
             show_legend:true,
             show_map_info:true,
         },
+        time_format: "YYYY-MM-DD HH:mm:ss zZZ",
 
         // The data received from the mss_dataserver.
         mssds_data: {
@@ -772,15 +781,34 @@ export default new Vuex.Store({
             }
         },
 
+        display_mode(state) {
+            return state.display.mode;
+        },
+
         get_event_supplement: (state) => (public_id) => {
             if (public_id in state.event_supplement)
             {
-                return state.event_supplement[public_id];
+                return state.event_supplement[public_id].data;
             }
             else
             {
                 return undefined;
             }
+        },
+        
+        get_event_supplement_state: (state) => (public_id) => {
+            if (public_id in state.event_supplement)
+            {
+                return state.event_supplement[public_id].state;
+            }
+            else
+            {
+                return undefined;
+            }
+        },
+
+        time_format(state) {
+            return state.time_format;
         },
     },
 
@@ -975,12 +1003,14 @@ export default new Vuex.Store({
 
         activate_archive_mode(state) {
             state.layout.panes.map_container.event_info.visible = true
+            state.layout.panes.content.visible = true
             state.leaflet_map.layer_groups.event_supplement.addTo(state.leaflet_map.map_object);
             state.display.mode = 'archive';
         },
 
         deactivate_archive_mode(state) {
             state.layout.panes.map_container.event_info.visible = false;
+            state.layout.panes.content.visible = false
             state.leaflet_map.layer_groups.event_supplement.remove();
         },
 
@@ -990,6 +1020,10 @@ export default new Vuex.Store({
                 state.logger.debug('after');
                 }, 2000);
         },
+
+       language(state) {
+            return state.language;
+       },
 
 
 
@@ -1022,7 +1056,6 @@ export default new Vuex.Store({
         },
 
         view_event_in_archive({dispatch, commit, state}, payload) {
-            
             let action_payload = { mode: 'archive' }
             dispatch('set_display_mode', action_payload)
 
@@ -1031,14 +1064,15 @@ export default new Vuex.Store({
                 state.leaflet_map.layer_groups.event_supplement.clearLayers();
                 let mutation_payload = { public_id: payload.public_id };
                 commit('set_show_archive_event', mutation_payload);
-            
                 dispatch('request_event_supplement', payload)
             }
         },
 
         request_event_supplement({state}, payload) {
-
-            
+            // Use the Vue.set function to ensure, that the store
+            // tracks the changes of the object elements.
+            Vue.set(state.event_supplement, payload.public_id, {});
+            Vue.set(state.event_supplement[payload.public_id], 'state', 'loading');
             let msg_payload = {'public_id': payload.public_id}
             let msg = {'class': 'request',
                        'id': 'event_supplement',

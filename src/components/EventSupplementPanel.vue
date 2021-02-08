@@ -30,16 +30,18 @@
              v-if="active_event != undefined">
             <w-flex class="wrap">
                 <w-button class="ma1" 
+                          v-if="supplement_data_state === 'loaded'"
                           v-on:click="on_show_pgvvoronoi">
                     show pgvvoronoi
                 </w-button>
                 <w-button class="ma1" 
+                          v-if="supplement_data_state === 'loaded'"
                           v-on:click="on_show_pgvstation">
                     show pgvstation
                 </w-button>
             </w-flex>
-
         </div>
+        {{ supplement_data_state }}
     </div>
 </template>
 
@@ -60,11 +62,18 @@ export default {
         log_prefix.apply(this.logger,
             this.$store.getters.prefix_options);
     },
-    mounted() {
-    },
     data() {
         return {
         };
+    },
+    watch: {
+        supplement_data_state: function(new_state) {
+            if (new_state === 'loaded')
+            {
+                this.on_show_pgvvoronoi();
+                this.on_show_pgvstation();
+            }
+        },
     },
     computed: {
         public_id: function() {
@@ -91,6 +100,18 @@ export default {
             {
                 return undefined;
             }
+        },
+
+        supplement_data_state: function() {
+            if (this.public_id)
+            {
+                return this.$store.getters.get_event_supplement_state(this.public_id);
+            }
+            else
+            {
+                return undefined;
+            }
+
         },
 
         map: function() {
@@ -128,10 +149,16 @@ export default {
             let pgvstation = L.geoJSON(this.supplement_data.pgvstation,
                                            {
                                                pointToLayer: function(feature, lat_lon) {
-                                                   marker_style.fillColor = self.pgv_to_color(feature.properties.pgv);
-                                                   marker_style.radius = self.scales.radius(feature.properties.pgv);
-                                                   self.logger.debug("marker_style", marker_style);
-                                                   return L.circleMarker(lat_lon, marker_style);
+                                                    if( feature.properties.pgv) {
+                                                        marker_style.fillColor = self.pgv_to_color(feature.properties.pgv);
+                                                    }
+                                                    else
+                                                    {
+                                                        marker_style.fillColor = '#777777';
+                                                    }
+                                                    marker_style.radius = self.scales.radius(feature.properties.pgv);
+                                                    self.logger.debug("marker_style", marker_style);
+                                                    return L.circleMarker(lat_lon, marker_style);
                                                },
                                            }
                                           );

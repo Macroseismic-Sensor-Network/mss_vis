@@ -78,7 +78,7 @@
                 </pane>
                 <pane :size="layout.panes.content.size"
                       v-if="layout.panes.content.visible">
-                    Spreadsheet Pane
+                    <EventArchivePanel key="event_archive_panel_key" />
                 </pane>
             </splitpanes>
     </w-app>
@@ -89,6 +89,7 @@
 import PGVMap from '../components/PGVMap.vue'
 import TracksPanel from '../components/TracksPanel.vue'
 import MapInfoPanel from '../components/MapInfoPanel.vue'
+import EventArchivePanel from '../components/EventArchivePanel.vue'
 import EventMonitorPanel from '../components/EventMonitorPanel.vue'
 import EventDetailsPanel from '../components/EventDetailsPanel.vue'
 import EventSupplementPanel from '../components/EventSupplementPanel.vue'
@@ -116,6 +117,7 @@ export default {
         // eslint-disable-next-line
         PGVMap,
         MapInfoPanel,
+        EventArchivePanel,
         EventMonitorPanel,
         EventDetailsPanel,
         EventSupplementPanel,

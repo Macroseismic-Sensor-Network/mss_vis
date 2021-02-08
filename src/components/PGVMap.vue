@@ -37,7 +37,10 @@
                 <template #activator="{ on }">
                     <w-button v-on="on" color="black" lg="lg" bg-color="white" class="display-menu">{{ display_mode_selection }}</w-button>
                 </template>
-                <w-list class="white--bg" v-model="display_mode_selection" :items="display_menu_items" @item-select="on_select_display_mode"></w-list>
+                <w-radios v-model="display_mode_selection"
+                          :items="display_menu_items"
+                          @input="on_select_display_mode"></w-radios>
+
             </w-menu>
 
         </div>
@@ -109,11 +112,11 @@ export default {
             logger: undefined,
             showLegend:false,	//toggles the visibility off the legend
             display_menu_items: [
-                    { label: 'realtime' },
-                    { label: 'archive' },
+                    { label: 'realtime', value: 'realtime'},
+                    { label: 'archive', value: 'archive'},
                 ],
-            display_mode_selection: 'realtime',
             show_display_menu: false,
+            test_model: undefined,
         };
     },
 
@@ -189,6 +192,18 @@ export default {
             set(map) {
                 this.$store.commit('set_leaflet_map_object', map);
             }
+        },
+
+        display_mode_selection: {
+            get() {
+                return this.$store.getters.display_mode; 
+            },
+
+            set(mode) {
+                this.logger.debug('Setting display mode: ', mode);
+                let payload = { mode: mode }
+                this.$store.dispatch('set_display_mode', payload);
+            },
         },
 
         data_time_range: function() {
@@ -328,8 +343,6 @@ export default {
 
         on_select_display_mode() {
             this.show_display_menu = false;
-            let payload = { mode: this.display_mode_selection }
-            this.$store.dispatch('set_display_mode', payload);
         },
     },
 }
