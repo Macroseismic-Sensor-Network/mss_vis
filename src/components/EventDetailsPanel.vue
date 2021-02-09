@@ -25,17 +25,53 @@
 -->
 
 <template>
-    <div class="event-details-panel">
-        <div class="event-details-panel"
-             v-if="active_event === undefined">
-            <span class="event-info">Please select an event to display.</span>
-        </div>
-        <div class="event-details-panel"
-             v-if="active_event != undefined">
-            <span class="event-info"><b>public id:</b> {{ public_id }}</span>
-            <span class="event-info"><b>event start:</b> {{ event_start }}</span>
-            <span class="event-info"><b>event end:</b> {{ event_end }}</span>
-        </div>
+    <div>
+        <w-flex wrap class="text-left"
+                 v-if="active_event === undefined">
+            <div class="xs12 pa1">Please select an event to display.</div>
+        </w-flex>
+        <w-flex column
+                 v-if="active_event != undefined">
+            <w-flex wrap>
+                <div class="pr2 text-bold">public id:</div>
+                <div class="grow">{{ public_id }}</div>
+            </w-flex>
+            
+            <w-flex wrap>
+                <div class="pr2 text-bold">Start:</div>
+                <div class="grow">{{ event_start }}</div>
+            </w-flex>
+            
+            <w-flex wrap>
+                <div class="pr2 text-bold">Ende:</div>
+                <div class="grow">{{ event_end }}</div>
+            </w-flex>
+            
+            <w-flex wrap>
+                <div class="pr2 text-bold">PGV:</div>
+                <div class="grow">{{ pgv }} mm/s</div>
+            </w-flex>
+            
+            <w-flex wrap>
+                <div class="pr2 text-bold">Dauer:</div>
+                <div class="grow">{{ duration }} s</div>
+            </w-flex>
+            
+            <w-flex wrap>
+                <div class="pr2 text-bold">Anzahl der Detektionsdreiecke:</div>
+                <div class="grow">{{ num_detections }}</div>
+            </w-flex>
+            
+            <w-flex wrap>
+                <div class="grow text-bold">getriggerte Stationen ({{ num_stations }}):</div>
+            </w-flex>
+            <w-flex wrap>
+                <w-button v-for="cur_station in triggered_stations"
+                          v-bind:key="cur_station"
+                          class="mx2 mb1"
+                          v-bind:disabled="true">{{ cur_station }}</w-button>
+            </w-flex>
+        </w-flex>
     </div>
 </template>
 
@@ -43,6 +79,7 @@
 
 import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
+import * as moment from 'moment';
 
 export default {
     name: 'EventDetailsPanel',
@@ -54,6 +91,7 @@ export default {
         this.logger.setLevel(this.$store.getters.log_level);
         log_prefix.apply(this.logger,
             this.$store.getters.prefix_options);
+        moment.locale(this.$store.getters.language);
     },
     computed: {
         public_id: function() {
@@ -67,6 +105,10 @@ export default {
             }
         },
 
+        utc_offset: function() {
+            return this.$store.getters.utc_offset;
+        },
+
         active_event: function() {
             return this.$store.getters.active_archive_event;
         },
@@ -74,7 +116,7 @@ export default {
         event_start: function() {
             if (this.active_event)
             {
-                return this.active_event.start_time;
+                return this.get_local_time_str(moment.utc(this.active_event.start_time));
             }
             else
             {
@@ -85,7 +127,72 @@ export default {
         event_end: function() {
             if (this.active_event)
             {
-                return this.active_event.end_time;
+                let cur_start = moment.utc(this.active_event.end_time);
+                let time_str = this.get_local_time_str(cur_start);
+                this.logger.debug("cur_start: ", cur_start);
+                this.logger.debug("time_str: ", time_str);
+                return this.get_local_time_str(cur_start);
+            }
+            else
+            {
+                return undefined;
+            }
+        },
+        
+        pgv: function() {
+            if (this.active_event)
+            {
+                return (this.active_event.max_pgv * 1000).toFixed(3);
+            }
+            else
+            {
+                return undefined;
+            }
+        },
+
+        duration: function() {
+            if (this.active_event)
+            {
+                return this.active_event.length.toString();
+            }
+            else
+            {
+                return undefined;
+            }
+        },
+
+        triggered_stations: function() {
+            if (this.active_event)
+            {
+                let triggered_stations = []
+                for (let cur_nsl of this.active_event.triggered_stations)
+                {
+                    let comps = cur_nsl.split(':');
+                    triggered_stations.push(comps[1]);
+                }
+                return triggered_stations;
+            }
+            else
+            {
+                return undefined;
+            }
+        },
+        
+        num_stations: function() {
+            if (this.active_event)
+            {
+                return this.active_event.triggered_stations.length;
+            }
+            else
+            {
+                return undefined;
+            }
+        },
+        
+        num_detections: function() {
+            if (this.active_event)
+            {
+                return this.active_event.num_detections;
             }
             else
             {
@@ -93,23 +200,26 @@ export default {
             }
         },
     },
+    methods: {
+        get_local_time_str(time_utc) {
+            let local_time = this.utc_to_local_time(time_utc);
+            return this.format_time(local_time);
+        },
+
+        utc_to_local_time(time_utc) {
+            let time_local = time_utc.utcOffset(this.utc_offset / 60);
+            return time_local;
+        },
+
+        format_time(time) {
+            let time_format = this.$store.getters.time_format;
+            return time.format(time_format);
+        },
+    },
 }
 
 </script>
 
 <style scoped lang="sass">
-
-div.event-details-panel
-    height: 100%
-    width: 100%
-    overflow: auto
-
-span.event-info
-    margin: 0px
-    padding: 2px
-    display: inline-block
-    text-align: left
-    width: 100%
-    font-size: 10pt
 
 </style>
