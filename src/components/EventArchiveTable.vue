@@ -56,10 +56,12 @@ export default {
         return {
             table_headers: [
                     { label: 'public ID', key: 'public_id' },
-                    { label: 'start', key: 'start_time' },
-                    { label: 'end', key: 'end_time' },
-                    { label: 'duration [s]', key: 'duration' },
-                { label: 'PGV [mm/s]', key: 'pgv' }, 
+                    { label: 'Start', key: 'start_time' },
+                    { label: 'Ende', key: 'end_time' },
+                    { label: 'Dauer [s]', key: 'duration' },
+                    { label: 'PGV [mm/s]', key: 'pgv' },
+                    { label: '#Detektionen', key: 'num_detections' },
+                    { label: '#Stationen', key: 'num_stations' },
                 ],
         };
     },
@@ -79,15 +81,15 @@ export default {
                 let cur_event = this.event_archive[cur_key]
                 let cur_start = moment.utc(cur_event.start_time);
                 let cur_end = moment.utc(cur_event.end_time);
-                let cur_duration = cur_end.diff(cur_start, 'seconds');
-                cur_duration = cur_duration.toString();
                 items.push(
                     { 
                         public_id: cur_event.public_id,
                         start_time: this.get_local_time_str(cur_start),
                         end_time: this.get_local_time_str(cur_end),
-                        duration: cur_duration,
+                        duration: cur_event.length.toString(),
                         pgv: (cur_event.max_pgv * 1000).toFixed(3),
+                        num_detections: cur_event.num_detections.toString(),
+                        num_stations: cur_event.triggered_stations.length.toString()
                     });
             }
             return items;
