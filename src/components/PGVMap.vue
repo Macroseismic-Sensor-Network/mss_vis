@@ -49,11 +49,11 @@
             function. -->
         <svg id="svg_template_pgv_marker">
             <g id="current_pgv_marker">
-                <PGVMapMarker v-for="cur_station in stations"
-                              v-bind:key="cur_station.id"
-                              v-bind:station_id="cur_station.id"
-                              v-bind:lon="cur_station.x"
-                              v-bind:lat="cur_station.y"/>
+                <PGVMapMarker v-for="(cur_station, cur_nsl) in stations"
+                              v-bind:key="cur_nsl"
+                              v-bind:nsl_code="cur_nsl"
+                              v-bind:lon="cur_station.lon"
+                              v-bind:lat="cur_station.lat"/>
             </g>
         </svg>
 

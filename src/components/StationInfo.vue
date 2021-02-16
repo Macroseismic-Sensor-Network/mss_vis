@@ -47,7 +47,7 @@
     <div style="width: 100%;">
         <div class="station-info-item"><b>{{ name }}</b></div>
         <div class="station-info-item"><i>{{ description }}</i></div>
-        <div class="station-info-item"><i>{{ station_id }}</i></div>
+        <div class="station-info-item"><i>{{ nsl_code }}</i></div>
         <div class="station-info-item"><span class="text-right station-info-attribute">  akt. PGV:</span>{{ (pgv * 1000).toFixed(3) }} mm/s</div>
         <div class="station-info-item"><span class="text-right station-info-attribute">   max.PGV:</span>{{ (pgv_history * 1000).toFixed(3) }} mm/s</div>
         <div class="station-info-item"><span class="text-right station-info-attribute">      Verzögerung:</span>{{ delay }} s</div>
@@ -73,7 +73,7 @@ import * as moment from 'moment';
 export default {
     name: 'StationInfo',
     props: {
-        station_id: String,
+        nsl_code: String,
     },
     components: {},
     created() {
@@ -84,7 +84,7 @@ export default {
     },
     computed: {
         current_pgv: function() {
-            return this.$store.getters.current_pgv_by_station(this.$props.station_id);
+            return this.$store.getters.current_pgv_by_station(this.nsl_code);
         },
 
         pgv: function() {
@@ -109,7 +109,7 @@ export default {
         },
 
         station_meta: function() {
-            return this.$store.getters.station_meta_by_id(this.station_id);
+            return this.$store.getters.station_meta_by_nsl(this.nsl_code);
         },
 
         name: function() {
@@ -142,7 +142,7 @@ export default {
         },
 
         pgv_track_shown: function() {
-            return this.$store.getters.pgv_timeseries_shown(this.station_id);
+            return this.$store.getters.pgv_timeseries_shown(this.nsl_code);
         },
 
         pgv_track_label: function() {
@@ -158,22 +158,24 @@ export default {
     },
     methods: {
         on_remove_from_inspect: function() {
-            this.$store.commit('remove_inspect_station', this.station_id);
+            let payload = {'nsl_code': this.nsl_code}
+            this.$store.commit('remove_inspect_station', payload);
 
             if (this.pgv_track_shown)
             {
-                this.$store.commit('remove_track_pgv_timeseries', this.station_id);
+                this.$store.commit('remove_track_pgv_timeseries', payload);
             }
         },
 
         on_show_pgv_timeseries: function() {
+            let payload = {'nsl_code': this.nsl_code}
             if (this.pgv_track_shown)
             {
-                this.$store.commit('remove_track_pgv_timeseries', this.station_id);
+                this.$store.commit('remove_track_pgv_timeseries', payload);
             }
             else
             {
-                this.$store.commit('add_track_pgv_timeseries', this.station_id);
+                this.$store.dispatch('add_track_pgv_timeseries', payload);
             }
 
         },

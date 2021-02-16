@@ -51,13 +51,18 @@ function handle_msg_soh(msg_id, payload, state) {
 
 function handle_msg_data(msg_id, payload, state) {
     switch (msg_id) {
+        case 'station_metadata':
+            state.logger.debug('Received the station metadata.');
+            state.station_meta = payload;
+            state.stations_imported = true;
+            break;
         case 'current_pgv':
             state.logger.debug('Received current pgv data.');
             state.server_state = 'online';
             state.mssds_data.current_pgv = payload;
             break;
 
-        case 'supplement':
+        case 'event_supplement':
             state.logger.debug('Received event supplement data.');
             var public_id = payload.public_id;
             if ('data' in state.event_supplement[public_id])
@@ -620,14 +625,8 @@ export default new Vuex.Store({
             return state.station_meta;
         },
 
-        station_meta_by_id: (state) => (station_id) => {
-            let found_station = undefined;
-            for(let k = 0; k < state.station_meta.length; k++) {
-                if(state.station_meta[k].id === station_id) {
-                    found_station = state.station_meta[k];
-                }
-            }
-            return found_station;
+        station_meta_by_nsl: (state) => (nsl_code) => {
+            return state.station_meta[nsl_code]
         },
 
         stations_imported: (state) => {
@@ -795,7 +794,7 @@ export default new Vuex.Store({
                 return undefined;
             }
         },
-        
+
         get_event_supplement_state: (state) => (public_id) => {
             if (public_id in state.event_supplement)
             {
@@ -821,16 +820,19 @@ export default new Vuex.Store({
             state.logger.info("Connected to websocket server.");
             //console.info("state: ", state);
             //console.info("event: ", event);
-            var msg = {'class': 'control',
-                       'id': 'mode',
-                       'payload': 'pgv'};
+            var msg_header = {'msg_class': 'control',
+                              'msg_id': 'mode'};
+            var msg_payload = {'data_mode': 'pgv'};
+            var msg = {'header': msg_header,
+                       'payload': msg_payload};
             Vue.prototype.$socket.send(JSON.stringify(msg));
         },
 
         SOCKET_ONMESSAGE(state, payload) {
-            var msg_class = payload.class
-            var msg_id = payload.id
-            state.server_time = moment.utc(payload.server_time);
+            var header = payload.header
+            var msg_class = header.msg_class
+            var msg_id = header.msg_id
+            state.server_time = moment.utc(header.server_time);
 
             switch (msg_class) {
                 case 'soh':
@@ -930,14 +932,15 @@ export default new Vuex.Store({
         },
 
         remove_inspect_station(state, payload) {
-            if (state.inspect_stations.includes(payload))
+            state.logger.debug('inspect_stations: ', state.inspect_stations);
+            if (state.inspect_stations.includes(payload.nsl_code))
             {
-                state.inspect_stations.splice(state.inspect_stations.indexOf(payload), 1);
+                state.inspect_stations.splice(state.inspect_stations.indexOf(payload.nsl_code), 1);
             }
         },
 
         add_track_pgv_timeseries(state, payload) {
-            state.tracks.realtime.pgv_timeseries.push(payload);
+            state.tracks.realtime.pgv_timeseries.push(payload.nsl_code);
             let n_realtime_tracks = state.tracks.realtime.pgv_timeseries.length
             if (n_realtime_tracks == 1)
             {
@@ -948,7 +951,7 @@ export default new Vuex.Store({
         },
 
         remove_track_pgv_timeseries(state, payload) {
-            state.tracks.realtime.pgv_timeseries.splice(state.tracks.realtime.pgv_timeseries.indexOf(payload), 1);
+            state.tracks.realtime.pgv_timeseries.splice(state.tracks.realtime.pgv_timeseries.indexOf(payload.nsl_code), 1);
             let n_realtime_tracks = state.tracks.realtime.pgv_timeseries.length
             if (n_realtime_tracks == 0)
             {
@@ -1030,9 +1033,9 @@ export default new Vuex.Store({
     },
 
     actions: {
-        init_store({commit, state}) {
+        init_store(state) {
             state.logger.debug('Initializing the store.');
-            commit('load_station_metadata');
+            //commit('load_station_metadata');
             moment.locale(state.language);
         },
 
@@ -1055,6 +1058,12 @@ export default new Vuex.Store({
             }
         },
 
+        add_track_pgv_timeseries({dispatch, commit, state}, payload) {
+            state.logger.debug('add_track_pgv_timeseries payload: ', payload);
+            dispatch('request_pgv_timeseries', payload);
+            commit('add_track_pgv_timeseries', payload);
+        },
+
         view_event_in_archive({dispatch, commit, state}, payload) {
             let action_payload = { mode: 'archive' }
             dispatch('set_display_mode', action_payload)
@@ -1073,9 +1082,25 @@ export default new Vuex.Store({
             // tracks the changes of the object elements.
             Vue.set(state.event_supplement, payload.public_id, {});
             Vue.set(state.event_supplement[payload.public_id], 'state', 'loading');
+            let msg_header = {'msg_class': 'request',
+                              'msg_id': 'event_supplement'}
             let msg_payload = {'public_id': payload.public_id}
-            let msg = {'class': 'request',
-                       'id': 'event_supplement',
+            let msg = {'header': msg_header,
+                       'payload': msg_payload};
+
+            Vue.prototype.$socket.send(JSON.stringify(msg));
+            state.logger.debug("Sent websocket message: ", msg);
+        },
+
+        request_pgv_timeseries({state}, payload) {
+            // Use the Vue.set function to ensure, that the store
+            // tracks the changes of the object elements.
+            //Vue.set(state.event_supplement, payload.public_id, {});
+            //Vue.set(state.event_supplement[payload.public_id], 'state', 'loading');
+            let msg_header = {'msg_class': 'request',
+                              'msg_id': 'pgv_timeseries'}
+            let msg_payload = {'nsl_code': payload.nsl_code}
+            let msg = {'header': msg_header,
                        'payload': msg_payload};
 
             Vue.prototype.$socket.send(JSON.stringify(msg));

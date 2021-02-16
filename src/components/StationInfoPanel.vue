@@ -27,9 +27,9 @@
 <template>
     <div style="width: 100%; overflow: auto;">
         <span v-if="inspect_stations.length == 0">Click a station marker to see station details here.</span>
-        <StationInfo v-for="cur_station_id in inspect_stations"
-                     :key="cur_station_id"
-                     :station_id="cur_station_id"/>
+        <StationInfo v-for="cur_nsl_code in inspect_stations"
+                     :key="cur_nsl_code"
+                     :nsl_code="cur_nsl_code"/>
     </div>
 </template>
 

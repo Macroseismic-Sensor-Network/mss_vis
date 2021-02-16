@@ -60,7 +60,7 @@ export default {
     name: 'PGVMapMarker',
 
     props: {
-        station_id: String,
+        nsl_code: String,
         lon: Number,
         lat: Number,
     },
@@ -94,7 +94,7 @@ export default {
 
     computed: {
         element_id: function() {
-            return 'pgv_map_marker_' + this.station_id.replace(/\./g, '-');
+            return 'pgv_map_marker_' + this.nsl_code.replace(/:/g, '-');
         },
 
         map_redraw: function() {
@@ -106,7 +106,7 @@ export default {
         },   
 
         current_pgv: function() {
-            return this.$store.getters.current_pgv_by_station(this.$props.station_id);
+            return this.$store.getters.current_pgv_by_station(this.$props.nsl_code);
         },
 
         pgv: function() {
@@ -211,7 +211,7 @@ export default {
         },
 
         inspect_station() {
-            this.$store.commit('add_inspect_station', this.station_id);
+            this.$store.commit('add_inspect_station', this.nsl_code);
         },
 
         update() {
