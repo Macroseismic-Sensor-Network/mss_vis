@@ -103,9 +103,8 @@ function handle_msg_data(msg_id, payload, state) {
             state.logger.debug("Finished processing the pgv data.");
             break;
 
-        case 'pgv_archive':
-            state.logger.debug("Received pgv archive data.");
-            state.server_state = 'archive received'
+        case 'pgv_timeseries_archive':
+            state.logger.debug("Received pgv timeseries_archive data.");
             // Clear the pgv_data.
             state.pgv_data = {}
             for (let key in payload)
