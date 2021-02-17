@@ -138,7 +138,7 @@ export default {
                 return undefined;
             }
         },
-        
+
         pgv: function() {
             if (this.active_event)
             {
@@ -177,7 +177,7 @@ export default {
                 return undefined;
             }
         },
-        
+
         num_stations: function() {
             if (this.active_event)
             {
@@ -188,7 +188,7 @@ export default {
                 return undefined;
             }
         },
-        
+
         num_detections: function() {
             if (this.active_event)
             {
