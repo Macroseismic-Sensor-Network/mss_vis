@@ -105,8 +105,6 @@ function handle_msg_data(msg_id, payload, state) {
 
         case 'pgv_timeseries_archive':
             state.logger.debug("Received pgv timeseries_archive data.");
-            // Clear the pgv_data.
-            state.pgv_data = {}
             for (let key in payload)
             {
                 if (key in state.pgv_data)
@@ -114,7 +112,6 @@ function handle_msg_data(msg_id, payload, state) {
                     state.logger.debug('Replacing the existing data.')
                     state.pgv_data[key].data = payload[key].data
                     state.pgv_data[key].time = payload[key].time
-                    //state.pgv_data[key].time = time_utc
                 }
                 else
                 {
@@ -124,7 +121,6 @@ function handle_msg_data(msg_id, payload, state) {
                     Vue.set(state.pgv_data, key, {})
                     Vue.set(state.pgv_data[key], "data", payload[key].data)
                     Vue.set(state.pgv_data[key], "time", payload[key].time)
-                    //Vue.set(state.pgv_data[key], "time", time_utc)
                     state.logger.debug('Done.');
                 }
             }
