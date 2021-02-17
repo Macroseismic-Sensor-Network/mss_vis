@@ -27,9 +27,9 @@
 <template>
     <splitpanes horizontal
                 @resized="on_splitpanes_resized('resized splitpanes')">
-        <pane v-for="cur_stream_id in track_pgv_stations"
-              :key="cur_stream_id">
-            <TrackPgv :stream_id="cur_stream_id"/>
+        <pane v-for="cur_nsl in track_pgv_stations"
+              :key="cur_nsl">
+            <TrackPgv :nsl_code="cur_nsl"/>
         </pane>
     </splitpanes>
 </template>

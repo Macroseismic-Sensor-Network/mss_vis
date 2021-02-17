@@ -44,7 +44,7 @@ import * as log_prefix from 'loglevel-plugin-prefix';
 export default {
     name: 'TrackPGV',
     props: {
-        stream_id: String,
+        nsl_code: String,
     },
     components: {},
     directives: {
@@ -65,7 +65,7 @@ export default {
     data: function () {
         return {
             layout: {
-                //title: this.stream_id,
+                //title: this.nsl_code,
                 //titlefont: {size: 10},
                 //margin: {
                 //    l: 40,
@@ -141,18 +141,19 @@ export default {
     },
     computed: {
         pgv_data: function() {
-            return this.$store.getters.pgv_by_station(this.$props.stream_id);
+            return this.$store.getters.pgv_by_station(this.nsl_code);
         },
 
         plotly_data: function() {
             // eslint-disable-next-line
-            var pgv_data = this.$store.getters.pgv_by_station(this.$props.stream_id);
+            var pgv_data = this.$store.getters.pgv_by_station(this.nsl_code);
             var data = [];
+            var trace = {};
             if (typeof pgv_data != 'undefined') {
                 // Convert to mm/s.
                 var data_mm = pgv_data.data.map(function(x) {return x * 1000});
                 var data_ms = pgv_data.time.map(function(x) {return x * 1000});
-                var trace = {
+                trace = {
                     x: data_ms,
                     y: data_mm,
                     type: 'scatter',
@@ -165,13 +166,29 @@ export default {
                                    'time:  %{x}' +
                                    '<extra></extra>',
                 }
-                data = [trace, ]
             }
+            else {
+                trace = {
+                    x: [],
+                    y: [],
+                    type: 'scatter',
+                    mode: 'lines',
+                    line: {
+                        color: 'LightSkyBlue',
+                    },
+                    fill: 'tozeroy',
+                    hovertemplate: 'pgv:  %{y}<br>' +
+                                   'time:  %{x}' +
+                                   '<extra></extra>',
+                }
+
+            }
+            data = [trace, ]
             return data;
         },
 
         element_id: function() {
-            return 'pgv_graph_' + this.stream_id;
+            return 'pgv_graph_' + this.nsl_code;
         },
 
         display_range: function() {
@@ -184,7 +201,7 @@ export default {
         },
 
         station: function() {
-            var res = this.stream_id.split('.');
+            var res = this.nsl_code.split(':');
             return res[1];
         },
 
