@@ -40,6 +40,7 @@
 <script>
 import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
+import * as moment from 'moment';
 
 export default {
     name: 'RecentEvent',
@@ -68,7 +69,7 @@ export default {
 
     computed: {
         event_time: function() {
-            return this.start_time.slice(0, -7);
+            return this.get_local_time_str(moment.utc(this.start_time))
         },
 
         color: function() {
@@ -94,7 +95,11 @@ export default {
             {
                 return false;
             }
-        }
+        },
+
+        utc_offset: function() {
+            return this.$store.getters.utc_offset;
+        },
     },
 
     methods: {
@@ -114,6 +119,21 @@ export default {
             const colormap = this.$store.getters.map_config.colormap;
             var color = colormap(this.scales.color(pgv));
             return color;
+        },
+        
+        get_local_time_str(time_utc) {
+            let local_time = this.utc_to_local_time(time_utc);
+            return this.format_time(local_time);
+        },
+
+        utc_to_local_time(time_utc) {
+            let time_local = time_utc.utcOffset(this.utc_offset / 60);
+            return time_local;
+        },
+
+        format_time(time) {
+            let time_format = this.$store.getters.time_format;
+            return time.format(time_format);
         },
     },
 }
