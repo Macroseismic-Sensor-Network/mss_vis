@@ -163,7 +163,7 @@ export default {
 
             if (this.pgv_track_shown)
             {
-                this.$store.commit('remove_track_pgv_timeseries', payload);
+                this.$store.dispatch('remove_track_pgv_timeseries', payload);
             }
         },
 
@@ -171,7 +171,7 @@ export default {
             let payload = {'nsl_code': this.nsl_code}
             if (this.pgv_track_shown)
             {
-                this.$store.commit('remove_track_pgv_timeseries', payload);
+                this.$store.dispatch('remove_track_pgv_timeseries', payload);
             }
             else
             {

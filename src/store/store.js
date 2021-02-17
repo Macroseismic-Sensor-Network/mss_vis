@@ -77,9 +77,9 @@ function handle_msg_data(msg_id, payload, state) {
             state.event_supplement[public_id].state = 'loaded';
             break;
 
-        case 'pgv':
-            state.logger.debug("Received pgv data.");
-            state.server_state = 'online';
+        case 'pgv_timeseries':
+            state.logger.debug("Received pgv timeseries data.");
+            //state.server_state = 'online';
             for (let key in payload)
             {
                 if (key in state.pgv_data)
@@ -1064,6 +1064,12 @@ export default new Vuex.Store({
             commit('add_track_pgv_timeseries', payload);
         },
 
+        remove_track_pgv_timeseries({dispatch, commit, state}, payload) {
+            state.logger.debug('remove_track_pgv_timeseries payload: ', payload);
+            dispatch('cancel_pgv_timeseries', payload);
+            commit('remove_track_pgv_timeseries', payload);
+        },
+
         view_event_in_archive({dispatch, commit, state}, payload) {
             let action_payload = { mode: 'archive' }
             dispatch('set_display_mode', action_payload)
@@ -1106,5 +1112,17 @@ export default new Vuex.Store({
             Vue.prototype.$socket.send(JSON.stringify(msg));
             state.logger.debug("Sent websocket message: ", msg);
         },
+
+        cancel_pgv_timeseries({state}, payload) {
+            let msg_header = {'msg_class': 'cancel',
+                              'msg_id': 'pgv_timeseries'}
+            let msg_payload = {'nsl_code': payload.nsl_code}
+            let msg = {'header': msg_header,
+                       'payload': msg_payload};
+
+            Vue.prototype.$socket.send(JSON.stringify(msg));
+            state.logger.debug("Sent websocket message: ", msg);
+
+        }
     }
 });
