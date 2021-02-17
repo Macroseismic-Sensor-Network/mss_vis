@@ -1024,7 +1024,7 @@ export default new Vuex.Store({
     },
 
     actions: {
-        init_store(state) {
+        init_store({ state }) {
             state.logger.debug('Initializing the store.');
             //commit('load_station_metadata');
             moment.locale(state.language);
