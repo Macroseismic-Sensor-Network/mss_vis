@@ -162,8 +162,8 @@ export default {
                         color: 'LightSkyBlue',
                     },
                     fill: 'tozeroy',
-                    hovertemplate: 'pgv:  %{y}<br>' +
-                                   'time:  %{x}' +
+                    hovertemplate: 'PGV:  %{y:.5f} mm/s<br>' +
+                                   'Zeit:  %{x}' +
                                    '<extra></extra>',
                 }
             }
@@ -177,8 +177,8 @@ export default {
                         color: 'LightSkyBlue',
                     },
                     fill: 'tozeroy',
-                    hovertemplate: 'pgv:  %{y}<br>' +
-                                   'time:  %{x}' +
+                    hovertemplate: 'PGV:  %{y:.5f} mm/s<br>' +
+                                   'Zeit:  %{x}' +
                                    '<extra></extra>',
                 }
 
