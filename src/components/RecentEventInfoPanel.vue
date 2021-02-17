@@ -56,7 +56,9 @@ export default {
     },
     computed: {
         event_archive: function() {
-            return this.$store.getters.event_archive;
+            let event_archive = this.$store.getters.event_archive;
+            return Object.values(event_archive).sort((a, b) => (a.start_time < b.start_time) ? 1 : -1);
+            //return event_archive;
         },
     },
 }

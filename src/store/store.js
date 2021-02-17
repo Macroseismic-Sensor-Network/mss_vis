@@ -719,15 +719,7 @@ export default new Vuex.Store({
         },
 
         event_archive: (state) => {
-            // Return the event archive sorted descending by the start time.
-            if (state.event_archive.length > 1)
-            {
-                return state.event_archive.sort((a, b) => (a.start_time < b.start_time) ? 1 : -1);
-            }
-            else
-            {
-                return state.event_archive;
-            }
+            return state.event_archive
         },
 
         active_archive_event: (state) => {
