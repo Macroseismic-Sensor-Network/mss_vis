@@ -25,93 +25,132 @@
 -->
 
 <template>
-    <div class="event-supplement-panel">
-        <div class="event-supplement-panel"
-             v-if="active_event != undefined">
-            <w-flex class="wrap">
-                <EventSupplementButton v-for="cur_supplement in supplements"
-                                       v-bind:key="cur_supplement.category + '_' + cur_supplement.name"
-                                       v-bind:public_id="public_id"
-                                       v-bind:category="cur_supplement.category"
-                                       v-bind:name="cur_supplement.name"/>
-            </w-flex>
+    <div>
+        <div v-if="!is_loaded">
+            <w-spinner bounce/><w-spinner bounce/><w-spinner bounce/>Loading {{ supplement_id }}
         </div>
-        {{ supplement_data_state }}
+        <w-button class="ma1" 
+                  v-if="is_loaded"
+                  v-on:click="on_button_clicked">
+            {{ label }}
+        </w-button>
     </div>
 </template>
 
 <script>
 
-import EventSupplementButton from '../components/EventSupplementButton'
 import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
 import L from 'leaflet';
 
 export default {
-    name: 'EventSupplementPanel',
-    props: {},
+    name: 'EventSupplementButton',
+    props: {
+        public_id: String,
+        category: String,
+        name: String,
+    },
     components: {
-        EventSupplementButton,
     },
     created() {
         this.logger = log.getLogger(this.$options.name)
         this.logger.setLevel(this.$store.getters.log_level);
         log_prefix.apply(this.logger,
             this.$store.getters.prefix_options);
+
+    },
+    mounted() {
+        this.logger.debug('The Component is mounted.');
+        if (this.is_shown)
+        {
+            this.plot_layer();
+        }
     },
     data() {
         return {
-            supplements: [
-                { category: 'eventpgv',
-                  name: 'pgvstation'},
-                { category: 'eventpgv',
-                  name: 'pgvvoronoi'},
-                { category: 'pgvsequence',
-                  name: 'pgvstation'},
-                { category: 'pgvsequence',
-                  name: 'pgvvoronoi'},
-            ],
+            layer: undefined,
         };
     },
     watch: {
-    },
-    computed: {
-        public_id: function() {
-            if (this.active_event)
+        is_shown: function(new_state) {
+            if (new_state)
             {
-                return this.active_event.public_id;
+                this.plot_layer();
             }
             else
             {
-                return undefined;
+                this.supplement_group.removeLayer(this.layer);
             }
         },
 
-        active_event: function() {
-            return this.$store.getters.active_archive_event;
+        public_id: function() {
+            this.logger.debug('The public_id has changed.');
+            this.logger.debug(this.is_shown);
+            if (this.is_shown)
+            {
+                this.logger.debug('Removing the layer.')
+                this.supplement_group.removeLayer(this.layer);
+                this.logger.debug('Plotting the layer.')
+                this.logger.debug(this.is_loaded);
+                this.plot_layer();
+            }
+        },
+
+        is_loaded: function() {
+            this.logger.debug('The is_loaded state has changed.');
+            this.logger.debug(this.is_shown);
+            if (this.is_shown)
+            {
+                this.logger.debug('Removing the layer.')
+                this.supplement_group.removeLayer(this.layer);
+                this.logger.debug('Plotting the layer.')
+                this.logger.debug(this.is_loaded);
+                this.plot_layer();
+            }
+        },
+    },
+    computed: {
+        is_loaded: function() {
+            if (this.supplement_data === undefined) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        },
+
+        is_shown: function() {
+            return this.$store.getters.is_event_supplement_shown(this.supplement_id)
+        },
+
+        label: function() {
+            let prefix = '';
+            if (this.is_shown)
+            {
+                prefix = 'hide ';
+            }
+            else
+            {
+                prefix = 'show ';
+            }
+            return prefix + this.category + '/' + this.name;
+        },
+
+        supplement_id: function() {
+            return this.category + '/' + this.name;
         },
 
         supplement_data: function() {
             if (this.public_id)
             {
-                return this.$store.getters.get_event_supplement(this.public_id);
+                return this.$store.getters.get_event_supplement(this.public_id,
+                                                                this.category,
+                                                                this.name);
             }
             else
             {
                 return undefined;
             }
-        },
-
-        supplement_data_state: function() {
-            if (this.public_id)
-            {
-                return this.$store.getters.get_event_supplement_state(this.public_id);
-            }
-            else
-            {
-                return undefined;
-            }
-
         },
 
         map: function() {
@@ -125,6 +164,10 @@ export default {
         scales: function() {
             return this.$store.getters.scales;
         },
+
+        display_settings: function() {
+            return this.$store.getters.display_settings;
+        },
     },
     methods: {
         pgv_to_color(pgv) {
@@ -132,6 +175,25 @@ export default {
             const colormap = this.$store.getters.map_config.colormap;
             var color = colormap(this.scales.color(pgv));
             return color;
+        },
+
+        on_button_clicked: function() {
+            this.logger.debug('Supplement button clicked.');
+            let payload = { supplement_id: this.supplement_id };
+            this.$store.commit('toggle_supplement_layer', payload);
+        },
+
+        plot_layer: function() {
+            switch (this.supplement_id)
+            {
+                case 'eventpgv/pgvstation':
+                    this.on_show_pgvstation();
+                    break;
+
+                case 'eventpgv/pgvvoronoi':
+                    this.on_show_pgvvoronoi();
+                    break;
+            }
         },
 
         on_show_pgvstation: function() {
@@ -146,7 +208,7 @@ export default {
             };
 
             this.logger.debug("Adding pgvstation layer.");
-            let pgvstation = L.geoJSON(this.supplement_data.pgvstation,
+            this.layer = L.geoJSON(this.supplement_data,
                                            {
                                                pointToLayer: function(feature, lat_lon) {
                                                     if( feature.properties.pgv) {
@@ -157,12 +219,12 @@ export default {
                                                         marker_style.fillColor = '#777777';
                                                     }
                                                     marker_style.radius = self.scales.radius(feature.properties.pgv);
-                                                    self.logger.debug("marker_style", marker_style);
                                                     return L.circleMarker(lat_lon, marker_style);
                                                },
                                            }
                                           );
-            this.supplement_group.addLayer(pgvstation);
+            this.supplement_group.addLayer(this.layer);
+            this.layer.bringToFront();
         },
 
         on_show_pgvvoronoi: function() {
@@ -175,7 +237,7 @@ export default {
                 fillOpacity: 0.3,
             };
             this.logger.debug("Adding pgvvoronoi.");
-            let pgvvoronoi = L.geoJSON(this.supplement_data.pgvvoronoi,
+            this.layer = L.geoJSON(this.supplement_data,
                                            {
                                                 style: function(feature) {
                                                     voronoi_style.fillColor = self.pgv_to_color(feature.properties.pgv);
@@ -191,7 +253,8 @@ export default {
                                                 },
                                            }
             );
-            this.supplement_group.addLayer(pgvvoronoi);
+            this.supplement_group.addLayer(this.layer);
+            this.layer.bringToBack();
         },
     },
 }

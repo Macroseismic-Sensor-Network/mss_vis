@@ -67,11 +67,11 @@ function handle_msg_data(msg_id, payload, state) {
             var public_id = payload.public_id;
             if ('data' in state.event_supplement[public_id])
             {
-                state.event_supplement[public_id].data = payload;
+                state.event_supplement[public_id].data = payload.data;
             }
             else
             {
-                Vue.set(state.event_supplement[public_id], 'data', payload);
+                Vue.set(state.event_supplement[public_id], 'data', payload.data);
 
             }
             state.event_supplement[public_id].state = 'loaded';
@@ -200,6 +200,11 @@ function get_display_range(state) {
     return [start_date, end_date]
 }
 
+function check_nested(obj, level, ...rest) {
+    if (obj === undefined) return false;
+    if (rest.length == 0 && obj.hasOwnProperty(level)) return true;
+    return check_nested(obj[level], ...rest)
+}
 
 /*
 function to_isoformat(date) {
@@ -324,6 +329,8 @@ export default new Vuex.Store({
                 },
                 archive: {
                     active_event: undefined,
+                    supplement_layers: ['eventpgv/pgvstation',
+                                        'eventpgv/pgvvoronoi'],
                 },
             },
         },
@@ -771,10 +778,10 @@ export default new Vuex.Store({
             return state.display.mode;
         },
 
-        get_event_supplement: (state) => (public_id) => {
-            if (public_id in state.event_supplement)
+        get_event_supplement: (state) => (public_id, category, name) => {
+            if (check_nested(state.event_supplement, public_id, 'data', category, name))
             {
-                return state.event_supplement[public_id].data;
+                return state.event_supplement[public_id].data[category][name]
             }
             else
             {
@@ -795,6 +802,14 @@ export default new Vuex.Store({
 
         time_format(state) {
             return state.time_format;
+        },
+
+        is_event_supplement_shown: (state) => (supplement_id) => {
+            return state.display.settings.archive.supplement_layers.includes(supplement_id);
+        },
+
+        display_settings(state) {
+            return state.display.settings;
         },
     },
 
@@ -1001,6 +1016,7 @@ export default new Vuex.Store({
         deactivate_archive_mode(state) {
             state.layout.panes.map_container.event_info.visible = false;
             state.layout.panes.content.visible = false
+            state.leaflet_map.layer_groups.event_supplement.clearLayers();
             state.leaflet_map.layer_groups.event_supplement.remove();
         },
 
@@ -1011,10 +1027,22 @@ export default new Vuex.Store({
                 }, 2000);
         },
 
-       language(state) {
-            return state.language;
-       },
-
+        toggle_supplement_layer(state, payload) {
+            if (!state.display.settings.archive.supplement_layers.includes(payload.supplement_id))
+            {
+                state.logger.debug('Adding the supplement_id.');
+                state.display.settings.archive.supplement_layers.push(payload.supplement_id)
+            }
+            else
+            {
+                state.logger.debug('Removing the supplement_id.');
+                let pos = state.display.settings.archive.supplement_layers.indexOf(payload.supplement_id);
+                if (pos > -1)
+                {
+                    state.display.settings.archive.supplement_layers.splice(pos, 1);
+                }
+            }
+        },
 
 
     },
@@ -1065,8 +1093,18 @@ export default new Vuex.Store({
             {
                 state.leaflet_map.layer_groups.event_supplement.clearLayers();
                 let mutation_payload = { public_id: payload.public_id };
+                let supplement_payload = { public_id: payload.public_id,
+                                           selection: [{ category: 'eventpgv',
+                                                         name: 'pgvstation'}, 
+                                                       { category: 'eventpgv',
+                                                         name: 'pgvvoronoi'},
+                                                       { category: 'pgvsequence',
+                                                         name: 'pgvstation'},
+                                                       { category: 'pgvsequence',
+                                                         name: 'pgvvoronoi'}]
+                                         };
                 commit('set_show_archive_event', mutation_payload);
-                dispatch('request_event_supplement', payload)
+                dispatch('request_event_supplement', supplement_payload)
             }
         },
 
@@ -1077,7 +1115,8 @@ export default new Vuex.Store({
             Vue.set(state.event_supplement[payload.public_id], 'state', 'loading');
             let msg_header = {'msg_class': 'request',
                               'msg_id': 'event_supplement'}
-            let msg_payload = {'public_id': payload.public_id}
+            let msg_payload = {'public_id': payload.public_id,
+                               'selection': payload.selection}
             let msg = {'header': msg_header,
                        'payload': msg_payload};
 
