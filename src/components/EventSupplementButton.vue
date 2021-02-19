@@ -27,7 +27,7 @@
 <template>
     <div>
         <w-toolbar>
-            <div class="title3">{{ label }}</div>
+            <div class="title3">{{ title }}</div>
             <div class="spacer"></div>
             <w-tooltip left>
                 <template #activator="{ on }">
@@ -49,6 +49,7 @@
 import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
 import L from 'leaflet';
+import 'leaflet-timedimension';
 
 export default {
     name: 'EventSupplementButton',
@@ -68,14 +69,20 @@ export default {
     },
     mounted() {
         this.logger.debug('The Component is mounted.');
-        if (this.is_shown)
-        {
-            this.plot_layer();
-        }
     },
     data() {
         return {
             layer: undefined,
+            lang_title: {
+                eventpgv: {
+                    pgvstation: 'PGV Stationsmaker',
+                    pgvvoronoi: 'PGV Voronoizellen',
+                },
+                pgvsequence: {
+                    pgvstation: 'PGV Stationsmarker Zeitreihe',
+                    pgvvoronoi: 'PGV Voronoizellen Zeitreihe',
+                }
+            },
         };
     },
     watch: {
@@ -87,6 +94,7 @@ export default {
             else
             {
                 this.supplement_group.removeLayer(this.layer);
+                this.layer = undefined;
             }
         },
 
@@ -95,8 +103,11 @@ export default {
             this.logger.debug(this.is_shown);
             if (this.is_shown)
             {
-                this.logger.debug('Removing the layer.')
-                this.supplement_group.removeLayer(this.layer);
+                if (this.layer)
+                {
+                    this.logger.debug('Removing the layer.')
+                    this.supplement_group.removeLayer(this.layer);
+                }
                 this.logger.debug('Plotting the layer.')
                 this.logger.debug(this.is_loaded);
                 this.plot_layer();
@@ -108,8 +119,11 @@ export default {
             this.logger.debug(this.is_shown);
             if (this.is_shown)
             {
-                this.logger.debug('Removing the layer.')
-                this.supplement_group.removeLayer(this.layer);
+                if (this.layer)
+                {
+                    this.logger.debug('Removing the layer.')
+                    this.supplement_group.removeLayer(this.layer);
+                }
                 this.logger.debug('Plotting the layer.')
                 this.logger.debug(this.is_loaded);
                 this.plot_layer();
@@ -138,6 +152,10 @@ export default {
                 return 'verstecke';
             else
                 return 'zeige';
+        },
+
+        title: function() {
+            return this.lang_title[this.category][this.name];
         },
 
         is_shown: function() {
@@ -198,16 +216,24 @@ export default {
             switch (this.supplement_id)
             {
                 case 'eventpgv/pgvstation':
-                    this.on_show_pgvstation();
+                    this.plot_pgvstation();
                     break;
 
                 case 'eventpgv/pgvvoronoi':
-                    this.on_show_pgvvoronoi();
+                    this.plot_pgvvoronoi();
+                    break;
+
+                case 'pgvsequence/pgvstation':
+                    this.plot_pgvsequence_pgvstation();
+                    break;
+
+                case 'pgvsequence/pgvvoronoi':
+                    this.plot_pgvsequence_pgvvoronoi();
                     break;
             }
         },
 
-        on_show_pgvstation: function() {
+        plot_pgvstation: function() {
             var self = this;
             let marker_style = {
                 radius: 8,
@@ -238,7 +264,7 @@ export default {
             this.layer.bringToFront();
         },
 
-        on_show_pgvvoronoi: function() {
+        plot_pgvvoronoi: function() {
             var self = this;
             let voronoi_style = {
                 fillColor: "#ffffff",
@@ -263,6 +289,81 @@ export default {
                                                     return voronoi_style;
                                                 },
                                            }
+            );
+            this.supplement_group.addLayer(this.layer);
+            this.layer.bringToBack();
+        },
+
+        plot_pgvsequence_pgvstation: function() {
+            this.logger.debug('Adding pgvstation sequence.');
+            let self = this;
+            let marker_style = {
+                radius: 8,
+                fillColor: "#ff7800",
+                color: "#000",
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.8
+            };
+            let geojson_layer = L.geoJSON(this.supplement_data,
+                {
+                    pointToLayer: function(feature, lat_lon) {
+                        if( feature.properties.pgv) {
+                            marker_style.fillColor = self.pgv_to_color(feature.properties.pgv);
+                        }
+                        else
+                        {
+                            marker_style.fillColor = '#777777';
+                        }
+                        marker_style.radius = self.scales.radius(feature.properties.pgv);
+                        return L.circleMarker(lat_lon, marker_style);
+                    },
+                }
+            );
+            this.layer = L.timeDimension.layer.geoJson(geojson_layer,
+                {
+                    updateCurrentTime: true,
+                    updateTimeDimension: true,
+                    duration: 'PT0S',
+                    updateTimeDimensionMode: 'replace',
+                },
+            );
+            this.supplement_group.addLayer(this.layer);
+            this.layer.bringToFront();
+        },
+
+        plot_pgvsequence_pgvvoronoi: function() {
+            var self = this;
+            let voronoi_style = {
+                fillColor: "#ffffff",
+                color: "#000000",
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.3,
+            };
+            let geojson_layer = L.geoJSON(this.supplement_data,
+                                           {
+                                                style: function(feature) {
+                                                    voronoi_style.fillColor = self.pgv_to_color(feature.properties.pgv);
+                                                    if (feature.properties.triggered === true)
+                                                    {
+                                                        voronoi_style.fillOpacity = 1;
+                                                    }
+                                                    else
+                                                    {
+                                                        voronoi_style.fillOpacity = 0.3;
+                                                    }
+                                                    return voronoi_style;
+                                                },
+                                           }
+            );
+            this.layer = L.timeDimension.layer.geoJson(geojson_layer,
+                {
+                    updateCurrentTime: true,
+                    updateTimeDimension: true,
+                    duration: 'PT0S',
+                    updateTimeDimensionMode: 'replace',
+                },
             );
             this.supplement_group.addLayer(this.layer);
             this.layer.bringToBack();

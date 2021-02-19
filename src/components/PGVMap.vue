@@ -92,6 +92,7 @@ import * as log_prefix from 'loglevel-plugin-prefix';
 import L from 'leaflet';
 import 'leaflet-easybutton';
 import leafletImage from "leaflet-image";
+import 'leaflet-timedimension';
 
 export default {
     name: 'PGVMap',
@@ -133,10 +134,11 @@ export default {
     mounted() {
         //Leaflet map initialisieren
         this.leaflet_map=L.map("mapid", {
-            maxBounds: [[47.1, 15.2],
-                        [48.5, 17.5]],
-            maxBoundsViscosity: 1.0,
-        });
+                maxBounds: [[47.1, 15.2],
+                            [48.5, 17.5]],
+                maxBoundsViscosity: 1.0,
+            },
+        );
         this.init_map();
         //this.$watch('radius', this.plot_stations);
         //this.$store.commit("LOAD_STATION_METADATA");
@@ -179,7 +181,20 @@ export default {
             }
         };
     },
-
+    watch: {
+        is_realtime: function(new_state) {
+            if (new_state)
+            {
+                this.logger.debug('Removing the timedimension control.');
+                this.leaflet_map.removeControl(this.leaflet_time_dimension_control);
+            }
+            else
+            {
+                this.logger.debug('Adding the timedimension control.');
+                this.leaflet_map.addControl(this.leaflet_time_dimension_control);
+            }
+        },
+    },
     updated() {
     },
 
@@ -188,9 +203,35 @@ export default {
             get() {
                 return this.$store.getters.leaflet_map.map_object;
             },
-
             set(map) {
                 this.$store.commit('set_leaflet_map_object', map);
+            }
+        },
+
+        leaflet_time_dimension: {
+            get() {
+                return this.$store.getters.leaflet_map.time_dimension.dimension;
+            },
+            set(time_dimension) {
+                this.$store.commit('set_leaflet_time_dimension', time_dimension);
+            }
+        },
+
+        leaflet_time_dimension_player: {
+            get() {
+                return this.$store.getters.leaflet_map.time_dimension.player;
+            },
+            set(player) {
+                this.$store.commit('set_leaflet_time_dimension_player', player);
+            }
+        },
+
+        leaflet_time_dimension_control: {
+            get() {
+                return this.$store.getters.leaflet_map.time_dimension.control;
+            },
+            set(control) {
+                this.$store.commit('set_leaflet_time_dimension_control', control);
             }
         },
 
@@ -256,6 +297,29 @@ export default {
             }
 
             oe3d.addTo(this.leaflet_map);
+
+            // Add the timecontrol stuff.
+            this.leaflet_time_dimension = new L.TimeDimension({ period: 'PT0S',});
+            this.leaflet_map.timeDimension = this.leaflet_time_dimension;
+            this.leaflet_time_dimension_player = new L.TimeDimension.Player(
+                {
+                    transitionTime: 500,
+                    loop: true,
+                    startOver: true,
+                },
+                this.leaflet_time_dimension
+            );
+
+            let control_options ={
+                timeSliderDragUpdate: true,
+                loopButton: true,
+                autoPlay: true,
+                minSpeed: 1,
+                maxSpeed: 5,
+                speedStep: 1,
+                player: this.leaflet_time_dimension_player,
+            };
+            this.leaflet_time_dimension_control = new L.Control.TimeDimension(control_options);
 
             //var on_export_image_click = this.map_to_image;
             L.control.layers(layer_options, null, {position: 'topleft', autoZIndex:false }).addTo(this.leaflet_map);

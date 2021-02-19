@@ -350,6 +350,11 @@ export default new Vuex.Store({
             layer_groups: { 
                 event_supplement: L.layerGroup(),
             },
+            time_dimension: {
+                dimension: undefined,
+                player: undefined,
+                control: undefined,
+            },
         },
 
         map_config: { 
@@ -965,6 +970,18 @@ export default new Vuex.Store({
 
         set_leaflet_map_object(state, payload) {
             state.leaflet_map.map_object = payload;
+        },
+
+        set_leaflet_time_dimension(state, payload) {
+            state.leaflet_map.time_dimension.dimension = payload;
+        },
+
+        set_leaflet_time_dimension_player(state, payload) {
+            state.leaflet_map.time_dimension.player = payload;
+        },
+
+        set_leaflet_time_dimension_control(state, payload) {
+            state.leaflet_map.time_dimension.control = payload;
         },
 
         toggle_leaflet_map_redraw(state) {

@@ -49,13 +49,13 @@
                             <div style="overflow: scroll; height: 100%; background-color: white;">
                                 <w-accordion :items="4"
                                     v-model="map_info_accordion_expanded">
-                                    <template #item-title.1="">Map Info</template>
+                                    <template #item-title.1="">Status</template>
                                     <template #item-content.1=""><MapInfoPanel key="map_info_panel_key"/></template>
-                                    <template #item-title.2="">Event Monitor</template>
+                                    <template #item-title.2="">Ereignis Monitor</template>
                                     <template #item-content.2=""><EventMonitorPanel key="event_monitor_panel_key"/></template>
-                                    <template #item-title.3="">Recent Events</template>
+                                    <template #item-title.3="">Aktuelle Ereignisse</template>
                                     <template #item-content.3=""><RecentEventInfoPanel key="archive_info_panel_key"/></template>
-                                    <template #item-title.4="">Station Info</template>
+                                    <template #item-title.4="">Stationsdetails</template>
                                     <template #item-content.4=""><StationInfoPanel key="station_info_panel_key"/></template>
                                 </w-accordion>
                             </div>
@@ -66,9 +66,9 @@
                             <div style="overflow: scroll; height: 100%; background-color: white;">
                                 <w-accordion :items="2"
                                     v-model="map_info_accordion_expanded">
-                                    <template #item-title.1="">Event Details</template>
+                                    <template #item-title.1="">Ereignisdetails</template>
                                     <template #item-content.1=""><EventDetailsPanel key="event_details_panel_key"/></template>
-                                    <template #item-title.2="">Supplement Data</template>
+                                    <template #item-title.2="">Zusatzdaten</template>
                                     <template #item-content.2=""><EventSupplementPanel key="event_supplement_panel_key"/></template>
                                 </w-accordion>
                             </div>
