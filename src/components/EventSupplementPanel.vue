@@ -25,19 +25,14 @@
 -->
 
 <template>
-    <div class="event-supplement-panel">
-        <div class="event-supplement-panel"
-             v-if="active_event != undefined">
-            <w-flex class="wrap">
-                <EventSupplementButton v-for="cur_supplement in supplements"
-                                       v-bind:key="cur_supplement.category + '_' + cur_supplement.name"
-                                       v-bind:public_id="public_id"
-                                       v-bind:category="cur_supplement.category"
-                                       v-bind:name="cur_supplement.name"/>
-            </w-flex>
-        </div>
-        {{ supplement_data_state }}
-    </div>
+    <w-flex column
+         v-if="active_event != undefined">
+            <EventSupplementButton v-for="cur_supplement in supplements"
+                                   v-bind:key="cur_supplement.category + '_' + cur_supplement.name"
+                                   v-bind:public_id="public_id"
+                                   v-bind:category="cur_supplement.category"
+                                   v-bind:name="cur_supplement.name"/>
+    </w-flex>
 </template>
 
 <script>

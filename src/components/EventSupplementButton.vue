@@ -26,14 +26,21 @@
 
 <template>
     <div>
-        <div v-if="!is_loaded">
-            <w-spinner bounce/><w-spinner bounce/><w-spinner bounce/>Loading {{ supplement_id }}
-        </div>
-        <w-button class="ma1" 
-                  v-if="is_loaded"
-                  v-on:click="on_button_clicked">
-            {{ label }}
-        </w-button>
+        <w-toolbar>
+            <div class="title3">{{ label }}</div>
+            <div class="spacer"></div>
+            <w-tooltip left>
+                <template #activator="{ on }">
+                    <w-button :icon="show_icon"
+                              :loading="!is_loaded"
+                              v-on="on"
+                              v-on:click="on_show_clicked"
+                              text
+                              lg
+                              class="ml3"></w-button>
+                </template>{{ show_tooltip }}
+            </w-tooltip>
+        </w-toolbar>
     </div>
 </template>
 
@@ -119,21 +126,26 @@ export default {
             }
         },
 
+        show_icon: function() {
+            if (this.is_shown)
+                return 'mdi mdi-eye';
+            else
+                return 'mdi mdi-eye-off';
+        },
+
+        show_tooltip: function() {
+            if (this.is_shown)
+                return 'verstecke';
+            else
+                return 'zeige';
+        },
+
         is_shown: function() {
             return this.$store.getters.is_event_supplement_shown(this.supplement_id)
         },
 
         label: function() {
-            let prefix = '';
-            if (this.is_shown)
-            {
-                prefix = 'hide ';
-            }
-            else
-            {
-                prefix = 'show ';
-            }
-            return prefix + this.category + '/' + this.name;
+            return this.category + '/' + this.name;
         },
 
         supplement_id: function() {
@@ -177,8 +189,7 @@ export default {
             return color;
         },
 
-        on_button_clicked: function() {
-            this.logger.debug('Supplement button clicked.');
+        on_show_clicked: function() {
             let payload = { supplement_id: this.supplement_id };
             this.$store.commit('toggle_supplement_layer', payload);
         },

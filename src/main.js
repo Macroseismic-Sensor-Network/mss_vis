@@ -31,6 +31,7 @@ import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
 import WaveUI from 'wave-ui'
 import 'wave-ui/dist/wave-ui.css'
+import '@mdi/font/css/materialdesignicons.min.css'
 import pako from 'pako';
 
 Vue.config.productionTip = false
