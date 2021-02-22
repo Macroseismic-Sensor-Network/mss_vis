@@ -44,6 +44,10 @@
             </w-menu>
 
         </div>
+        <EventSupplementLayer v-for="cur_supplement in supported_supplements"
+                              v-bind:key="cur_supplement.category + '_' + cur_supplement.name"
+                              v-bind:category="cur_supplement.category"
+                              v-bind:name="cur_supplement.name"/>
 
         <!-- SVG templates are added to the leaflet SVG overlay in the mounted
             function. -->
@@ -83,6 +87,7 @@
 import $ from 'jquery';	
 import PGVMapMarker from '../components/PGVMapMarker.vue';
 import PGVLegend from '../components/PGVLegend.vue';
+import EventSupplementLayer from '../components/EventSupplementLayer.vue';
 //import ArchiveEventPlot from '../components/ArchiveEventPlot.vue';
 //import EventMonitorPlot from '../components/EventMonitorPlot.vue';
 import * as d3 from "d3";
@@ -104,6 +109,7 @@ export default {
     components: {
         PGVMapMarker,
         PGVLegend,
+        EventSupplementLayer,
         //EventMonitorPlot,
         //ArchiveEventPlot,
     },
@@ -265,6 +271,10 @@ export default {
 
         is_realtime: function() {
             return this.$store.getters.is_realtime; 
+        },
+
+        supported_supplements: function() {
+            return this.$store.getters.supported_supplements;
         },
     },
 

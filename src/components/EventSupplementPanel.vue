@@ -48,28 +48,17 @@ export default {
     components: {
         EventSupplementButton,
     },
+
     created() {
         this.logger = log.getLogger(this.$options.name)
         this.logger.setLevel(this.$store.getters.log_level);
         log_prefix.apply(this.logger,
             this.$store.getters.prefix_options);
     },
-    data() {
-        return {
-            supplements: [
-                { category: 'eventpgv',
-                  name: 'pgvstation'},
-                { category: 'eventpgv',
-                  name: 'pgvvoronoi'},
-                { category: 'pgvsequence',
-                  name: 'pgvstation'},
-                { category: 'pgvsequence',
-                  name: 'pgvvoronoi'},
-            ],
-        };
-    },
+
     watch: {
     },
+
     computed: {
         public_id: function() {
             if (this.active_event)
@@ -84,6 +73,10 @@ export default {
 
         active_event: function() {
             return this.$store.getters.active_archive_event;
+        },
+
+        supplements: function() {
+            return this.$store.getters.supported_supplements;
         },
 
         supplement_data: function() {

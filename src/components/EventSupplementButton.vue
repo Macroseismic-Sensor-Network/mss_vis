@@ -48,8 +48,8 @@
 
 import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
-import L from 'leaflet';
-import 'leaflet-timedimension';
+//import L from 'leaflet';
+//import 'leaflet-timedimension';
 
 export default {
     name: 'EventSupplementButton',
@@ -68,7 +68,6 @@ export default {
 
     },
     mounted() {
-        this.logger.debug('The Component is mounted.');
     },
     data() {
         return {
@@ -86,49 +85,6 @@ export default {
         };
     },
     watch: {
-        is_shown: function(new_state) {
-            if (new_state)
-            {
-                this.plot_layer();
-            }
-            else
-            {
-                this.supplement_group.removeLayer(this.layer);
-                this.layer = undefined;
-            }
-        },
-
-        public_id: function() {
-            this.logger.debug('The public_id has changed.');
-            this.logger.debug(this.is_shown);
-            if (this.is_shown)
-            {
-                if (this.layer)
-                {
-                    this.logger.debug('Removing the layer.')
-                    this.supplement_group.removeLayer(this.layer);
-                }
-                this.logger.debug('Plotting the layer.')
-                this.logger.debug(this.is_loaded);
-                this.plot_layer();
-            }
-        },
-
-        is_loaded: function() {
-            this.logger.debug('The is_loaded state has changed.');
-            this.logger.debug(this.is_shown);
-            if (this.is_shown)
-            {
-                if (this.layer)
-                {
-                    this.logger.debug('Removing the layer.')
-                    this.supplement_group.removeLayer(this.layer);
-                }
-                this.logger.debug('Plotting the layer.')
-                this.logger.debug(this.is_loaded);
-                this.plot_layer();
-            }
-        },
     },
     computed: {
         is_loaded: function() {
@@ -159,15 +115,7 @@ export default {
         },
 
         is_shown: function() {
-            return this.$store.getters.is_event_supplement_shown(this.supplement_id)
-        },
-
-        label: function() {
-            return this.category + '/' + this.name;
-        },
-
-        supplement_id: function() {
-            return this.category + '/' + this.name;
+            return this.$store.getters.is_event_supplement_shown(this.category, this.name)
         },
 
         supplement_data: function() {
@@ -182,191 +130,12 @@ export default {
                 return undefined;
             }
         },
-
-        map: function() {
-            return this.$store.getters.leaflet_map.map_object;
-        },
-
-        supplement_group: function() {
-            return this.$store.getters.leaflet_map.layer_groups.event_supplement;
-        },
-
-        scales: function() {
-            return this.$store.getters.scales;
-        },
-
-        display_settings: function() {
-            return this.$store.getters.display_settings;
-        },
     },
     methods: {
-        pgv_to_color(pgv) {
-            // Convert the PGV value [m/s] to a color value.
-            const colormap = this.$store.getters.map_config.colormap;
-            var color = colormap(this.scales.color(pgv));
-            return color;
-        },
-
         on_show_clicked: function() {
-            let payload = { supplement_id: this.supplement_id };
+            let payload = { category: this.category,
+                            name: this.name };
             this.$store.commit('toggle_supplement_layer', payload);
-        },
-
-        plot_layer: function() {
-            switch (this.supplement_id)
-            {
-                case 'eventpgv/pgvstation':
-                    this.plot_pgvstation();
-                    break;
-
-                case 'eventpgv/pgvvoronoi':
-                    this.plot_pgvvoronoi();
-                    break;
-
-                case 'pgvsequence/pgvstation':
-                    this.plot_pgvsequence_pgvstation();
-                    break;
-
-                case 'pgvsequence/pgvvoronoi':
-                    this.plot_pgvsequence_pgvvoronoi();
-                    break;
-            }
-        },
-
-        plot_pgvstation: function() {
-            var self = this;
-            let marker_style = {
-                radius: 8,
-                fillColor: "#ff7800",
-                color: "#000",
-                weight: 1,
-                opacity: 1,
-                fillOpacity: 0.8
-            };
-
-            this.logger.debug("Adding pgvstation layer.");
-            this.layer = L.geoJSON(this.supplement_data,
-                                           {
-                                               pointToLayer: function(feature, lat_lon) {
-                                                    if( feature.properties.pgv) {
-                                                        marker_style.fillColor = self.pgv_to_color(feature.properties.pgv);
-                                                    }
-                                                    else
-                                                    {
-                                                        marker_style.fillColor = '#777777';
-                                                    }
-                                                    marker_style.radius = self.scales.radius(feature.properties.pgv);
-                                                    return L.circleMarker(lat_lon, marker_style);
-                                               },
-                                           }
-                                          );
-            this.supplement_group.addLayer(this.layer);
-            this.layer.bringToFront();
-        },
-
-        plot_pgvvoronoi: function() {
-            var self = this;
-            let voronoi_style = {
-                fillColor: "#ffffff",
-                color: "#000000",
-                weight: 1,
-                opacity: 1,
-                fillOpacity: 0.3,
-            };
-            this.logger.debug("Adding pgvvoronoi.");
-            this.layer = L.geoJSON(this.supplement_data,
-                                           {
-                                                style: function(feature) {
-                                                    voronoi_style.fillColor = self.pgv_to_color(feature.properties.pgv);
-                                                    if (feature.properties.triggered === true)
-                                                    {
-                                                        voronoi_style.fillOpacity = 1;
-                                                    }
-                                                    else
-                                                    {
-                                                        voronoi_style.fillOpacity = 0.3;
-                                                    }
-                                                    return voronoi_style;
-                                                },
-                                           }
-            );
-            this.supplement_group.addLayer(this.layer);
-            this.layer.bringToBack();
-        },
-
-        plot_pgvsequence_pgvstation: function() {
-            this.logger.debug('Adding pgvstation sequence.');
-            let self = this;
-            let marker_style = {
-                radius: 8,
-                fillColor: "#ff7800",
-                color: "#000",
-                weight: 1,
-                opacity: 1,
-                fillOpacity: 0.8
-            };
-            let geojson_layer = L.geoJSON(this.supplement_data,
-                {
-                    pointToLayer: function(feature, lat_lon) {
-                        if( feature.properties.pgv) {
-                            marker_style.fillColor = self.pgv_to_color(feature.properties.pgv);
-                        }
-                        else
-                        {
-                            marker_style.fillColor = '#777777';
-                        }
-                        marker_style.radius = self.scales.radius(feature.properties.pgv);
-                        return L.circleMarker(lat_lon, marker_style);
-                    },
-                }
-            );
-            this.layer = L.timeDimension.layer.geoJson(geojson_layer,
-                {
-                    updateCurrentTime: true,
-                    updateTimeDimension: true,
-                    duration: 'PT0S',
-                    updateTimeDimensionMode: 'replace',
-                },
-            );
-            this.supplement_group.addLayer(this.layer);
-            this.layer.bringToFront();
-        },
-
-        plot_pgvsequence_pgvvoronoi: function() {
-            var self = this;
-            let voronoi_style = {
-                fillColor: "#ffffff",
-                color: "#000000",
-                weight: 1,
-                opacity: 1,
-                fillOpacity: 0.3,
-            };
-            let geojson_layer = L.geoJSON(this.supplement_data,
-                                           {
-                                                style: function(feature) {
-                                                    voronoi_style.fillColor = self.pgv_to_color(feature.properties.pgv);
-                                                    if (feature.properties.triggered === true)
-                                                    {
-                                                        voronoi_style.fillOpacity = 1;
-                                                    }
-                                                    else
-                                                    {
-                                                        voronoi_style.fillOpacity = 0.3;
-                                                    }
-                                                    return voronoi_style;
-                                                },
-                                           }
-            );
-            this.layer = L.timeDimension.layer.geoJson(geojson_layer,
-                {
-                    updateCurrentTime: true,
-                    updateTimeDimension: true,
-                    duration: 'PT0S',
-                    updateTimeDimensionMode: 'replace',
-                },
-            );
-            this.supplement_group.addLayer(this.layer);
-            this.layer.bringToBack();
         },
     },
 }

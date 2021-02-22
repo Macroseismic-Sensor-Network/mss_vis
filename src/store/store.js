@@ -329,11 +329,27 @@ export default new Vuex.Store({
                 },
                 archive: {
                     active_event: undefined,
-                    supplement_layers: ['eventpgv/pgvstation',
-                                        'eventpgv/pgvvoronoi'],
+                    supplement_layers: [
+                        { category: 'eventpgv',
+                          name: 'pgvstation'},
+                        { category: 'eventpgv',
+                          name: 'pgvvoronoi'},
+                    ],
                 },
             },
         },
+
+        // The supported event supplements.
+        supported_supplements: [
+            { category: 'eventpgv',
+              name: 'pgvstation'},
+            { category: 'eventpgv',
+              name: 'pgvvoronoi'},
+            { category: 'pgvsequence',
+              name: 'pgvstation'},
+            { category: 'pgvsequence',
+              name: 'pgvvoronoi'},
+        ],
 
         // The event supplement data. Keys are the public_id of the event.
         event_supplement: {},
@@ -809,12 +825,20 @@ export default new Vuex.Store({
             return state.time_format;
         },
 
-        is_event_supplement_shown: (state) => (supplement_id) => {
-            return state.display.settings.archive.supplement_layers.includes(supplement_id);
+        is_event_supplement_shown: (state) => (category, name) => {
+            let supp_layer = { category: category,
+                               name: name};
+            let layer_found = state.display.settings.archive.supplement_layers.some(layer => layer.category === supp_layer.category && layer.name === name);
+
+            return state.display.mode === 'archive' && layer_found;
         },
 
         display_settings(state) {
             return state.display.settings;
+        },
+
+        supported_supplements(state) {
+            return state.supported_supplements;
         },
     },
 
@@ -1045,20 +1069,24 @@ export default new Vuex.Store({
         },
 
         toggle_supplement_layer(state, payload) {
-            if (!state.display.settings.archive.supplement_layers.includes(payload.supplement_id))
+            let supp_layer = { category: payload.category,
+                               name: payload.name};
+            let layer_found = state.display.settings.archive.supplement_layers.some(layer => layer.category === supp_layer.category && layer.name === supp_layer.name);
+            if (!layer_found)
             {
-                state.logger.debug('Adding the supplement_id.');
-                state.display.settings.archive.supplement_layers.push(payload.supplement_id)
+                state.logger.debug('Adding the layer: ', supp_layer);
+                state.display.settings.archive.supplement_layers.push(supp_layer)
             }
             else
             {
-                state.logger.debug('Removing the supplement_id.');
-                let pos = state.display.settings.archive.supplement_layers.indexOf(payload.supplement_id);
+                state.logger.debug('Removing the layer: ', supp_layer);
+                let pos = state.display.settings.archive.supplement_layers.findIndex(layer => layer.category === supp_layer.category && layer.name === supp_layer.name);
                 if (pos > -1)
                 {
                     state.display.settings.archive.supplement_layers.splice(pos, 1);
                 }
             }
+            state.logger.debug(state.display.settings.archive.supplement_layers);
         },
 
 
