@@ -58,8 +58,20 @@ export default {
     },
     computed: {
         track_pgv_stations: function() {
-            return this.$store.getters.tracks.realtime.pgv_timeseries;
+            if (this.is_realtime)
+            {
+                return this.$store.getters.tracks.realtime.pgv_timeseries;
+            }
+            else
+            {
+                return [];
+            }
         },
+        
+        is_realtime: function() {
+            return this.$store.getters.is_realtime; 
+        },
+
     },
     methods: {
         on_splitpanes_resized() {

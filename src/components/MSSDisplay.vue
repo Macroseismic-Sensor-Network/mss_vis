@@ -28,12 +28,15 @@
     <w-app id="mss-display-container" class="cell auto">
             <splitpanes class="default-theme"
                         horizontal
-                        @resized="on_splitpanes_resized()">
-                <pane :size="layout.panes.tracks.size"
-                      v-if="layout.panes.tracks.visible">
+                        @resized="on_display_container_splitpanes_resized()">
+                <pane :size="layout.panes.tracks.size.toString() + '%'"
+                    :max-size="layout.panes.tracks.max_size"  
+                    v-if="layout.panes.tracks.visible"
+                    ref="tracks_pane">
                     <TracksPanel :key="tracksPanelKey"/>
                 </pane>
-                <pane :size="layout.panes.map_container.size">
+                <pane :size="layout.panes.map_container.size.toString() + '%'"
+                      ref="map_container_pane">
                     <splitpanes @resized="on_splitpanes_resized()">
                         <pane :size="layout.panes.map_container.menu.size"
                               v-if="layout.panes.map_container.menu.visible">
@@ -76,8 +79,10 @@
                         </pane>
                     </splitpanes>
                 </pane>
-                <pane :size="layout.panes.content.size"
-                      v-if="layout.panes.content.visible">
+                <pane :size="layout.panes.content.size.toString() + '%'"
+                      v-if="layout.panes.content.visible"
+                      :max-size="layout.panes.content.max_size"
+                      ref="content_pane">
                     <EventArchivePanel key="event_archive_panel_key" />
                 </pane>
             </splitpanes>
@@ -144,22 +149,60 @@ export default {
     },
     methods: {
         on_splitpanes_resized() {
+            this.logger.debug('on_splitpanes_resized()');
             this.$store.getters.leaflet_map.map_object.invalidateSize();
             let payload = undefined;
             if (this.layout.panes.map_container.info.visible === true) {
-                payload = {'map_info_size': this.$refs.map_info_pane.style.width};
+                payload = {'map_info_size': parseFloat(this.$refs.map_info_pane.style.width)};
             }
             else {
-                payload = {'event_info_size': this.$refs.event_info_pane.style.width};
+                payload = {'event_info_size': parseFloat(this.$refs.event_info_pane.style.width)};
             }
             this.$store.commit('set_map_container_right_pane_size', payload);
         },
 
-        on_map_container_info_splitpanes_resized(sp_event) {
-            this.$store.commit("update_map_container_info_layout", sp_event);
+        on_display_container_splitpanes_resized() {
+            this.logger.debug('on_display_container_splitpanes_resized');
+            this.$store.getters.leaflet_map.map_object.invalidateSize();
+            let payload = undefined;
+            if (this.is_realtime)
+            {
+                payload = {
+                    mode: 'realtime',
+                    tracks_size: undefined,
+                    map_container_size: 100,
+                };
+                if (this.layout.panes.tracks.visible === true) {
+                    payload.tracks_size = parseFloat(this.$refs.tracks_pane.style.height);
+                }
+                payload.map_container_size = parseFloat(this.$refs.map_container_pane.style.height);
+            }
+            else
+            {
+                payload = {
+                    mode: 'archive',
+                    tracks_size: undefined,
+                    map_container_size: 100,
+                    content_size: undefined,
+                };
+                if (this.layout.panes.tracks.visible === true) {
+                    payload.tracks_size = parseFloat(this.$refs.tracks_pane.style.height);
+                }
+                if (this.layout.panes.content.visible === true) {
+                    payload.content_size = parseFloat(this.$refs.content_pane.style.height);
+                }
+                payload.map_container_size = parseFloat(this.$refs.map_container_pane.style.height);
+    
+            }
+            this.logger.debug('Commit payload: ', payload);
+            this.$store.commit('set_display_container_pane_size', payload);
         },
     },
     computed: {
+        is_realtime: function() {
+            return this.$store.getters.is_realtime; 
+        },
+
         stations: function() {
             return this.$store.getters.station_meta;
         },

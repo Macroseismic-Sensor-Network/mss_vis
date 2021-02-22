@@ -74,7 +74,7 @@
         -->
         <!-- End of templates. -->
 
-        <svg id="svg_legend" width="300px" height="140" v-if="is_realtime">
+        <svg id="svg_legend" width="300px" height="140">
             <PGVLegend name="map_legend" v-if="showLegend"/>
         </svg>
     </div>

@@ -275,7 +275,8 @@ export default new Vuex.Store({
             panes: {
                 tracks: {
                     size: 0,
-                    visible: false,
+                    visible: true,
+                    max_size: 0,
                 },
                 map_container: {
                     size: 100,
@@ -299,7 +300,8 @@ export default new Vuex.Store({
                 },
                 content: {
                     size: 0,
-                    visible: false,
+                    max_size: 0,
+                    visible: true
                 },
             },
         },
@@ -324,6 +326,7 @@ export default new Vuex.Store({
         display: {
             // The current mode of the display (realtime, archive)
             mode: 'realtime',
+            changing_mode: false,
             settings: {
                 realtime: {
                 },
@@ -920,7 +923,7 @@ export default new Vuex.Store({
                 state.station_meta = data;
                 state.stations_imported = true;
                 state.logger.debug("Station metadata loaded.");
-                //self.plot_stations();
+                //self.plot_stationize();
             });
         },
 
@@ -975,9 +978,9 @@ export default new Vuex.Store({
             let n_realtime_tracks = state.tracks.realtime.pgv_timeseries.length
             if (n_realtime_tracks == 1)
             {
-                state.layout.panes.tracks.visible = true;
                 state.layout.panes.tracks.size = 15;
                 state.layout.panes.map_container.size = 100 - state.layout.panes.tracks.size - state.layout.panes.content.size;
+                state.layout.panes.tracks.max_size = 100;
             }
         },
 
@@ -986,8 +989,8 @@ export default new Vuex.Store({
             let n_realtime_tracks = state.tracks.realtime.pgv_timeseries.length
             if (n_realtime_tracks == 0)
             {
-                state.layout.panes.tracks.visible = false;
                 state.layout.panes.tracks.size = 0;
+                state.layout.panes.tracks.max_size = 0;
                 state.layout.panes.map_container.size = 100 - state.layout.panes.tracks.size - state.layout.panes.content.size;
             }
         },
@@ -1030,6 +1033,40 @@ export default new Vuex.Store({
             state.layout.panes.map_container.event_info.size = payload['map_info_size']
         },
 
+        set_display_container_pane_size(state, payload) {
+            if (!state.display.changing_mode)
+            {
+                state.logger.debug('Setting the pane layout sizes.');
+                if (payload.mode === 'realtime')
+                {
+                    if (payload.tracks_size)
+                    {
+                        state.layout.panes.tracks.size = Math.floor(payload.tracks_size);
+                    }
+
+                    state.layout.panes.map_container.size = 100 - state.layout.panes.tracks.size;
+                }
+                else if (payload.mode === 'archive')
+                {
+                    if (payload.tracks_size)
+                    {
+                        state.layout.panes.tracks.size = Math.floor(payload.tracks_size);
+                    }
+
+                    if (payload.content_size)
+                    {
+                        state.layout.panes.content.size = Math.floor(payload.content_size);
+                    }
+
+                    state.layout.panes.map_container.size = 100 - state.layout.panes.tracks.size;
+                }
+            }
+            else
+            {
+                state.logger.debug('Setting size during mode change is not allowed.');
+            }
+        },
+
         set_map_info_accordion_expanded(state, payload) {
             state.map_info_accordion.map_info.expanded = payload[0];
             state.map_info_accordion.event_monitor.expanded = payload[1];
@@ -1039,24 +1076,35 @@ export default new Vuex.Store({
 
 
         activate_realtime_mode(state) {
-            state.layout.panes.map_container.info.visible = true
-            state.display.mode = 'realtime'
+            state.logger.debug('activating realtime mode')
+            state.layout.panes.map_container.size = 100 - state.layout.panes.tracks.size;
+            state.layout.panes.map_container.info.visible = true;
+            state.display.mode = 'realtime';
         },
 
         deactivate_realtime_mode(state) {
+            state.logger.debug('deactivating realtime mode')
             state.layout.panes.map_container.info.visible = false
         },
 
         activate_archive_mode(state) {
-            state.layout.panes.map_container.event_info.visible = true
-            state.layout.panes.content.visible = true
+            state.logger.debug('activating archive mode')
+            state.layout.panes.content.visible = true;
+            state.layout.panes.map_container.event_info.visible = true;
+            state.layout.panes.content.visible = true;
+            state.layout.panes.content.max_size = 100;
+            state.layout.panes.content.size = 30;
+            state.layout.panes.map_container.size = 100 - state.layout.panes.tracks.size - state.layout.panes.content.size;
             state.leaflet_map.layer_groups.event_supplement.addTo(state.leaflet_map.map_object);
             state.display.mode = 'archive';
         },
 
         deactivate_archive_mode(state) {
+            state.logger.debug('deactivating archive mode')
             state.layout.panes.map_container.event_info.visible = false;
-            state.layout.panes.content.visible = false
+            state.layout.panes.content.visible = true;
+            state.layout.panes.content.size = 0;
+            state.layout.panes.content.max_size = 0;
             state.leaflet_map.layer_groups.event_supplement.clearLayers();
             state.leaflet_map.layer_groups.event_supplement.remove();
         },
@@ -1102,6 +1150,7 @@ export default new Vuex.Store({
         set_display_mode({ commit, state }, payload) {
             if (payload.mode != state.display.mode)
             {
+                state.display.changing_mode = true;
                 switch(payload.mode)
                 {
                     case 'realtime':
@@ -1115,6 +1164,7 @@ export default new Vuex.Store({
                         break;
 
                 }
+                state.display.changing_mode = false;
             }
         },
 
