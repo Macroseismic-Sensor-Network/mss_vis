@@ -314,7 +314,7 @@ export default {
             this.leaflet_time_dimension_player = new L.TimeDimension.Player(
                 {
                     transitionTime: 500,
-                    loop: true,
+                    loop: false,
                     startOver: true,
                 },
                 this.leaflet_time_dimension
@@ -323,7 +323,7 @@ export default {
             let control_options ={
                 timeSliderDragUpdate: true,
                 loopButton: true,
-                autoPlay: true,
+                autoPlay: false,
                 minSpeed: 1,
                 maxSpeed: 5,
                 speedStep: 1,
