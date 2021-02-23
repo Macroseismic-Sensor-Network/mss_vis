@@ -294,7 +294,7 @@ export default new Vuex.Store({
                         visible: true,
                     },
                     event_info: {
-                        size: 0,
+                        size: 20,
                         visible: false,
                     },
                 },
