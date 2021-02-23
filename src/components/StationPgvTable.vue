@@ -58,6 +58,7 @@ export default {
                     { label: 'NSL Code', key: 'nsl_code' },
                     { label: 'Name', key: 'name' },
                     { label: 'Beschreibung', key: 'description' },
+                    { label: 'MSS Seriennummer', key: 'mss_serial'},
                     { label: 'Länge', key: 'lon' },
                     { label: 'Breite', key: 'lat' },
                     { label: 'Höhe', key: 'height' },
@@ -85,7 +86,7 @@ export default {
                 let cur_station = this.stations[cur_nsl];
                 let cur_pgv = undefined;
                 let cur_pgv_str = '';
-                if (this.mssds_data.current_pgv)
+                if (this.mssds_data.current_pgv.pgv_data)
                 {
                     if (cur_nsl in this.mssds_data.current_pgv.pgv_data)
                     {
@@ -107,6 +108,7 @@ export default {
                         nsl_code: cur_nsl,
                         name: cur_station.name,
                         description: cur_station.description,
+                        mss_serial: cur_station.recorder_serials,
                         lon: cur_station.lon,
                         lat: cur_station.lat,
                         height: cur_station.height,
