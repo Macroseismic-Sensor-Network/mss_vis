@@ -44,7 +44,8 @@
                         </pane>
                         <pane :size="layout.panes.map_container.map.size"
                               v-if="layout.panes.map_container.map.visible">
-                            <PGVMap :key="mapKey" />
+                            <PGVMap :key="mapKey" 
+                                    v-resize:debounce="on_pgv_map_resize"/>
                         </pane>
                         <pane :size="layout.panes.map_container.info.size"
                               v-if="layout.panes.map_container.info.visible"
@@ -155,7 +156,6 @@ export default {
     methods: {
         on_splitpanes_resized() {
             this.logger.debug('on_splitpanes_resized()');
-            this.$store.getters.leaflet_map.map_object.invalidateSize();
             let payload = undefined;
             if (this.layout.panes.map_container.info.visible === true) {
                 payload = {'map_info_size': parseFloat(this.$refs.map_info_pane.style.width)};
@@ -168,7 +168,6 @@ export default {
 
         on_display_container_splitpanes_resized() {
             this.logger.debug('on_display_container_splitpanes_resized');
-            this.$store.getters.leaflet_map.map_object.invalidateSize();
             let payload = undefined;
             if (this.is_realtime)
             {
@@ -200,6 +199,12 @@ export default {
             }
             this.logger.debug('Commit payload: ', payload);
             this.$store.commit('set_display_container_pane_size', payload);
+        },
+
+        on_pgv_map_resize() {
+            this.logger.debug('Resizing the PgvMap.');
+            this.$store.getters.leaflet_map.map_object.invalidateSize();
+            this.logger.debug('Map state invalidated.');
         },
     },
     computed: {
