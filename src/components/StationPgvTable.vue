@@ -62,7 +62,9 @@ export default {
                     { label: 'Länge', key: 'lon' },
                     { label: 'Breite', key: 'lat' },
                     { label: 'Höhe', key: 'height' },
-                    { label: 'PGV [mm/s]', key: 'pgv' },
+                    { label: 'PGV [mm/s]', key: 'pgv'},
+                    { label: 'max. PGV letzte 60 s [mm/s]', key: 'pgv_history'},
+                    { label: 'Verzögerung [s]', key: 'delay'},
                 ],
         };
     },
@@ -79,18 +81,30 @@ export default {
             return this.$store.getters.utc_offset;
         },
 
+        server_time_local: function() {
+            return this.$store.getters.server_time_local;
+        },
+
         table_items: function() {
             let items = [];
             for (let cur_nsl in this.stations)
             {
                 let cur_station = this.stations[cur_nsl];
                 let cur_pgv = undefined;
+                let cur_pgv_history = undefined;
+                let cur_delay = undefined;
                 let cur_pgv_str = '';
+                let cur_pgv_history_str = '';
+                let cur_delay_str = '';
                 if (this.mssds_data.current_pgv.pgv_data)
                 {
                     if (cur_nsl in this.mssds_data.current_pgv.pgv_data)
                     {
                         cur_pgv = this.mssds_data.current_pgv.pgv_data[cur_nsl].latest_pgv;
+                        cur_pgv_history = this.mssds_data.current_pgv.pgv_data[cur_nsl].pgv_history;
+                        let cur_latest_time = this.mssds_data.current_pgv.pgv_data[cur_nsl].latest_time;
+                        cur_latest_time = moment.unix(cur_latest_time).utc();
+                        cur_delay = this.server_time_local.diff(cur_latest_time, 'seconds');
                     }
                 }
 
@@ -101,6 +115,24 @@ export default {
                 else
                 {
                     cur_pgv_str = 'keine Daten';
+                }
+                
+                if (cur_pgv_history != undefined)
+                {
+                    cur_pgv_history_str = (cur_pgv_history * 1000).toFixed(6);
+                }
+                else
+                {
+                    cur_pgv_history_str = 'keine Daten';
+                }
+
+                if (cur_delay != undefined)
+                {
+                    cur_delay_str = cur_delay.toString();
+                }
+                else
+                {
+                    cur_delay_str = 'keine Daten';
                 }
 
                 items.push(
@@ -113,7 +145,8 @@ export default {
                         lat: cur_station.lat,
                         height: cur_station.height,
                         pgv: cur_pgv_str,
-                        //pgv: (cur_event.max_pgv * 1000).toFixed(3),
+                        pgv_history: cur_pgv_history_str,
+                        delay: cur_delay_str,
                     });
             }
             return items;
