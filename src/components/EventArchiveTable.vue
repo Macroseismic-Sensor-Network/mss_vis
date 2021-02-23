@@ -25,13 +25,13 @@
 -->
 
 <template>
-    <div class="event-archive-table">
         <w-table :headers="table_headers"
                  :items="table_items"
+                 :fixed-headers="true"
                  v-bind:select-row="true"
+                 style="height: 100%"
                  @row-select="on_row_select($event)">
         </w-table>
-    </div>
 </template>
 
 <script>
@@ -125,7 +125,6 @@ export default {
 
 div.event-archive-table
     width: 100%
-    height: 100%
     overflow: auto
 
 </style>
