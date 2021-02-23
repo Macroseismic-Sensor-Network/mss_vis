@@ -1184,6 +1184,11 @@ export default new Vuex.Store({
                         break;
 
                     case 'archive':
+                        // Set the event archive to the recents events.
+                        // TODO: Remove this part if the dynamic loading of the
+                        // archive events for a give timespan is implemented.
+                        state.archive_events = state.recent_events;
+
                         commit('deactivate_realtime_mode');
                         commit('activate_archive_mode');
                         break;
@@ -1214,9 +1219,6 @@ export default new Vuex.Store({
         view_event_in_archive({dispatch, commit, state}, payload) {
             let action_payload = { mode: 'archive' }
             dispatch('set_display_mode', action_payload)
-
-            // Set the event archive to the recents events.
-            state.archive_events = state.recent_events;
 
             if (payload.public_id != state.display.settings.archive.active_event)
             {
