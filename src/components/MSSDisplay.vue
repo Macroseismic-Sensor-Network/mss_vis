@@ -83,7 +83,10 @@
                       v-if="layout.panes.content.visible"
                       :max-size="layout.panes.content.max_size"
                       ref="content_pane">
-                    <EventArchivePanel key="event_archive_panel_key" />
+                    <EventArchivePanel key="event_archive_panel_key" 
+                                       v-if="is_archive"/>
+                    <StationRealtimePanel key="station_realtime_panel_key"
+                                          v-if="is_realtime"/>
                 </pane>
             </splitpanes>
     </w-app>
@@ -100,6 +103,7 @@ import EventDetailsPanel from '../components/EventDetailsPanel.vue'
 import EventSupplementPanel from '../components/EventSupplementPanel.vue'
 import RecentEventInfoPanel from '../components/RecentEventInfoPanel.vue'
 import StationInfoPanel from '../components/StationInfoPanel.vue'
+import StationRealtimePanel from '../components/StationRealtimePanel.vue'
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 import * as log from 'loglevel';
@@ -128,6 +132,7 @@ export default {
         EventSupplementPanel,
         RecentEventInfoPanel,
         StationInfoPanel,
+        StationRealtimePanel,
         TracksPanel,
         Splitpanes,
         Pane,
@@ -192,7 +197,6 @@ export default {
                     payload.content_size = parseFloat(this.$refs.content_pane.style.height);
                 }
                 payload.map_container_size = parseFloat(this.$refs.map_container_pane.style.height);
-    
             }
             this.logger.debug('Commit payload: ', payload);
             this.$store.commit('set_display_container_pane_size', payload);
@@ -201,6 +205,10 @@ export default {
     computed: {
         is_realtime: function() {
             return this.$store.getters.is_realtime; 
+        },
+
+        is_archive: function() {
+            return this.$store.getters.is_archive; 
         },
 
         stations: function() {

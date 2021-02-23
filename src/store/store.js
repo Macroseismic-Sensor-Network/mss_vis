@@ -300,7 +300,7 @@ export default new Vuex.Store({
                 },
                 content: {
                     size: 0,
-                    max_size: 0,
+                    max_size: 100,
                     visible: true
                 },
             },
@@ -465,6 +465,10 @@ export default new Vuex.Store({
 
         layout: state => {
             return state.layout;
+        },
+
+        mssds_data: state => {
+            return state.mssds_data;
         },
 
         current_pgv: state => {
@@ -797,6 +801,17 @@ export default new Vuex.Store({
                 return false;
             }
         },
+        
+        is_archive(state) {
+            if (state.display.mode === 'archive')
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        },
 
         display_mode(state) {
             return state.display.mode;
@@ -1104,7 +1119,7 @@ export default new Vuex.Store({
             state.layout.panes.map_container.event_info.visible = false;
             state.layout.panes.content.visible = true;
             state.layout.panes.content.size = 0;
-            state.layout.panes.content.max_size = 0;
+            state.layout.panes.content.max_size = 100;
             state.leaflet_map.layer_groups.event_supplement.clearLayers();
             state.leaflet_map.layer_groups.event_supplement.remove();
         },
