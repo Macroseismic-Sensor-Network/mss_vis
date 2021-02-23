@@ -28,7 +28,7 @@
     <div class="event-monitor-panel">
         <w-flex wrap class="text-left"
                  v-if="!event_available">
-            <div class="xs12 pa1">Waiting for an event trigger.</div>
+            <div class="xs12 pa1">Warte auf the Start eines Ereignisses.</div>
         </w-flex>
         <w-flex column
                  v-if="event_available">
