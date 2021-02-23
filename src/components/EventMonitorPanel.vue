@@ -26,22 +26,46 @@
 
 <template>
     <div class="event-monitor-panel">
-        <span id="map_info_server_state" class="event-monitor-info">state: {{ current_event_state }}</span>
-        <span id="map_info_last_data"
-              class="event-monitor-info"
-              v-if="event_available">
-            start: {{ current_event_start }} UTC
-        </span>
-        <span id="map_info_first_data"
-              class="event-monitor-info"
-              v-if="event_available">
-            end: {{ current_event_end }} UTC
-        </span>
-        <span id="map_info_server_state"
-              class="event-monitor-info"
-              v-if="event_available">
-            max PGV: {{ (current_event_max_pgv * 1000).toFixed(3) + ' mm/s'}}
-        </span>
+        <w-flex wrap class="text-left"
+                 v-if="!event_available">
+            <div class="xs12 pa1">Waiting for an event trigger.</div>
+        </w-flex>
+        <w-flex column
+                 v-if="event_available">
+            <w-flex wrap>
+                <div class="pr2 text-bold">public id:</div>
+                <div class="grow">{{ public_id }}</div>
+            </w-flex>
+
+            <w-flex wrap>
+                <div class="pr2 text-bold">Start:</div>
+                <div class="grow">{{ event_start }}</div>
+            </w-flex>
+
+            <w-flex wrap>
+                <div class="pr2 text-bold">Ende:</div>
+                <div class="grow">{{ event_end }}</div>
+            </w-flex>
+
+            <w-flex wrap>
+                <div class="pr2 text-bold">PGV:</div>
+                <div class="grow">{{ pgv }} mm/s</div>
+            </w-flex>
+
+            <w-flex wrap>
+                <div class="pr2 text-bold">Dauer:</div>
+                <div class="grow">{{ duration }} s</div>
+            </w-flex>
+
+            <w-flex wrap>
+                <div class="pr2 text-bold">Anzahl der Detektionsdreiecke:</div>
+                <div class="grow">{{ num_detections }}</div>
+            </w-flex>
+
+            <w-flex wrap>
+                <div class="grow text-bold">getriggerte Stationen: {{ num_stations }}</div>
+            </w-flex>
+        </w-flex>
     </div>
 </template>
 
@@ -49,6 +73,7 @@
 
 import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
+import * as moment from 'moment';
 
 export default {
     name: 'EventMonitorPanel',
@@ -72,49 +97,102 @@ export default {
             else
                 return false;
         },
-
-        current_event_max_pgv: function() {
-            var max_pgv = this.$store.getters.current_event_max_pgv;
-            if (max_pgv)
+        
+        public_id: function() {
+            if (this.event_available)
             {
-                return max_pgv;
+                return this.current_event.public_id;
             }
             else
             {
-                return 0;
+                return undefined;
+            }
+        },
+        
+        event_start: function() {
+            if (this.event_available)
+            {
+                return this.get_local_time_str(moment.utc(this.current_event.start_time));
+            }
+            else
+            {
+                return undefined;
             }
         },
 
-        current_event_start: function() {
-            if ('start_time' in this.current_event)
+        event_end: function() {
+            if (this.event_available)
             {
-                return this.current_event.start_time;
+                let cur_start = moment.utc(this.current_event.end_time);
+                let time_str = this.get_local_time_str(cur_start);
+                this.logger.debug("cur_start: ", cur_start);
+                this.logger.debug("time_str: ", time_str);
+                return this.get_local_time_str(cur_start);
             }
             else
             {
-                return "";
+                return undefined;
+            }
+        },
+        
+        pgv: function() {
+            if (this.event_available)
+            {
+                return (this.current_event.max_pgv * 1000).toFixed(3);
+            }
+            else
+            {
+                return undefined;
             }
         },
 
-        current_event_end: function() {
-            if ('end_time' in this.current_event)
+        duration: function() {
+            if (this.event_available)
             {
-                return this.current_event.end_time;
+                return this.current_event.length.toString();
             }
             else
             {
-                return "";
+                return undefined;
+            }
+        },
+        
+        triggered_stations: function() {
+            if (this.event_available)
+            {
+                let triggered_stations = []
+                for (let cur_nsl of this.current_event.triggered_stations)
+                {
+                    let comps = cur_nsl.split(':');
+                    triggered_stations.push(comps[1]);
+                }
+                return triggered_stations;
+            }
+            else
+            {
+                return undefined;
             }
         },
 
-        current_event_state: function() {
-            if ('state' in this.current_event)
+        num_stations: function() {
+            if (this.event_available)
             {
-                return this.current_event.state;
+                return this.current_event.triggered_stations.length;
             }
             else
             {
-                return "Waiting for event trigger.";
+                return undefined;
+            }
+        },
+
+        num_detections: function() {
+            if (this.event_available)
+            {
+                return this.current_event.num_detections;
+            }
+            else
+            {
+                return undefined;
             }
         },
     },
