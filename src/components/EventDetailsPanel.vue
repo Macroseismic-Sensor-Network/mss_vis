@@ -36,32 +36,32 @@
                 <div class="pr2 text-bold">public id:</div>
                 <div class="grow">{{ public_id }}</div>
             </w-flex>
-            
+
             <w-flex wrap>
                 <div class="pr2 text-bold">Start:</div>
                 <div class="grow">{{ event_start }}</div>
             </w-flex>
-            
+
             <w-flex wrap>
                 <div class="pr2 text-bold">Ende:</div>
                 <div class="grow">{{ event_end }}</div>
             </w-flex>
-            
+
             <w-flex wrap>
                 <div class="pr2 text-bold">PGV:</div>
                 <div class="grow">{{ pgv }} mm/s</div>
             </w-flex>
-            
+
             <w-flex wrap>
                 <div class="pr2 text-bold">Dauer:</div>
                 <div class="grow">{{ duration }} s</div>
             </w-flex>
-            
+
             <w-flex wrap>
                 <div class="pr2 text-bold">Anzahl der Detektionsdreiecke:</div>
                 <div class="grow">{{ num_detections }}</div>
             </w-flex>
-            
+
             <w-flex wrap>
                 <div class="grow text-bold">getriggerte Stationen ({{ num_stations }}):</div>
             </w-flex>
