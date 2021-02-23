@@ -142,7 +142,7 @@ export default {
               this.logger.debug("Plotting the archive event.");
               d3.select('#current_pgv_marker').style('visibility', 'hidden');
               d3.select('#event_monitor_plot_group').style('visibility', 'hidden');
-              var plot_event = this.$store.getters.event_archive[this.map_control.show_archive_event]
+              var plot_event = this.$store.getters.recent_events[this.map_control.show_archive_event]
               var stations = [];
               var used_stations = Object.keys(plot_event.max_station_pgv_used);
               vertices = [];

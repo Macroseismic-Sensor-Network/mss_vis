@@ -110,7 +110,7 @@ export default {
         },
 
         active_event: function() {
-            return this.$store.getters.active_archive_event;
+            return this.$store.getters.active_recent_event;
         },
 
         event_start: function() {

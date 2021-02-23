@@ -144,9 +144,14 @@ function handle_msg_data(msg_id, payload, state) {
             state.event_warning = payload;
             break;
 
+        case 'recent_events':
+            state.logger.debug("Received an event archive.");
+            state.recent_events = payload;
+            break;
+
         case 'event_archive':
             state.logger.debug("Received an event archive.");
-            state.event_archive = payload;
+            //state.event_archive = payload;
             break;
     }
 
@@ -237,7 +242,8 @@ export default new Vuex.Store({
         detection_result_data: {},
         event_data: {},
         event_warning: {},
-        event_archive: {},
+        archive_events: {},
+        recent_events: {},
         connected: false,
         message: '',
         server_id: '',
@@ -727,7 +733,7 @@ export default new Vuex.Store({
         },
 
         archive_event_max_pgv: (state) => (pos) =>  {
-            return state.event_archive[pos].max_pgv
+            return state.recent_events[pos].max_pgv
 
             /*
             var max_pgv = [];
@@ -749,14 +755,18 @@ export default new Vuex.Store({
             return state.map_control;
         },
 
-        event_archive: (state) => {
-            return state.event_archive
+        recent_events: (state) => {
+            return state.recent_events;
         },
 
-        active_archive_event: (state) => {
+        archive_events: (state) => {
+            return state.archive_events;
+        },
+
+        active_recent_event: (state) => {
             if (state.display.settings.archive.active_event != undefined)
             {
-                return state.event_archive[state.display.settings.archive.active_event];
+                return state.recent_events[state.display.settings.archive.active_event];
             }
             else
             {
@@ -1195,9 +1205,18 @@ export default new Vuex.Store({
             commit('remove_track_pgv_timeseries', payload);
         },
 
+        view_recent_event_in_archive({dispatch, state}, payload) {
+            // Set the event archive to the recents events.
+            state.archive_events = state.recent_events;
+            dispatch('view_event_in_archive', payload);
+        },
+
         view_event_in_archive({dispatch, commit, state}, payload) {
             let action_payload = { mode: 'archive' }
             dispatch('set_display_mode', action_payload)
+
+            // Set the event archive to the recents events.
+            state.archive_events = state.recent_events;
 
             if (payload.public_id != state.display.settings.archive.active_event)
             {

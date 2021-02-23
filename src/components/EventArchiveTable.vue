@@ -66,9 +66,9 @@ export default {
         };
     },
     computed: {
-        event_archive: function() {
-            let event_archive = this.$store.getters.event_archive;
-            return Object.values(event_archive).sort((a, b) => (a.start_time < b.start_time) ? 1 : -1);
+        archive_events: function() {
+            let archive_events = this.$store.getters.archive_events;
+            return Object.values(archive_events).sort((a, b) => (a.start_time < b.start_time) ? 1 : -1);
         },
 
         utc_offset: function() {
@@ -77,9 +77,9 @@ export default {
 
         table_items: function() {
             let items = [];
-            for (let cur_key in this.event_archive)
+            for (let cur_key in this.archive_events)
             {
-                let cur_event = this.event_archive[cur_key]
+                let cur_event = this.archive_events[cur_key]
                 let cur_start = moment.utc(cur_event.start_time);
                 let cur_end = moment.utc(cur_event.end_time);
                 items.push(

@@ -26,7 +26,7 @@
 
 <template>
     <div class="archive-event-panel">
-        <RecentEvent v-for="cur_event in event_archive"
+        <RecentEvent v-for="cur_event in recent_events"
                      v-bind:key="cur_event.public_id"
                      v-bind:public_id = "cur_event.public_id"
                      v-bind:db_id="cur_event.db_id"
@@ -55,10 +55,10 @@ export default {
             this.$store.getters.prefix_options);
     },
     computed: {
-        event_archive: function() {
-            let event_archive = this.$store.getters.event_archive;
-            return Object.values(event_archive).sort((a, b) => (a.start_time < b.start_time) ? 1 : -1);
-            //return event_archive;
+        recent_events: function() {
+            let recent_events = this.$store.getters.recent_events;
+            return Object.values(recent_events).sort((a, b) => (a.start_time < b.start_time) ? 1 : -1);
+            //return recent_events;
         },
     },
 }

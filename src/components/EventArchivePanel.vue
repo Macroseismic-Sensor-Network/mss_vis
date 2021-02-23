@@ -49,8 +49,8 @@ export default {
             this.$store.getters.prefix_options);
     },
     computed: {
-        event_archive: function() {
-            return this.$store.getters.event_archive;
+        recent_events: function() {
+            return this.$store.getters.recent_events;
         },
     },
 }

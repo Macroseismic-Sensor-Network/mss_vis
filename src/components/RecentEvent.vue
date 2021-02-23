@@ -77,7 +77,7 @@ export default {
         },
 
         current_event: function() {
-            return this.$store.getters.event_archive[this.pos];
+            return this.$store.getters.recent_events[this.pos];
         },
 
         scales: function() {
@@ -107,7 +107,7 @@ export default {
         {
             this.logger.debug("Showing event: " + this.public_id);
             var payload = { public_id: this.public_id };
-            this.$store.dispatch('view_event_in_archive', payload);
+            this.$store.dispatch('view_recent_event_in_archive', payload);
             //payload = { mode: 'archive' }
             //this.$store.dispatch('set_display_mode', payload);
             //this.$store.dispatch('load_event_supplement');
