@@ -28,13 +28,22 @@
     <div class="event-monitor-panel">
         <w-flex wrap class="text-left"
                  v-if="!event_available">
-            <div class="xs12 pa1">Warte auf the Start eines Ereignisses.</div>
+            <div class="xs12 pa1">Warte auf den Start eines Ereignisses.</div>
         </w-flex>
         <w-flex column
                  v-if="event_available">
             <w-flex wrap>
+                <div class="grow text-bold">{{ monitor_state }}</div>
+            </w-flex>
+
+            <w-flex wrap>
                 <div class="pr2 text-bold">public id:</div>
                 <div class="grow">{{ public_id }}</div>
+            </w-flex>
+
+            <w-flex wrap>
+                <div class="pr2 text-bold">Status:</div>
+                <div class="grow">{{ state }}</div>
             </w-flex>
 
             <w-flex wrap>
@@ -92,12 +101,15 @@ export default {
         },
 
         event_available: function() {
+            let res = false;
             if ('state' in this.current_event)
-                return true;
-            else
-                return false;
+                if (this.current_event.state != 'closed')
+                    res =  true;
+                else
+                    res = false;
+            return res;
         },
-        
+
         public_id: function() {
             if (this.event_available)
             {
@@ -108,7 +120,34 @@ export default {
                 return undefined;
             }
         },
-        
+
+        monitor_state: function() {
+            let state = 'Warte auf den Beginn eines Ereignisses.';
+            if (this.event_available)
+            {
+                if (this.current_event.state === 'closed')
+                {
+                    state = "Das letzte detektierte Ereignis:";   
+                }
+                else
+                {
+                    state = "Der Start eines neuen Ereignisses wurde detektiert.";
+                }
+            }
+            return state;
+        },
+
+        state: function() {
+            if (this.event_available)
+            {
+                return this.current_event.state;
+            }
+            else
+            {
+                return undefined;
+            }
+        },
+
         event_start: function() {
             if (this.event_available)
             {
@@ -134,7 +173,7 @@ export default {
                 return undefined;
             }
         },
-        
+
         pgv: function() {
             if (this.event_available)
             {
@@ -156,7 +195,7 @@ export default {
                 return undefined;
             }
         },
-        
+
         triggered_stations: function() {
             if (this.event_available)
             {
@@ -194,6 +233,22 @@ export default {
             {
                 return undefined;
             }
+        },
+    },
+    methods: {
+        get_local_time_str(time_utc) {
+            let local_time = this.utc_to_local_time(time_utc);
+            return this.format_time(local_time);
+        },
+
+        utc_to_local_time(time_utc) {
+            let time_local = time_utc.utcOffset(this.utc_offset / 60);
+            return time_local;
+        },
+
+        format_time(time) {
+            let time_format = this.$store.getters.time_format;
+            return time.format(time_format);
         },
     },
 }
