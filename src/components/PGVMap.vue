@@ -98,6 +98,7 @@ import L from 'leaflet';
 import 'leaflet-easybutton';
 import leafletImage from "leaflet-image";
 import 'leaflet-timedimension';
+import 'leaflet.tilelayer.colorfilter';
 
 export default {
     name: 'PGVMap',
@@ -124,6 +125,7 @@ export default {
                 ],
             show_display_menu: false,
             test_model: undefined,
+            leaflet_baselayers: {},
         };
     },
 
@@ -193,11 +195,21 @@ export default {
             {
                 this.logger.debug('Removing the timedimension control.');
                 this.leaflet_map.removeControl(this.leaflet_time_dimension_control);
+                let filter = [];
+                this.leaflet_base_layers.mss_oe3d.updateFilter(filter);
+                this.leaflet_base_layers.osm_osmde.updateFilter(filter);
+                this.leaflet_base_layers.stamen_toner.updateFilter(filter);
+                this.leaflet_base_layers.stamen_terrain.updateFilter(filter);
             }
             else
             {
                 this.logger.debug('Adding the timedimension control.');
                 this.leaflet_map.addControl(this.leaflet_time_dimension_control);
+                let filter = ['saturate:10%'];
+                this.leaflet_base_layers.mss_oe3d.updateFilter(filter);
+                this.leaflet_base_layers.osm_osmde.updateFilter(filter);
+                this.leaflet_base_layers.stamen_toner.updateFilter(filter);
+                this.leaflet_base_layers.stamen_terrain.updateFilter(filter);
             }
         },
     },
@@ -241,6 +253,14 @@ export default {
             }
         },
 
+        leaflet_layer_filter: function() {
+            let filter = [];
+            if (!this.is_realtime)
+                filter = ['saturate: 20%',];
+
+            return filter
+        },
+
         display_mode_selection: {
             get() {
                 return this.$store.getters.display_mode; 
@@ -280,30 +300,59 @@ export default {
 
     methods: {
         init_map() {
-            var oe3d = L.tileLayer('/assets/vue/nrt/data/map/oe3d/{z}/{x}/{y}.jpg', 
+            var oe3d = L.tileLayer.colorFilter('/assets/vue/nrt/data/map/oe3d/{z}/{x}/{y}.jpg', 
                 {
                     minZoom: 10,
                     maxZoom: 13,
                     tms: false,
-                    attribution: 'Map based on OE3D and OpenStreetMap. Generated with QGis.',
+                    filter: [],
+                    attribution: 'Map based on data from <a href="http://www.oe3d.at/">OE3D</a> and <a href="http://openstreetmap.org">OpenStreetMap</a>. Generated with <a href="https://www.qgis.org">QGis</a>.',
+                    id: 'mss/oe3d',
                 });
 
-            var osm=L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw',
+            var osm = L.tileLayer.colorFilter('https://tile.openstreetmap.de/{z}/{x}/{y}.png',
                 {
                     minZoom: 10,
                     maxZoom: 13,
+                    filter: [],
                     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
                     '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
                     'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-                    id: 'mapbox/streets-v11',
-                    tileSize: 512,
-                    zoomOffset: -1,
+                    id: 'osm/osm_de',
                 });
 
+            var stamen_toner = L.tileLayer.colorFilter('https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png',
+                {
+                    minZoom: 10,
+                    maxZoom: 13,
+                    filter: [],
+                    attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>.' + 
+                    'Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://www.openstreetmap.org/copyright">ODbL</a>.',
+                    id: 'stamen/toner',
+                });
+
+            var stamen_terrain = L.tileLayer.colorFilter('https://stamen-tiles.a.ssl.fastly.net/terrain/{z}/{x}/{y}.png',
+                {
+                    minZoom: 10,
+                    maxZoom: 13,
+                    filter: [],
+                    attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>.' + 
+                    'Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://www.openstreetmap.org/copyright">ODbL</a>.',
+                    id: 'stamen/terrain',
+                });
+
+            this.leaflet_base_layers = {
+                mss_oe3d: oe3d,
+                osm_osmde: osm,
+                stamen_toner: stamen_toner,
+                stamen_terrain: stamen_terrain,
+            };
 
             var layer_options = {
                 "MSS OE3D": oe3d,
-                "Open Streetmap": osm,	
+                "Open Streetmap": osm,
+                "Stamen Terrain": stamen_terrain,
+                "Stamen Toner": stamen_toner,
             }
 
             oe3d.addTo(this.leaflet_map);
