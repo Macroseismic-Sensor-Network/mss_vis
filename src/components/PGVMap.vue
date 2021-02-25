@@ -350,7 +350,7 @@ export default {
 
             var layer_options = {
                 "MSS OE3D": oe3d,
-                "Open Streetmap": osm,
+                "OpenStreetMap": osm,
                 "Stamen Terrain": stamen_terrain,
                 "Stamen Toner": stamen_toner,
             }
