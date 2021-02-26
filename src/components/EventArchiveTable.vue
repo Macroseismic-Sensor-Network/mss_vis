@@ -29,7 +29,7 @@
                  :items="table_items"
                  :fixed-headers="true"
                  v-bind:select-row="true"
-                 style="height: 100%"
+                 style="height: 100%;"
                  @row-select="on_row_select($event)">
         </w-table>
 </template>
