@@ -37,13 +37,14 @@
                 :cx="leaflet_x"
                 :cy="leaflet_y"/>
         <circle v-bind:id="element_id + '_current'"
+                v-on:mouseover="on_mouseover('current')"
+                v-on:mouseout="on_mouseout('current')"
                 :r="pgv_radius"
                 :fill="pgv_fill"
                 :stroke="pgv_stroke"
                 :fill-opacity="current_fill_opacity" 
                 :cx="leaflet_x"
                 :cy="leaflet_y"/>
-
     </g>
 </template>
 
@@ -55,6 +56,7 @@ import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
 import L from 'leaflet';
 import * as moment from 'moment';
+import _ from "lodash"
 
 export default {
     name: 'PGVMapMarker',
@@ -70,6 +72,46 @@ export default {
         this.logger.setLevel(this.$store.getters.log_level);
         log_prefix.apply(this.logger,
             this.$store.getters.prefix_options);
+
+        // Create the debounced methods here. When creating them in the methods
+        // section, the cancel function is not available.
+        this.on_mouseover = _.debounce(function (source ) {
+            this.logger.debug("on_mouseover debounce " + source);
+            if (this.on_mouseout.cancel)
+            {
+                this.logger.debug("cancel on_mouseout");
+                this.on_mouseout.cancel();
+            }
+            if (!this.mouseover_first_src)
+                this.mouseover_first_src = source
+            let latlon = new L.LatLng(this.lat, this.lon);
+            let layer_pos = this.leaflet_map.latLngToLayerPoint(latlon);
+            this.logger.debug("cont_pos: ", layer_pos);
+            if (!this.tooltip)
+            {
+                this.logger.debug('Creating the new tooltip.');
+                this.tooltip = d3.select('.leaflet-tooltip-pane')
+                    .append("div")
+                        .style("position", "absolute")
+                        .attr("class", "leaflet-tooltip leaflet-zoom-animated")
+                        .html(this.tooltip_string);
+            }
+            this.tooltip.style("visibility", "visible");
+            let pos_x = layer_pos.x + 10;
+            let pos_y = layer_pos.y + 0;
+            this.tooltip.style("transform", 'translate3D(' + pos_x + 'px,' + pos_y + 'px,0px)')
+        }, 200, {leading: true,});
+
+        this.on_mouseout = _.debounce(function(source) {
+            this.logger.debug("on_mouseout debounce " + source);
+            if (source === this.mouseover_first_src)
+            {
+                this.tooltip.style("visibility", "hidden");
+                this.tooltip.remove();
+                this.tooltip = undefined;
+                this.mouseover_first_src = undefined
+            }
+        }, 100);
     },
 
     mounted () {
@@ -83,12 +125,21 @@ export default {
             logger: undefined,
             leaflet_x: undefined,
             leaflet_y: undefined,
+            tooltip: undefined,
+            mouseover_first_src: undefined,
         };
     },
 
     watch: {
         map_redraw: function() {
             this.update();
+        },
+
+        pgv: function() {
+            if (this.tooltip)
+            {
+                this.tooltip.html(this.tooltip_string);
+            }
         },
     },
 
@@ -200,6 +251,21 @@ export default {
         is_realtime: function() {
             return this.$store.getters.is_realtime; 
         },
+
+        tooltip_string: function() {
+            let pgv_string = 'keine Daten';
+            let pgv_history_string = 'keine Daten';
+            let nsl_parts = this.nsl_code.split(':')
+
+            if (this.pgv)
+                pgv_string = 'PGV: ' + (this.pgv * 1000).toFixed(4) + ' mm/s'
+
+            if (this.pgv_history)
+                pgv_history_string = 'PGV (last 60s): ' + (this.pgv_history * 1000).toFixed(4) + ' mm/s'
+
+            let tooltip_string = nsl_parts[1] + '<br>' + pgv_string + '<br>' + pgv_history_string
+            return tooltip_string
+        },
     },
 
     methods: {
@@ -219,6 +285,8 @@ export default {
             this.leaflet_x = this.leaflet_map.latLngToLayerPoint(latlon).x;
             this.leaflet_y = this.leaflet_map.latLngToLayerPoint(latlon).y;
         },
+
+
     },
 }
 </script>
