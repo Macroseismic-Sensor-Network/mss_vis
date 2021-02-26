@@ -25,13 +25,13 @@
 -->
 
 <template>
-    <div class="station-pgv-table">
-        <w-table :headers="table_headers"
-                 :items="table_items"
-                 v-bind:select-row="true"
-                 @row-select="on_row_select($event)">
-        </w-table>
-    </div>
+    <w-table :headers="table_headers"
+             :items="table_items"
+             :fixed-headers="true"
+             v-bind:select-row="true"
+             style="height: 100%;"
+             @row-select="on_row_select($event)">
+    </w-table>
 </template>
 
 <script>
@@ -162,10 +162,5 @@ export default {
 </script>
 
 <style scoped lang="sass">
-
-div.station-pgv-table
-    width: 100%
-    height: 100%
-    overflow: auto
 
 </style>
