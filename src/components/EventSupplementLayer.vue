@@ -311,7 +311,14 @@ export default {
                             marker_style.fillColor = '#777777';
                         }
                         marker_style.radius = self.scales.radius(feature.properties.pgv);
-                        return L.circleMarker(lat_lon, marker_style);
+                        let marker = L.circleMarker(lat_lon, marker_style);
+                        let pgv_string = 'keine Daten'
+                        let nsl_parts = feature.properties.nsl.split(':')
+                        if (feature.properties.pgv)
+                            pgv_string = (feature.properties.pgv * 1000).toFixed(4) + ' mm/s'
+
+                        marker.bindTooltip(nsl_parts[1] + "<br>PGV: " + pgv_string).openTooltip();
+                        return marker;
                     },
                 }
             );
@@ -338,18 +345,26 @@ export default {
             };
             let geojson_layer = L.geoJSON(this.supplement_data,
                                            {
-                                                style: function(feature) {
-                                                    voronoi_style.fillColor = self.pgv_to_color(feature.properties.pgv);
-                                                    if (feature.properties.triggered === true)
-                                                    {
-                                                        voronoi_style.fillOpacity = 1;
-                                                    }
-                                                    else
-                                                    {
-                                                        voronoi_style.fillOpacity = 0.3;
-                                                    }
-                                                    return voronoi_style;
-                                                },
+                                               style: function(feature) {
+                                                   voronoi_style.fillColor = self.pgv_to_color(feature.properties.pgv);
+                                                   if (feature.properties.triggered === true)
+                                                   {
+                                                       voronoi_style.fillOpacity = 1;
+                                                   }
+                                                   else
+                                                   {
+                                                       voronoi_style.fillOpacity = 0.3;
+                                                   }
+                                                   return voronoi_style;
+                                               },
+                                               onEachFeature: function(feature, layer) {
+                                                    let pgv_string = 'keine Daten'
+                                                    let nsl_parts = feature.properties.nsl.split(':')
+                                                    if (feature.properties.pgv)
+                                                        pgv_string = (feature.properties.pgv * 1000).toFixed(4) + ' mm/s'
+
+                                                   layer.bindTooltip("PGV: " + pgv_string + "<br>gemessen an " + nsl_parts[1]).openTooltip();
+                                               },
                                            }
             );
             this.layer = L.timeDimension.layer.geoJson(geojson_layer,
