@@ -236,7 +236,14 @@ export default {
                                                         marker_style.fillColor = '#777777';
                                                     }
                                                     marker_style.radius = self.scales.radius(feature.properties.pgv);
-                                                    return L.circleMarker(lat_lon, marker_style);
+                                                    let marker = L.circleMarker(lat_lon, marker_style);
+                                                    let pgv_string = 'keine Daten'
+                                                    let nsl_parts = feature.properties.nsl.split(':')
+                                                    if (feature.properties.pgv)
+                                                        pgv_string = (feature.properties.pgv * 1000).toFixed(4) + ' mm/s'
+
+                                                    marker.bindTooltip(nsl_parts[1] + "<br>PGV: " + pgv_string).openTooltip();
+                                                    return marker;
                                                },
                                            }
                                           );
@@ -268,6 +275,14 @@ export default {
                                                     }
                                                     return voronoi_style;
                                                 },
+                                               onEachFeature: function(feature, layer) {
+                                                    let pgv_string = 'keine Daten'
+                                                    let nsl_parts = feature.properties.nsl.split(':')
+                                                    if (feature.properties.pgv)
+                                                        pgv_string = (feature.properties.pgv * 1000).toFixed(4) + ' mm/s'
+
+                                                   layer.bindTooltip("PGV: " + pgv_string + "<br>gemessen an " + nsl_parts[1]).openTooltip();
+                                               },
                                            }
             );
             this.supplement_group.addLayer(this.layer);
