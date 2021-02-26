@@ -26,6 +26,22 @@
 
 <template>
     <div class="archive-event-panel">
+        <w-flex wrap>
+            <w-button round 
+                class="ma1"
+                :outline="!filter_no_filter"
+                v-on:click="filter = 'no'">
+                Kein Filter
+            </w-button>
+            
+            <w-button round
+                class="ma1"
+                :outline="!filter_felt"
+                v-on:click="filter = 'felt'">
+                Wahrnehmbar
+            </w-button>
+        </w-flex>
+        <w-divider class="my2"></w-divider>
         <RecentEvent v-for="cur_event in recent_events"
                      v-bind:key="cur_event.public_id"
                      v-bind:public_id = "cur_event.public_id"
@@ -45,6 +61,11 @@ import * as log_prefix from 'loglevel-plugin-prefix';
 export default {
     name: 'RecentEventInfoPanel',
     props: {},
+    data() {
+        return {
+            filter: 'felt',
+        };
+    },
     components: {
         RecentEvent
     },
@@ -57,8 +78,28 @@ export default {
     computed: {
         recent_events: function() {
             let recent_events = this.$store.getters.recent_events;
-            return Object.values(recent_events).sort((a, b) => (a.start_time < b.start_time) ? 1 : -1);
-            //return recent_events;
+            recent_events = Object.values(recent_events);
+            switch (this.filter)
+            {
+                case 'felt':
+                    recent_events = recent_events.filter(cur_event => cur_event.max_pgv >= 0.0001);
+                    break;
+            }
+            return recent_events.sort((a, b) => (a.start_time < b.start_time) ? 1 : -1);
+        },
+
+        filter_no_filter: function() {
+            if (this.filter === 'no')
+                return true;
+            else
+                return false;
+        },
+        
+        filter_felt: function() {
+            if (this.filter === 'felt')
+                return true;
+            else
+                return false;
         },
     },
 }
