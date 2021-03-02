@@ -354,6 +354,8 @@ export default new Vuex.Store({
               name: 'pgvstation'},
             { category: 'eventpgv',
               name: 'pgvvoronoi'},
+            { category: 'eventpgv',
+              name: 'isoseismalfilledcontour'},
             { category: 'pgvsequence',
               name: 'pgvstation'},
             { category: 'pgvsequence',
@@ -421,6 +423,58 @@ export default new Vuex.Store({
             },
             format: undefined
         },
+
+        ems98: {
+            1: { intensity: 'I',
+                 definition: 'nicht fühlbar',
+                 description: 'Nicht fühlbar',
+            },
+            2: { intensity: 'II',
+                 definition: 'kaum bemerkbar',
+                 description: 'Nur sehr vereinzelt von ruhenden Personen wahrgenommen.',
+            },
+            3: { intensity: 'III',
+                 definition: 'schwach',
+                 description: 'Von wenigen Personen in Gebäuden wahrgenommen. Ruhende Personen fühlen ein leichtes Schwingen oder Erschüttern.',
+            },
+            4: { intensity: 'IV',
+                 definition: 'deutlich',
+                 description: 'Im Freien vereinzelt, in Gebäuden von vielen Personen wahrgenommen. Einige Schlafende erwachen. Geschirr und Fenster klirren, Türen klappern.',
+            },
+            5: { intensity: 'V',
+                 definition: 'stark',
+                 description: 'Im Freien von wenigen, in Gebäuden von den meisten Personen wahrgenommen. Viele Schlafende erwachen. Wenige werden verängstigt. Gebäude werden insgesamt erschüttert. Hängende Gegenstände pendeln stark, kleine Gegenstände werden verschoben. Türen und Fenster schlagen auf oder zu.',
+            },
+            6: { intensity: 'VI',
+                 definition: 'leichte Gebäudeschäden',
+                 description: 'Viele Personen erschrecken und flüchten ins Freie. Einige Gegenstände fallen um. An vielen Häusern, vornehmlich in schlechterem Zustand, entstehen leichte Schäden wie feine Mauerrisse und das Abfallen von z. B. kleinen Verputzteilen.',
+            },
+            7: { intensity: 'VII',
+                 definition: 'Gebäudeschäden',
+                 description: 'Die meisten Personen erschrecken und flüchten ins Freie. Möbel werden verschoben. Gegenstände fallen in großen Mengen aus Regalen. An vielen Häusern solider Bauart treten mäßige Schäden auf (kleine Mauerrisse, Abfall von Putz, Herabfallen von Schornsteinteilen). Vornehmlich Gebäude in schlechterem Zustand zeigen größere Mauerrisse und Einsturz von Zwischenwänden.',
+            },
+            8: { intensity: 'VIII',
+                 definition: 'schwere Gebäudeschäden',
+                 description: 'Viele Personen verlieren das Gleichgewicht. An vielen Gebäuden einfacher Bausubstanz treten schwere Schäden auf; d. h. Giebelteile und Dachsimse stürzen ein. Einige Gebäude sehr einfacher Bauart stürzen ein.',
+            },
+            9: { intensity: 'IX',
+                 definition: 'zerstörend',
+                 description: 'Allgemeine Panik unter den Betroffenen. Sogar gut gebaute gewöhnliche Bauten zeigen sehr schwere Schäden und teilweisen Einsturz tragender Bauteile. Viele schwächere Bauten stürzen ein.',
+            },
+            10: { intensity: 'X',
+                 definition: 'sehr zerstörend',
+                 description: 'Viele gut gebaute Häuser werden zerstört oder erleiden schwere Beschädigungen.',
+            },
+            11: { intensity: 'XI',
+                 definition: 'verwüstend',
+                 description: 'Die meisten Bauwerke, selbst einige mit gutem erdbebengerechtem Konstruktionsentwurf und -ausführung, werden zerstört.',
+            },
+            12: { intensity: 'XII',
+                 definition: 'vollständig verwüstend',
+                 description: 'Nahezu alle Konstruktionen werden zerstört.',
+            },
+                 
+        },
     },
 
     getters: {
@@ -475,6 +529,10 @@ export default new Vuex.Store({
 
         mssds_data: state => {
             return state.mssds_data;
+        },
+
+        ems98: state => {
+            return state.ems98;
         },
 
         current_pgv: state => {
@@ -1229,6 +1287,8 @@ export default new Vuex.Store({
                                                          name: 'pgvstation'}, 
                                                        { category: 'eventpgv',
                                                          name: 'pgvvoronoi'},
+                                                       { category: 'eventpgv',
+                                                         name: 'isoseismalfilledcontour'},
                                                        { category: 'pgvsequence',
                                                          name: 'pgvstation'},
                                                        { category: 'pgvsequence',

@@ -33,6 +33,7 @@
                 <template #activator="{ on }">
                     <w-button :icon="show_icon"
                               :loading="!is_loaded"
+                              :disabled="!is_available"
                               v-on="on"
                               v-on:click="on_show_clicked"
                               text
@@ -76,6 +77,7 @@ export default {
                 eventpgv: {
                     pgvstation: 'PGV Stationsmaker',
                     pgvvoronoi: 'PGV Voronoizellen',
+                    isoseismalfilledcontour: 'Isoseisten',
                 },
                 pgvsequence: {
                     pgvstation: 'PGV Stationsmarker Zeitreihe',
@@ -95,6 +97,19 @@ export default {
                 return true;
             }
         },
+    
+        is_available: function() {
+            if (this.is_loaded)
+            {
+                if (Object.keys(this.supplement_data).length === 0)
+                    return false;
+                else
+                    return true;
+            }
+            else
+                return false;
+        },
+
 
         show_icon: function() {
             if (this.is_shown)
@@ -104,10 +119,15 @@ export default {
         },
 
         show_tooltip: function() {
-            if (this.is_shown)
-                return 'verstecke';
+            if (this.is_available)
+            {
+                if (this.is_shown)
+                    return 'verstecke';
+                else
+                    return 'zeige';
+            }
             else
-                return 'zeige';
+                return 'nicht verfügbar';
         },
 
         title: function() {

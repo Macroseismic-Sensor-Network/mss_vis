@@ -203,6 +203,10 @@ export default {
                     this.plot_pgvvoronoi();
                     break;
 
+                case 'eventpgv/isoseismalfilledcontour':
+                    this.plot_isoseismalfilledcontour();
+                    break;
+
                 case 'pgvsequence/pgvstation':
                     this.plot_pgvsequence_pgvstation();
                     break;
@@ -281,8 +285,56 @@ export default {
                                                     if (feature.properties.pgv)
                                                         pgv_string = (feature.properties.pgv * 1000).toFixed(4) + ' mm/s'
 
-                                                   layer.bindTooltip("PGV: " + pgv_string + "<br>gemessen an " + nsl_parts[1]).openTooltip();
+                                                   layer.bindTooltip("PGV: " + pgv_string + "<br>gemessen an " + nsl_parts[1],
+                                                    { sticky: true,
+                                                    }).openTooltip();
                                                },
+                                           }
+            );
+            this.supplement_group.addLayer(this.layer);
+            this.layer.bringToBack();
+        },
+
+        plot_isoseismalfilledcontour: function() {
+            var self = this;
+            let ems98 = this.$store.getters.ems98;
+            let polygon_style = {
+                fillColor: "#ffffff",
+                color: "#000000",
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.3,
+            };
+            this.logger.debug("Adding isoseismalfilledcontour.");
+            this.layer = L.geoJSON(this.supplement_data,
+                                           {
+                                                style: function(feature) {
+                                                    if(feature.properties.intensity < 2)
+                                                    {
+                                                        polygon_style.fillColor = self.pgv_to_color(0.00003);
+                                                        polygon_style.color = polygon_style.fillColor;
+                                                        polygon_style.fillOpacity = 0.3;
+                                                        polygon_style.opacity = 0.3;
+                                                    }
+                                                    else
+                                                    {
+                                                        polygon_style.fillColor = self.pgv_to_color(feature.properties.pgv);
+                                                        polygon_style.color = '#000000';
+                                                        polygon_style.fillOpacity = 0.8;
+                                                        polygon_style.opacity = 1;
+                                                    }
+
+                                                    return polygon_style;
+                                                },
+                                                onEachFeature: function(feature, layer) {
+                                                    let intensity = 1
+                                                    if (feature.properties.intensity >= 2)
+                                                        intensity = feature.properties.intensity;
+                                                    let ems98_level = ems98[Math.floor(intensity)]
+                                                    layer.bindTooltip("Intensität: " + intensity + '<br>' + ems98_level.definition,
+                                                        { sticky: true,
+                                                        }).openTooltip();
+                                                },
                                            }
             );
             this.supplement_group.addLayer(this.layer);
