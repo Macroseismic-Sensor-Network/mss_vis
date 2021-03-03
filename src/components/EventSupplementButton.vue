@@ -31,6 +31,18 @@
             <div class="spacer"></div>
             <w-tooltip left>
                 <template #activator="{ on }">
+                    <w-button :icon="download_icon"
+                              :loading="!is_loaded"
+                              :disabled="!is_available"
+                              v-on="on"
+                              v-on:click="on_download_clicked"
+                              text
+                              lg
+                              class="ml3"></w-button>
+                </template>{{ download_tooltip }}
+            </w-tooltip>
+            <w-tooltip left>
+                <template #activator="{ on }">
                     <w-button :icon="show_icon"
                               :loading="!is_loaded"
                               :disabled="!is_available"
@@ -97,7 +109,12 @@ export default {
                 return true;
             }
         },
-    
+
+        active_event: function() {
+            return this.$store.getters.active_recent_event;
+        },
+
+
         is_available: function() {
             if (this.is_loaded)
             {
@@ -130,6 +147,20 @@ export default {
                 return 'nicht verfügbar';
         },
 
+        download_icon: function() {
+            return 'mdi mdi-download-circle';
+        },
+
+        download_tooltip: function() {
+            if (this.is_available)
+            {
+                return 'download GeoJSON';
+            }
+            else
+                return 'nicht verfügbar';
+        },
+
+
         title: function() {
             return this.lang_title[this.category][this.name];
         },
@@ -156,6 +187,23 @@ export default {
             let payload = { category: this.category,
                             name: this.name };
             this.$store.commit('toggle_supplement_layer', payload);
+        },
+
+        on_download_clicked: function() {
+            this.logger.debug('Download the GeoJSON data.');
+            let supplement_data = this.supplement_data;
+            supplement_data.properties = { public_id: this.public_id,
+                                           event_start: this.active_event.start_time,
+                                           event_end: this.active_event.end_time }
+            let json_data = JSON.stringify(this.supplement_data);
+            let data_blob = new Blob([json_data], {type: "text/json"});
+            let data_url = URL.createObjectURL(data_blob);
+            let download_link = document.createElement("a");
+            download_link.href = data_url;
+            download_link.download = this.public_id + '_' + this.category + '_' + this.name + '.geojson';
+            document.body.appendChild(download_link);
+            download_link.click();
+            document.body.removeChild(download_link);
         },
     },
 }
