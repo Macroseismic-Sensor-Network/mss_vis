@@ -194,7 +194,8 @@ export default {
             let supplement_data = this.supplement_data;
             supplement_data.properties = { public_id: this.public_id,
                                            event_start: this.active_event.start_time,
-                                           event_end: this.active_event.end_time }
+                                           event_end: this.active_event.end_time,
+                                           license: 'CC-BY-SA 4.0'}
             let json_data = JSON.stringify(this.supplement_data);
             let data_blob = new Blob([json_data], {type: "text/json"});
             let data_url = URL.createObjectURL(data_blob);
