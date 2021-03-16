@@ -326,12 +326,31 @@ export default {
 
                                                     return polygon_style;
                                                 },
+                                                //onEachFeature: function(feature, layer) {
+                                                //    let intensity = 1
+                                                //    if (feature.properties.intensity >= 2)
+                                                //        intensity = feature.properties.intensity;
+                                                //    let ems98_level = ems98[Math.floor(intensity)]
+                                                //    layer.bindTooltip("Intensität: " + intensity + '<br>' + ems98_level.definition,
+                                                //        { sticky: true,
+                                                //        }).openTooltip();
+                                                //},
                                                 onEachFeature: function(feature, layer) {
-                                                    let intensity = 1
+                                                    let intensity = 1;
+                                                    let pgv = 0;
+                                                    let pgv_string = '< 0.1 mm/s';
                                                     if (feature.properties.intensity >= 2)
+                                                    {
                                                         intensity = feature.properties.intensity;
+                                                        pgv = feature.properties.pgv;
+                                                    }
+
+                                                    if (pgv > 0)
+                                                    {
+                                                        pgv_string = (pgv * 1000).toFixed(4);
+                                                    }
                                                     let ems98_level = ems98[Math.floor(intensity)]
-                                                    layer.bindTooltip("Intensität: " + intensity + '<br>' + ems98_level.definition,
+                                                    layer.bindTooltip("PGV: " + pgv_string + '<br>' + 'entspricht I = ' + intensity + ' (' + ems98_level.definition + ')',
                                                         { sticky: true,
                                                         }).openTooltip();
                                                 },

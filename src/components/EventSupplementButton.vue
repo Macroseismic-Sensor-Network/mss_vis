@@ -89,7 +89,7 @@ export default {
                 eventpgv: {
                     pgvstation: 'PGV Stationsmaker',
                     pgvvoronoi: 'PGV Voronoizellen',
-                    isoseismalfilledcontour: 'Isoseisten',
+                    isoseismalfilledcontour: 'PGV Konturlinien',
                 },
                 pgvsequence: {
                     pgvstation: 'PGV Stationsmarker Zeitreihe',
