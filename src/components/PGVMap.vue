@@ -35,7 +35,7 @@
         <div id="mapid">
             <w-menu v-model="show_display_menu" z-index="600" align-right="align-right">
                 <template #activator="{ on }">
-                    <w-button v-on="on" color="black" lg="lg" bg-color="white" class="display-menu">{{ display_mode_selection }}</w-button>
+                    <w-button v-on="on" color="black" lg="lg" bg-color="white" class="display-menu">{{ display_mode_label }}</w-button>
                 </template>
                 <w-radios v-model="display_mode_selection"
                           :items="display_menu_items"
@@ -120,8 +120,8 @@ export default {
             logger: undefined,
             showLegend:false,	//toggles the visibility off the legend
             display_menu_items: [
-                    { label: 'realtime', value: 'realtime'},
-                    { label: 'archive', value: 'archive'},
+                    { label: 'Aktuell', value: 'realtime'},
+                    { label: 'Archiv', value: 'archive'},
                 ],
             show_display_menu: false,
             test_model: undefined,
@@ -271,6 +271,11 @@ export default {
                 let payload = { mode: mode }
                 this.$store.dispatch('set_display_mode', payload);
             },
+        },
+
+        display_mode_label: function() {
+            let result = this.display_menu_items.filter(item => item.value === this.display_mode_selection);
+            return result[0].label;
         },
 
         data_time_range: function() {

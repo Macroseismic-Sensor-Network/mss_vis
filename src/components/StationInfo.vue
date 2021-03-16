@@ -58,7 +58,7 @@
             </w-button>
             <w-button class="ma1"
                       v-on:click="on_remove_from_inspect">
-                close
+                Schließen
             </w-button>
         </w-flex>
     </div>
@@ -148,11 +148,11 @@ export default {
         pgv_track_label: function() {
             if (this.pgv_track_shown)
             {
-                return "hide pgv track";  
+                return "Verstecke PGV Track";  
             }
             else
             {
-                return "show pgv track";  
+                return "Zeige PGV Track";  
             }
         },
     },
