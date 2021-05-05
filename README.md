@@ -1,4 +1,7 @@
-# client_side
+# MSS-VIS
+
+A Vue.js application for near-realtime visualization of the data of the MSS network.
+
 
 ## Project setup
 ```
