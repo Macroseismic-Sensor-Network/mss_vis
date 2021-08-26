@@ -28,7 +28,7 @@
     <div>
         <w-flex wrap class="text-left"
                  v-if="active_event === undefined">
-            <div class="xs12 pa1">Please select an event to display.</div>
+            <div class="xs12 pa1">Bitte wähle ein Ereignis in der Tabelle.</div>
         </w-flex>
         <w-flex column
                  v-if="active_event != undefined">
