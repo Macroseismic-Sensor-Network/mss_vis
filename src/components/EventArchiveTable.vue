@@ -25,13 +25,30 @@
 -->
 
 <template>
-        <w-table :headers="table_headers"
-                 :items="table_items"
-                 :fixed-headers="true"
-                 v-bind:select-row="true"
-                 style="height: 100%;"
-                 @row-select="on_row_select($event)">
-        </w-table>
+  <div class="event-archive-table">
+    <w-flex wrap>
+            <w-button round 
+                class="ma1"
+                :outline="!filter_no_filter"
+                v-on:click="filter = 'no'">
+                Kein Filter
+            </w-button>
+            
+            <w-button round
+                class="ma1"
+                :outline="!filter_felt"
+                v-on:click="filter = 'felt'">
+                Wahrnehmbar
+            </w-button>
+    </w-flex>
+    <w-table :headers="table_headers"
+             :items="table_items"
+             :fixed-headers="true"
+             v-bind:select-row="true"
+             style="height: 100%;"
+             @row-select="on_row_select($event)">
+    </w-table>
+  </div>
 </template>
 
 <script>
@@ -62,13 +79,37 @@ export default {
                     { label: 'PGV [mm/s]', key: 'pgv' },
                     { label: '#Detektionen', key: 'num_detections' },
                     { label: '#Stationen', key: 'num_stations' },
-                ],
+            ],
+            filter: 'felt',
         };
     },
     computed: {
+        filter_no_filter: function() {
+            if (this.filter === 'no')
+                return true;
+            else
+                return false;
+        },
+        
+        filter_felt: function() {
+            if (this.filter === 'felt')
+                return true;
+            else
+                return false;
+        },
+        
         archive_events: function() {
             let archive_events = this.$store.getters.archive_events;
-            return Object.values(archive_events).sort((a, b) => (a.start_time < b.start_time) ? 1 : -1);
+            archive_events = Object.values(archive_events);
+            switch (this.filter)
+            {
+                case 'felt':
+                    archive_events = archive_events.filter(cur_event => cur_event.max_pgv >= 0.0001);
+                    break;
+                
+            }
+            
+            return archive_events.sort((a, b) => (a.start_time < b.start_time) ? 1 : -1)
         },
 
         utc_offset: function() {
@@ -124,7 +165,7 @@ export default {
 <style scoped lang="sass">
 
 div.event-archive-table
-    width: 100%
-    overflow: auto
+  background-color: white
+  
 
 </style>
