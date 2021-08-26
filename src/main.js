@@ -47,7 +47,7 @@ else
 
 Vue.use(VueNativeSock,
         'wss://mss.mertl-research.at/ws_vis/', 
-        //'ws://localhost:8100', 
+        //'ws://localhost:8083/ws_vis/', 
         {
             store: store,
             format: 'json',
