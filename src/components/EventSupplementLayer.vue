@@ -347,7 +347,7 @@ export default {
 
                                                     if (pgv > 0)
                                                     {
-                                                        pgv_string = (pgv * 1000).toFixed(4);
+                                                        pgv_string = (pgv * 1000).toFixed(4) + ' mm/s';
                                                     }
                                                     let ems98_level = ems98[Math.floor(intensity)]
                                                     layer.bindTooltip("PGV: " + pgv_string + '<br>' + 'entspricht I = ' + intensity + ' (' + ems98_level.definition + ')',
