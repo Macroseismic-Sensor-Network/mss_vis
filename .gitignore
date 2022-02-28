@@ -22,3 +22,6 @@ yarn-error.log*
 
 # Map tiles
 /public/assets/vue/nrt/data/map
+
+# File link to station data.
+current_mss_stations.csv
