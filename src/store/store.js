@@ -314,11 +314,14 @@ export default new Vuex.Store({
 
         // The map info accordion state.
         map_info_accordion: {
+            supporter: {
+                expanded: true,
+            },
             map_info: {
                 expanded: true,
             },
             event_monitor: {
-                expanded: true,
+                expanded: false,
             },
             recent_events: {
                 expanded: true,
@@ -326,6 +329,16 @@ export default new Vuex.Store({
             station_info: {
                 expanded: false,
             },
+        },
+
+        // The event info accordion state.
+        event_info_accordion: {
+            event_details: {
+                expanded: true,
+            },
+            supplement_data: {
+                expanded: true,
+            }
         },
 
         // The state of the display.
@@ -422,6 +435,19 @@ export default new Vuex.Store({
                 return date.toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, '$1');
             },
             format: undefined
+        },
+
+        supporter: {
+            baumit: {
+                name: 'Baumit GmbH',
+                url: 'https://www.baumit.com',
+                logo: 'logo_baumit.jpg',
+            },
+            zamg: {
+                name: 'Zentralanstalt für Meteorologie und Geodynamik',
+                url: 'https://www.zamg.ac.at',
+                logo: 'logo_zamg.jpg',
+            }
         },
 
         ems98: {
@@ -533,6 +559,10 @@ export default new Vuex.Store({
 
         ems98: state => {
             return state.ems98;
+        },
+
+        supporter: state => {
+            return state.supporter;
         },
 
         current_pgv: state => {
@@ -859,6 +889,10 @@ export default new Vuex.Store({
             return state.map_info_accordion;
         },
 
+        event_info_accordion(state) {
+            return state.event_info_accordion;
+        },
+
         is_realtime(state) {
             if (state.display.mode === 'realtime')
             {
@@ -1151,12 +1185,17 @@ export default new Vuex.Store({
         },
 
         set_map_info_accordion_expanded(state, payload) {
-            state.map_info_accordion.map_info.expanded = payload[0];
-            state.map_info_accordion.event_monitor.expanded = payload[1];
-            state.map_info_accordion.recent_events.expanded = payload[2];
+            state.map_info_accordion.supporter.expanded = payload[0];
+            state.map_info_accordion.map_info.expanded = payload[1];
+            state.map_info_accordion.event_monitor.expanded = payload[2];
             state.map_info_accordion.station_info.expanded = payload[3];
+            state.map_info_accordion.recent_events.expanded = payload[4];
         },
 
+        set_event_info_accordion_expanded(state, payload) {
+            state.event_info_accordion.event_details.expanded = payload[0];
+            state.event_info_accordion.supplement_data.expanded = payload[1];
+        },
 
         activate_realtime_mode(state) {
             state.logger.debug('activating realtime mode')
