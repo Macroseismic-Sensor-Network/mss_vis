@@ -25,30 +25,22 @@
 -->
 
 <template>
-    <splitpanes horizontal
-                @resized="on_splitpanes_resized('resized splitpanes')">
-        <pane v-for="cur_nsl in track_pgv_stations"
-              :key="cur_nsl">
-            <TrackPgv :nsl_code="cur_nsl"/>
-        </pane>
-    </splitpanes>
+    <div class="station-realtime-panel">
+        <StationPgvTable />
+    </div>
 </template>
 
 <script>
 
-import TrackPgv from '../components/TrackPgv.vue'
-import { Splitpanes, Pane } from 'splitpanes'
-import 'splitpanes/dist/splitpanes.css'
 import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
+import StationPgvTable from '../components/StationPgvTable.vue';
 
 export default {
-    name: 'TracksPanel',
+    name: 'StationRealtimePanel',
     props: {},
     components: {
-        Splitpanes,
-        Pane,
-        TrackPgv,
+        StationPgvTable,
     },
     created() {
         this.logger = log.getLogger(this.$options.name)
@@ -57,28 +49,16 @@ export default {
             this.$store.getters.prefix_options);
     },
     computed: {
-        track_pgv_stations: function() {
-            if (this.is_realtime)
-            {
-                return this.$store.getters.tracks.realtime.pgv_timeseries;
-            }
-            else
-            {
-                return [];
-            }
-        },
-        
-        is_realtime: function() {
-            return this.$store.getters.is_realtime; 
-        },
-
-    },
-    methods: {
-        on_splitpanes_resized() {
-            this.logger.info('TrackPanel resized');
-            this.$store.commit('toggle_tracks_resize');
-        },
     },
 }
 
 </script>
+
+<style scoped lang="sass">
+
+div.station-realtime-panel
+    height: 100%
+    width: 100%
+    overflow: auto
+
+</style>

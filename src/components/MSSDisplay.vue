@@ -28,12 +28,15 @@
     <w-app id="mss-display-container" class="cell auto">
             <splitpanes class="default-theme"
                         horizontal
-                        @resized="on_splitpanes_resized()">
-                <pane :size="layout.panes.tracks.size"
-                      v-if="layout.panes.tracks.visible">
+                        @resized="on_display_container_splitpanes_resized()">
+                <pane :size="layout.panes.tracks.size.toString() + '%'"
+                    :max-size="layout.panes.tracks.max_size"  
+                    v-if="layout.panes.tracks.visible"
+                    ref="tracks_pane">
                     <TracksPanel :key="tracksPanelKey"/>
                 </pane>
-                <pane :size="layout.panes.map_container.size">
+                <pane :size="layout.panes.map_container.size.toString() + '%'"
+                      ref="map_container_pane">
                     <splitpanes @resized="on_splitpanes_resized()">
                         <pane :size="layout.panes.map_container.menu.size"
                               v-if="layout.panes.map_container.menu.visible">
@@ -41,7 +44,8 @@
                         </pane>
                         <pane :size="layout.panes.map_container.map.size"
                               v-if="layout.panes.map_container.map.visible">
-                            <PGVMap :key="mapKey" />
+                            <PGVMap :key="mapKey" 
+                                    v-resize:debounce="on_pgv_map_resize"/>
                         </pane>
                         <pane :size="layout.panes.map_container.info.size"
                               v-if="layout.panes.map_container.info.visible"
@@ -49,22 +53,41 @@
                             <div style="overflow: scroll; height: 100%; background-color: white;">
                                 <w-accordion :items="4"
                                     v-model="map_info_accordion_expanded">
-                                    <template #item-title.1="">Map Info</template>
+                                    <template #item-title.1="">Status</template>
                                     <template #item-content.1=""><MapInfoPanel key="map_info_panel_key"/></template>
-                                    <template #item-title.2="">Event Monitor</template>
+                                    <template #item-title.2="">Ereignis Monitor</template>
                                     <template #item-content.2=""><EventMonitorPanel key="event_monitor_panel_key"/></template>
-                                    <template #item-title.3="">Recent Events</template>
-                                    <template #item-content.3=""><ArchiveEventInfoPanel key="archive_info_panel_key"/></template>
-                                    <template #item-title.4="">Station Info</template>
+                                    <template #item-title.3="">Aktuelle Ereignisse</template>
+                                    <template #item-content.3=""><RecentEventInfoPanel key="archive_info_panel_key"/></template>
+                                    <template #item-title.4="">Stationsdetails</template>
                                     <template #item-content.4=""><StationInfoPanel key="station_info_panel_key"/></template>
                                 </w-accordion>
                             </div>
                         </pane>
+                        <pane :size="layout.panes.map_container.event_info.size"
+                              v-if="layout.panes.map_container.event_info.visible"
+                              ref="event_info_pane">
+                            <div style="overflow: scroll; height: 100%; background-color: white;">
+                                <w-accordion :items="2"
+                                    v-model="map_info_accordion_expanded">
+                                    <template #item-title.1="">Ereignisdetails</template>
+                                    <template #item-content.1=""><EventDetailsPanel key="event_details_panel_key"/></template>
+                                    <template #item-title.2="">Zusatzdaten</template>
+                                    <template #item-content.2=""><EventSupplementPanel key="event_supplement_panel_key"/></template>
+                                </w-accordion>
+                            </div>
+
+                        </pane>
                     </splitpanes>
                 </pane>
-                <pane :size="layout.panes.content.size"
-                      v-if="layout.panes.content.visible">
-                    Spreadsheet Pane
+                <pane :size="layout.panes.content.size.toString() + '%'"
+                      v-if="layout.panes.content.visible"
+                      :max-size="layout.panes.content.max_size"
+                      ref="content_pane">
+                    <EventArchivePanel key="event_archive_panel_key" 
+                                       v-if="is_archive"/>
+                    <StationRealtimePanel key="station_realtime_panel_key"
+                                          v-if="is_realtime"/>
                 </pane>
             </splitpanes>
     </w-app>
@@ -75,9 +98,13 @@
 import PGVMap from '../components/PGVMap.vue'
 import TracksPanel from '../components/TracksPanel.vue'
 import MapInfoPanel from '../components/MapInfoPanel.vue'
+import EventArchivePanel from '../components/EventArchivePanel.vue'
 import EventMonitorPanel from '../components/EventMonitorPanel.vue'
-import ArchiveEventInfoPanel from '../components/ArchiveEventInfoPanel.vue'
+import EventDetailsPanel from '../components/EventDetailsPanel.vue'
+import EventSupplementPanel from '../components/EventSupplementPanel.vue'
+import RecentEventInfoPanel from '../components/RecentEventInfoPanel.vue'
 import StationInfoPanel from '../components/StationInfoPanel.vue'
+import StationRealtimePanel from '../components/StationRealtimePanel.vue'
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 import * as log from 'loglevel';
@@ -100,9 +127,13 @@ export default {
         // eslint-disable-next-line
         PGVMap,
         MapInfoPanel,
+        EventArchivePanel,
         EventMonitorPanel,
-        ArchiveEventInfoPanel,
+        EventDetailsPanel,
+        EventSupplementPanel,
+        RecentEventInfoPanel,
         StationInfoPanel,
+        StationRealtimePanel,
         TracksPanel,
         Splitpanes,
         Pane,
@@ -115,6 +146,8 @@ export default {
         this.logger.setLevel(this.$store.getters.log_level);
         log_prefix.apply(this.logger,
             this.$store.getters.prefix_options);
+
+        this.$store.dispatch("init_store");
     },
     mounted() {
     },
@@ -122,14 +155,67 @@ export default {
     },
     methods: {
         on_splitpanes_resized() {
-            this.$store.getters.leaflet_map.map_object.invalidateSize();
+            this.logger.debug('on_splitpanes_resized()');
+            let payload = undefined;
+            if (this.layout.panes.map_container.info.visible === true) {
+                payload = {'map_info_size': parseFloat(this.$refs.map_info_pane.style.width)};
+            }
+            else {
+                payload = {'event_info_size': parseFloat(this.$refs.event_info_pane.style.width)};
+            }
+            this.$store.commit('set_map_container_right_pane_size', payload);
         },
 
-        on_map_container_info_splitpanes_resized(sp_event) {
-            this.$store.commit("update_map_container_info_layout", sp_event);
+        on_display_container_splitpanes_resized() {
+            this.logger.debug('on_display_container_splitpanes_resized');
+            let payload = undefined;
+            if (this.is_realtime)
+            {
+                payload = {
+                    mode: 'realtime',
+                    tracks_size: undefined,
+                    map_container_size: 100,
+                };
+                if (this.layout.panes.tracks.visible === true) {
+                    payload.tracks_size = parseFloat(this.$refs.tracks_pane.style.height);
+                }
+                payload.map_container_size = parseFloat(this.$refs.map_container_pane.style.height);
+            }
+            else
+            {
+                payload = {
+                    mode: 'archive',
+                    tracks_size: undefined,
+                    map_container_size: 100,
+                    content_size: undefined,
+                };
+                if (this.layout.panes.tracks.visible === true) {
+                    payload.tracks_size = parseFloat(this.$refs.tracks_pane.style.height);
+                }
+                if (this.layout.panes.content.visible === true) {
+                    payload.content_size = parseFloat(this.$refs.content_pane.style.height);
+                }
+                payload.map_container_size = parseFloat(this.$refs.map_container_pane.style.height);
+            }
+            this.logger.debug('Commit payload: ', payload);
+            this.$store.commit('set_display_container_pane_size', payload);
+        },
+
+        on_pgv_map_resize() {
+            this.logger.debug('Resizing the PgvMap.');
+            this.$store.getters.leaflet_map.map_object.invalidateSize();
+            this.logger.debug('Map state invalidated.');
         },
     },
     computed: {
+        is_realtime: function() {
+            return this.$store.getters.is_realtime; 
+        },
+
+        is_archive: function() {
+            return this.$store.getters.is_archive; 
+        },
+
         stations: function() {
             return this.$store.getters.station_meta;
         },

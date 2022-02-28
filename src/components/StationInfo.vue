@@ -33,7 +33,7 @@
             <div class="cell small-6"><span class="float-right text-right" style="min-width: 9rem;">latest PGV [mm/s]:</span></div>
             <div class="cell small-6">{{ (pgv * 1000).toFixed(3) }}</div>
             <div class="cell small-6"><span class="float-right text-right" style="min-width: 9rem;">  max. PGV [mm/s]:</span></div>
-            <div class="cell small-6">{{ (pgv_max * 1000).toFixed(3) }}</div>
+            <div class="cell small-6">{{ (pgv_history * 1000).toFixed(3) }}</div>
             <div class="cell auto"></div>
             <div class="cell shrink">
                 <a v-on:click="on_show_pgv_timeseries" class="button tiny float-right">{{ pgv_track_label }}</a>
@@ -47,9 +47,10 @@
     <div style="width: 100%;">
         <div class="station-info-item"><b>{{ name }}</b></div>
         <div class="station-info-item"><i>{{ description }}</i></div>
-        <div class="station-info-item"><i>{{ station_id }}</i></div>
-        <div class="station-info-item"><span class="text-right station-info-attribute">latest PGV [mm/s]:</span>{{ (pgv * 1000).toFixed(3) }}</div>
-        <div class="station-info-item"><span class="text-right station-info-attribute">  max. PGV [mm/s]:</span>{{ (pgv_max * 1000).toFixed(3) }}</div>
+        <div class="station-info-item"><i>{{ nsl_code }}</i></div>
+        <div class="station-info-item"><span class="text-right station-info-attribute">  akt. PGV:</span>{{ (pgv * 1000).toFixed(3) }} mm/s</div>
+        <div class="station-info-item"><span class="text-right station-info-attribute">   max.PGV:</span>{{ (pgv_history * 1000).toFixed(3) }} mm/s</div>
+        <div class="station-info-item"><span class="text-right station-info-attribute">      Verzögerung:</span>{{ delay }} s</div>
         <w-flex class="wrap">
             <w-button class="ma1" 
                       v-on:click="on_show_pgv_timeseries">
@@ -57,7 +58,7 @@
             </w-button>
             <w-button class="ma1"
                       v-on:click="on_remove_from_inspect">
-                close
+                Schließen
             </w-button>
         </w-flex>
     </div>
@@ -67,11 +68,12 @@
 
 import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
+import * as moment from 'moment';
 
 export default {
     name: 'StationInfo',
     props: {
-        station_id: String,
+        nsl_code: String,
     },
     components: {},
     created() {
@@ -81,16 +83,33 @@ export default {
             this.$store.getters.prefix_options);
     },
     computed: {
-        pgv: function() {
-            return this.$store.getters.current_pgv_by_station(this.station_id);
+        current_pgv: function() {
+            return this.$store.getters.current_pgv_by_station(this.nsl_code);
         },
 
-        pgv_max: function() {
-            return this.$store.getters.disp_range_max_pgv_by_station(this.station_id);
+        pgv: function() {
+            return this.current_pgv.latest_pgv;
+        },
+
+        pgv_history: function() {
+            return this.current_pgv.pgv_history;
+        },
+
+        latest_time: function() {
+            return moment.unix(this.current_pgv.latest_time).utc();
+        },
+
+        server_time_local: function() {
+            return this.$store.getters.server_time_local;
+        },
+
+        delay: function() {
+            let time_diff = this.server_time_local.diff(this.latest_time, 'seconds');
+            return time_diff;
         },
 
         station_meta: function() {
-            return this.$store.getters.station_meta_by_id(this.station_id);
+            return this.$store.getters.station_meta_by_nsl(this.nsl_code);
         },
 
         name: function() {
@@ -123,38 +142,40 @@ export default {
         },
 
         pgv_track_shown: function() {
-            return this.$store.getters.pgv_timeseries_shown(this.station_id);
+            return this.$store.getters.pgv_timeseries_shown(this.nsl_code);
         },
 
         pgv_track_label: function() {
             if (this.pgv_track_shown)
             {
-                return "hide pgv track";  
+                return "Verstecke PGV Track";  
             }
             else
             {
-                return "show pgv track";  
+                return "Zeige PGV Track";  
             }
         },
     },
     methods: {
         on_remove_from_inspect: function() {
-            this.$store.commit('remove_inspect_station', this.station_id);
+            let payload = {'nsl_code': this.nsl_code}
+            this.$store.commit('remove_inspect_station', payload);
 
             if (this.pgv_track_shown)
             {
-                this.$store.commit('remove_track_pgv_timeseries', this.station_id);
+                this.$store.dispatch('remove_track_pgv_timeseries', payload);
             }
         },
 
         on_show_pgv_timeseries: function() {
+            let payload = {'nsl_code': this.nsl_code}
             if (this.pgv_track_shown)
             {
-                this.$store.commit('remove_track_pgv_timeseries', this.station_id);
+                this.$store.dispatch('remove_track_pgv_timeseries', payload);
             }
             else
             {
-                this.$store.commit('add_track_pgv_timeseries', this.station_id);
+                this.$store.dispatch('add_track_pgv_timeseries', payload);
             }
 
         },

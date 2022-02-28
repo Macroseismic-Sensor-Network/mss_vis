@@ -25,25 +25,16 @@
 -->
 
 <template>
-    <div class="event-monitor-panel">
+    <div>
         <w-flex wrap class="text-left"
-                 v-if="!event_available">
-            <div class="xs12 pa1">Warte auf den Start eines Ereignisses.</div>
+                 v-if="active_event === undefined">
+            <div class="xs12 pa1">Bitte wähle ein Ereignis in der Tabelle.</div>
         </w-flex>
         <w-flex column
-                 v-if="event_available">
-            <w-flex wrap>
-                <div class="grow text-bold">{{ monitor_state }}</div>
-            </w-flex>
-
+                 v-if="active_event != undefined">
             <w-flex wrap>
                 <div class="pr2 text-bold">public id:</div>
                 <div class="grow">{{ public_id }}</div>
-            </w-flex>
-
-            <w-flex wrap>
-                <div class="pr2 text-bold">Status:</div>
-                <div class="grow">{{ state }}</div>
             </w-flex>
 
             <w-flex wrap>
@@ -72,7 +63,13 @@
             </w-flex>
 
             <w-flex wrap>
-                <div class="grow text-bold">getriggerte Stationen: {{ num_stations }}</div>
+                <div class="grow text-bold">getriggerte Stationen ({{ num_stations }}):</div>
+            </w-flex>
+            <w-flex wrap>
+                <w-button v-for="cur_station in triggered_stations"
+                          v-bind:key="cur_station"
+                          class="mx2 mb1"
+                          v-bind:disabled="true">{{ cur_station }}</w-button>
             </w-flex>
         </w-flex>
     </div>
@@ -85,7 +82,7 @@ import * as log_prefix from 'loglevel-plugin-prefix';
 import * as moment from 'moment';
 
 export default {
-    name: 'EventMonitorPanel',
+    name: 'EventDetailsPanel',
     props: {},
     components: {
     },
@@ -94,26 +91,13 @@ export default {
         this.logger.setLevel(this.$store.getters.log_level);
         log_prefix.apply(this.logger,
             this.$store.getters.prefix_options);
+        moment.locale(this.$store.getters.language);
     },
     computed: {
-        current_event: function() {
-            return this.$store.getters.current_event;
-        },
-
-        event_available: function() {
-            let res = false;
-            if ('state' in this.current_event)
-                if (this.current_event.state != 'closed')
-                    res =  true;
-                else
-                    res = false;
-            return res;
-        },
-
         public_id: function() {
-            if (this.event_available)
+            if (this.active_event)
             {
-                return this.current_event.public_id;
+                return this.active_event.public_id;
             }
             else
             {
@@ -121,37 +105,18 @@ export default {
             }
         },
 
-        monitor_state: function() {
-            let state = 'Warte auf den Beginn eines Ereignisses.';
-            if (this.event_available)
-            {
-                if (this.current_event.state === 'closed')
-                {
-                    state = "Das letzte detektierte Ereignis:";   
-                }
-                else
-                {
-                    state = "Der Start eines neuen Ereignisses wurde detektiert.";
-                }
-            }
-            return state;
+        utc_offset: function() {
+            return this.$store.getters.utc_offset;
         },
 
-        state: function() {
-            if (this.event_available)
-            {
-                return this.current_event.state;
-            }
-            else
-            {
-                return undefined;
-            }
+        active_event: function() {
+            return this.$store.getters.active_recent_event;
         },
 
         event_start: function() {
-            if (this.event_available)
+            if (this.active_event)
             {
-                return this.get_local_time_str(moment.utc(this.current_event.start_time));
+                return this.get_local_time_str(moment.utc(this.active_event.start_time));
             }
             else
             {
@@ -160,9 +125,9 @@ export default {
         },
 
         event_end: function() {
-            if (this.event_available)
+            if (this.active_event)
             {
-                let cur_start = moment.utc(this.current_event.end_time);
+                let cur_start = moment.utc(this.active_event.end_time);
                 let time_str = this.get_local_time_str(cur_start);
                 this.logger.debug("cur_start: ", cur_start);
                 this.logger.debug("time_str: ", time_str);
@@ -175,9 +140,9 @@ export default {
         },
 
         pgv: function() {
-            if (this.event_available)
+            if (this.active_event)
             {
-                return (this.current_event.max_pgv * 1000).toFixed(3);
+                return (this.active_event.max_pgv * 1000).toFixed(3);
             }
             else
             {
@@ -186,9 +151,9 @@ export default {
         },
 
         duration: function() {
-            if (this.event_available)
+            if (this.active_event)
             {
-                return this.current_event.length.toString();
+                return this.active_event.length.toString();
             }
             else
             {
@@ -197,10 +162,10 @@ export default {
         },
 
         triggered_stations: function() {
-            if (this.event_available)
+            if (this.active_event)
             {
                 let triggered_stations = []
-                for (let cur_nsl of this.current_event.triggered_stations)
+                for (let cur_nsl of this.active_event.triggered_stations)
                 {
                     let comps = cur_nsl.split(':');
                     triggered_stations.push(comps[1]);
@@ -214,9 +179,9 @@ export default {
         },
 
         num_stations: function() {
-            if (this.event_available)
+            if (this.active_event)
             {
-                return this.current_event.triggered_stations.length;
+                return this.active_event.triggered_stations.length;
             }
             else
             {
@@ -225,9 +190,9 @@ export default {
         },
 
         num_detections: function() {
-            if (this.event_available)
+            if (this.active_event)
             {
-                return this.current_event.num_detections;
+                return this.active_event.num_detections;
             }
             else
             {
@@ -256,19 +221,5 @@ export default {
 </script>
 
 <style scoped lang="sass">
-
-div.event-monitor-panel
-    height: 100%
-    width: 100%
-    overflow: auto
-
-span.event-monitor-info
-    cursor: pointer
-    margin: 0px
-    padding: 2px
-    display: inline-block
-    text-align: left
-    width: 100%
-    font-size: 10pt
 
 </style>

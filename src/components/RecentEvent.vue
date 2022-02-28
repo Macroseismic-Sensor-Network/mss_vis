@@ -25,20 +25,32 @@
 -->
 
 <template>
-    <div class="archive_event"><span class="archive_event" v-bind:class="{ active: is_active }" v-bind:style="{backgroundColor: color}" v-on:click="show_event">{{ event_id }} ({{ (max_pgv * 1000).toFixed(3) }} mm/s)</span><br></div>
+    <div class="archive_event">
+        <span class="archive_event"
+              v-bind:class="{ active: is_active }"
+              v-bind:style="{backgroundColor: color}"
+              v-on:click="show_event">
+                {{ event_time }} ({{ (max_pgv * 1000).toFixed(3) }} mm/s)
+        </span>
+        <br>
+    </div>
 </template>
 
 
 <script>
 import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
+import * as moment from 'moment';
 
 export default {
-    name: 'ArchiveEvent',
+    name: 'RecentEvent',
 
     props: {
-        id: String,
-        pos: Number,
+        public_id: String,
+        db_id: Number,
+        start_time: String,
+        end_time: String,
+        max_pgv: Number,
     },
 
     data() {
@@ -56,12 +68,8 @@ export default {
 
 
     computed: {
-        event_id: function() {
-            return this.id.slice(0, -7);
-        },
-
-        max_pgv: function() {
-            return this.$store.getters.archive_event_max_pgv(this.pos);
+        event_time: function() {
+            return this.get_local_time_str(moment.utc(this.start_time))
         },
 
         color: function() {
@@ -69,7 +77,7 @@ export default {
         },
 
         current_event: function() {
-            return this.$store.getters.event_archive[this.pos];
+            return this.$store.getters.recent_events[this.pos];
         },
 
         scales: function() {
@@ -79,7 +87,7 @@ export default {
         is_active: function() {
             var active_event_pos = this.$store.getters.map_control.show_archive_event;
 
-            if (this.pos === active_event_pos)
+            if (this.public_id === active_event_pos)
             {
                 return true;
             }
@@ -87,16 +95,23 @@ export default {
             {
                 return false;
             }
-        }
+        },
+
+        utc_offset: function() {
+            return this.$store.getters.utc_offset;
+        },
     },
 
     methods: {
         show_event()
         {
-            this.logger.debug("Showing event: " + this.pos);
-            var payload = { pos: this.pos };
-            this.$store.commit('set_show_archive_event', payload);
-            this.$store.getters.utm_to_wgs84;
+            this.logger.debug("Showing event: " + this.public_id);
+            var payload = { public_id: this.public_id };
+            this.$store.dispatch('view_recent_event_in_archive', payload);
+            //payload = { mode: 'archive' }
+            //this.$store.dispatch('set_display_mode', payload);
+            //this.$store.dispatch('load_event_supplement');
+            //this.$store.getters.utm_to_wgs84;
         },
 
         pgv_to_color(pgv) {
@@ -104,6 +119,21 @@ export default {
             const colormap = this.$store.getters.map_config.colormap;
             var color = colormap(this.scales.color(pgv));
             return color;
+        },
+        
+        get_local_time_str(time_utc) {
+            let local_time = this.utc_to_local_time(time_utc);
+            return this.format_time(local_time);
+        },
+
+        utc_to_local_time(time_utc) {
+            let time_local = time_utc.utcOffset(this.utc_offset / 60);
+            return time_local;
+        },
+
+        format_time(time) {
+            let time_format = this.$store.getters.time_format;
+            return time.format(time_format);
         },
     },
 }

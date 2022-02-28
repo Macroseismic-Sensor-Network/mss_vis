@@ -25,25 +25,22 @@
 -->
 
 <template>
-    <div class="archive-event-panel">
-        <ArchiveEvent v-for="(cur_event, index) in event_archive"
-                      v-bind:key="cur_event.start_time"
-                      v-bind:id="cur_event.start_time"
-                      v-bind:pos="index"/>
+    <div class="event-archive-panel">
+        <EventArchiveTable />
     </div>
 </template>
 
 <script>
 
-import ArchiveEvent from '../components/ArchiveEvent.vue';
 import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
+import EventArchiveTable from '../components/EventArchiveTable.vue';
 
 export default {
-    name: 'ArchiveEventInfoPanel',
+    name: 'EventArchivePanel',
     props: {},
     components: {
-        ArchiveEvent
+        EventArchiveTable
     },
     created() {
         this.logger = log.getLogger(this.$options.name)
@@ -52,8 +49,8 @@ export default {
             this.$store.getters.prefix_options);
     },
     computed: {
-        event_archive: function() {
-            return this.$store.getters.event_archive;
+        recent_events: function() {
+            return this.$store.getters.recent_events;
         },
     },
 }
@@ -62,18 +59,7 @@ export default {
 
 <style scoped lang="sass">
 
-span.event-info-title
-    margin: 0px
-    margin-bottom: 5px
-    padding: 2px
-    display: inline-block
-    text-align: center
-    width: 100%
-    font-weight: bold
-    background-color: black
-    color: white
-
-div.archive-event-panel
+div.event-archive-panel
     height: 100%
     width: 100%
     overflow: auto

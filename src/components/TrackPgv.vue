@@ -44,7 +44,7 @@ import * as log_prefix from 'loglevel-plugin-prefix';
 export default {
     name: 'TrackPGV',
     props: {
-        stream_id: String,
+        nsl_code: String,
     },
     components: {},
     directives: {
@@ -65,7 +65,7 @@ export default {
     data: function () {
         return {
             layout: {
-                //title: this.stream_id,
+                //title: this.nsl_code,
                 //titlefont: {size: 10},
                 //margin: {
                 //    l: 40,
@@ -141,18 +141,20 @@ export default {
     },
     computed: {
         pgv_data: function() {
-            return this.$store.getters.pgv_by_station(this.$props.stream_id);
+            return this.$store.getters.pgv_by_station(this.nsl_code);
         },
 
         plotly_data: function() {
             // eslint-disable-next-line
-            var pgv_data = this.$store.getters.pgv_by_station(this.$props.stream_id);
+            var pgv_data = this.$store.getters.pgv_by_station(this.nsl_code);
             var data = [];
+            var trace = {};
             if (typeof pgv_data != 'undefined') {
                 // Convert to mm/s.
                 var data_mm = pgv_data.data.map(function(x) {return x * 1000});
-                var trace = {
-                    x: pgv_data.time,
+                var data_ms = pgv_data.time.map(function(x) {return x * 1000});
+                trace = {
+                    x: data_ms,
                     y: data_mm,
                     type: 'scatter',
                     mode: 'lines',
@@ -160,25 +162,46 @@ export default {
                         color: 'LightSkyBlue',
                     },
                     fill: 'tozeroy',
-                    hovertemplate: 'pgv:  %{y}<br>' +
-                                   'time:  %{x}' +
+                    hovertemplate: 'PGV:  %{y:.5f} mm/s<br>' +
+                                   'Zeit:  %{x}' +
                                    '<extra></extra>',
                 }
-                data = [trace, ]
             }
+            else {
+                trace = {
+                    x: [],
+                    y: [],
+                    type: 'scatter',
+                    mode: 'lines',
+                    line: {
+                        color: 'LightSkyBlue',
+                    },
+                    fill: 'tozeroy',
+                    hovertemplate: 'PGV:  %{y:.5f} mm/s<br>' +
+                                   'Zeit:  %{x}' +
+                                   '<extra></extra>',
+                }
+
+            }
+            data = [trace, ]
             return data;
         },
 
         element_id: function() {
-            return 'pgv_graph_' + this.stream_id;
+            return 'pgv_graph_' + this.nsl_code;
         },
 
         display_range: function() {
-            return this.$store.getters.display_time_range;
+            let range = this.$store.getters.display_time_range;
+            this.logger.debug("range[0]: ", range[0].toISOString());
+            this.logger.debug("range[1]: ", range[1].toISOString());
+            this.logger.debug("server_time: ", this.$store.getters.server_time.toISOString());
+            range = [range[0].valueOf(), range[1].valueOf()];
+            return range;
         },
 
         station: function() {
-            var res = this.stream_id.split('.');
+            var res = this.nsl_code.split(':');
             return res[1];
         },
 
@@ -203,7 +226,7 @@ export default {
         },
 
         update() {
-            console.log('Updating Graph ' + this.element_id);
+            this.logger.debug('Updating Graph ' + this.element_id);
             //var layout = this.layout;
             //this.layout.xaxis.range = ['2019-07-05T11:30:00', '2019-07-05T14:00']
             //this.layout.xaxis.range = this.display_range;
@@ -227,7 +250,7 @@ export default {
         },
 
         update_range() {
-            console.log('Updating the range.' + this.display_range);
+            this.logger.debug('Updating the range.' + this.display_range);
             this.layout.xaxis.range = this.display_range;
             Plotly.relayout(this.element_id, this.layout);
         },
