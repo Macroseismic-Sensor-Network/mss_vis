@@ -44,6 +44,7 @@
     <w-table :headers="table_headers"
              :items="table_items"
              :fixed-headers="true"
+             :selectable-rows="1"
              v-bind:select-row="true"
              style="height: 100%;"
              @row-select="on_row_select($event)">
