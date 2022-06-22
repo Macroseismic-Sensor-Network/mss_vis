@@ -1,6 +1,11 @@
-# client_side
+# MSS-VIS
+
+A Vue.js application for near-realtime visualization of the data of the MSS network.
+
 
 ## Project setup
+Clone the source code from the Gibhub repository and run the install command in the 'mss_vis' root folder (the one that contains the package.json file). 
+
 ```
 npm install
 ```
