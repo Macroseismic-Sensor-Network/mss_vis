@@ -38,7 +38,7 @@
     "vue-x-docs": "^1.0.3",
     "vue2-leaflet": "^2.5.2",
     "vuex": "^3.1.1",
-    "wave-ui": "^1.56.0",
+    "wave-ui": "^1.56.2",
     "webpack": "^4.41.2"
   },
   "eslintConfig": {
