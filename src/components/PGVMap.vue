@@ -100,6 +100,25 @@ import leafletImage from "leaflet-image";
 import 'leaflet-timedimension';
 import 'leaflet.tilelayer.colorfilter';
 
+/**
+ * @component components/PGVMap
+ * @desc The map component holding the Leaflet map, the PGV markers, 
+ * the legend and the event supplement layers.
+ * @vue-prop {String} title The title of the map.
+ * @vue-data {Object} logger=undefined The logger instance.
+ * @vue-data {Boolean} showLegend=false The visibility of the legend.
+ * @vue-data {Object} display_menu_items - The items of the display mode menu.
+ * @vue-data {Boolean} show_display_menu=false The visibility of the display mode menu.
+ * @vue-data {Object} leaflet_baselayers=undefined The base layers of the leaflet map.
+ * @vue-computed {Object} leaflet_map - The Leaflet map object.
+ * @vue-computed {Object} leaflet_time_dimension - The Leaflet Time Dimension object.
+ * @vue-computed {Object} leaflet_time_dimension_player - The Leaflet Time Dimension player object.
+ * @vue-computed {Object} leaflet_time_dimension_control - The Leaflet Time Dimension control object.
+ * @vue-computed {String[]} leaflet_layer_filter - The Leaflet layer filter options. Handles the reduced saturation of the map in archive display mode.
+ * @vue-computed {String} display_mode_selection - The display mode.
+ * @vue-computed {String} display_mode_label - The label of the display mode.
+ * @vue-computed {Object} data_time_range - The start- and end time of the available PGV data.
+ */
 export default {
     name: 'PGVMap',
 
@@ -394,6 +413,9 @@ export default {
             */
 
             this.leaflet_map.setView([47.8972,16.3507], 10);
+
+            /* Remove the flag from the attribution prefix. */
+            this.leaflet_map.attributionControl.setPrefix('<a href="https://leafletjs.com" title="A JavaScript library for interactive maps">Leaflet</a>');
 
             var svg=L.svg();
             svg.addTo(this.leaflet_map);
