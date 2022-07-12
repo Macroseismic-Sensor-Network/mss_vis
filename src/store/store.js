@@ -447,6 +447,11 @@ export default new Vuex.Store({
                 name: 'Zentralanstalt für Meteorologie und Geodynamik',
                 url: 'https://www.zamg.ac.at',
                 logo: 'logo_zamg.jpg',
+            },
+            hainburg: {
+                name: 'Stadtgemeinde Hainburg',
+                url: 'https://www.hainburg-donau.gv.at/',
+                logo: 'stadtgemeinde_hainburg_wappen.jpg',
             }
         },
 
