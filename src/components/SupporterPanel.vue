@@ -31,7 +31,7 @@
              v-bind:key="cur_supporter.name"
              class="supporter-logo-container">
           <a v-bind:href="cur_supporter.url"
-             target="_blank">
+             target="_blank" v-bind:title="cur_supporter.name">
             <img v-bind:src="'/assets/vue/nrt/image/supporter/' + cur_supporter.logo"
                  v-bind:alt="'Logo von ' + cur_supporter.name"/>
           </a>
