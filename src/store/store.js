@@ -149,26 +149,28 @@ function handle_msg_data(msg_id, payload, state) {
             state.recent_events = payload;
 
             // Add the dummy event class to the events.
+            /*
             for (let cur_key in state.recent_events) {
-                let event_class = 'unbekannt';
-                let event_region = 'unbekannt';
-                let event_class_mode = 'automatisch';
+                //let event_class = 'unbekannt';
+                //let event_region = 'unbekannt';
+                //let event_class_mode = 'automatisch';
                 let foreign_id = null;
                 let f_dom = null;
-                let sprengungen = ['mss_dsrt_2022-08-24T120921500000',
-                                   'mss_dsrt_2022-08-24T115735500000',
-                                   'mss_dsrt_2022-08-19T091407500000'];
-                if (sprengungen.includes(state.recent_events[cur_key].public_id)) {
-                    event_class = 'sprengung';
-                    event_region = 'dürnbach';
-                    event_class_mode = 'überprüft';
-                }
-                state.recent_events[cur_key].event_class = event_class;
-                state.recent_events[cur_key].event_region = event_region;
-                state.recent_events[cur_key].event_class_mode = event_class_mode;
+                //let sprengungen = ['mss_dsrt_2022-08-24T120921500000',
+                //                   'mss_dsrt_2022-08-24T115735500000',
+                //                   'mss_dsrt_2022-08-19T091407500000'];
+                //if (sprengungen.includes(state.recent_events[cur_key].public_id)) {
+                //    event_class = 'sprengung';
+                //    event_region = 'dürnbach';
+                //    event_class_mode = 'überprüft';
+                //}
+                //state.recent_events[cur_key].event_class = event_class;
+                //state.recent_events[cur_key].event_region = event_region;
+                //state.recent_events[cur_key].event_class_mode = event_class_mode;
                 state.recent_events[cur_key].foreign_id = foreign_id;
                 state.recent_events[cur_key].f_dom = f_dom;
             }
+            */
             break;
 
         case 'event_archive':
