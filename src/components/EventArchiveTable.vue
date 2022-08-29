@@ -136,6 +136,7 @@ export default {
                           { label: 'Start', key: 'start_time' },
                           { label: 'Dauer [s]', key: 'duration' },
                           { label: 'PGV [mm/s]', key: 'pgv' },
+                          { label: 'Magnitude', key: 'magnitude'},
                           { label: 'f dom. [Hz]', key: 'f_dom'},
                           { label: 'Klasse', key: 'event_class'},
                           { label: 'Region', key: 'event_region'},
@@ -151,6 +152,7 @@ export default {
                           //{ label: 'Ende', key: 'end_time' },
                           { label: 'Dauer [s]', key: 'duration' },
                           { label: 'PGV [mm/s]', key: 'pgv' },
+                          { label: 'Magnitude', key: 'magnitude'},
                           { label: 'Klasse', key: 'event_class'},
                           { label: 'Region', key: 'event_region'},
                           { label: 'Modus', key: 'event_class_mode'},
@@ -166,7 +168,11 @@ export default {
             {
                 let cur_event = this.archive_events[cur_key]
                 let cur_start = moment.utc(cur_event.start_time);
-                let cur_end = moment.utc(cur_event.end_time);                
+                let cur_end = moment.utc(cur_event.end_time);
+                let cur_magnitude = cur_event.magnitude
+                if (cur_magnitude) {
+                    cur_magnitude = cur_magnitude.toFixed(1)
+                }
                 items.push(
                     { 
                         public_id: cur_event.public_id,
@@ -179,6 +185,7 @@ export default {
                         f_dom: cur_event.f_dom,
                         foreign_id: cur_event.foreign_id,
                         pgv: (cur_event.max_pgv * 1000).toFixed(3),
+                        magnitude: cur_magnitude,
                         num_detections: cur_event.num_detections.toString(),
                         num_stations: cur_event.triggered_stations.length.toString()
                     });
