@@ -43,9 +43,23 @@
 
             <w-button round
                 class="ma1"
+                :outline="!filter_earthquake"
+                v-on:click="filter = 'earthquake'">
+                Erdbeben
+            </w-button>
+
+            <w-button round
+                class="ma1"
                 :outline="!filter_blast_duernbach"
                 v-on:click="filter = 'blast_duernbach'">
                 Sprengung Dürnbach
+            </w-button>
+
+            <w-button round
+                class="ma1"
+                :outline="!filter_blast_hainburg"
+                v-on:click="filter = 'blast_hainburg'">
+                Sprengung Hainburg
             </w-button>
     </w-flex>
     <w-table :headers="table_header"
@@ -104,6 +118,20 @@ export default {
                 return false;
         },
 
+        filter_blast_hainburg: function() {
+            if (this.filter === 'blast_hainburg')
+                return true;
+            else
+                return false;
+        },
+
+        filter_earthquake: function() {
+            if (this.filter === 'earthquake')
+                return true;
+            else
+                return false;
+        },
+
         active_event: function() {
             return this.$store.getters.active_recent_event;
         },
@@ -117,7 +145,13 @@ export default {
                     archive_events = archive_events.filter(cur_event => cur_event.max_pgv >= 0.0001);
                     break;
                 case 'blast_duernbach':
-                    archive_events = archive_events.filter(cur_event => (cur_event.event_class === 'sprengung' && cur_event.event_region == 'dürnbach'));
+                    archive_events = archive_events.filter(cur_event => (cur_event.event_class.toLowerCase() === 'sprengung' && cur_event.event_region.toLowerCase() == 'steinbruch dürnbach'));
+                    break;
+                case 'blast_hainburg':
+                    archive_events = archive_events.filter(cur_event => (cur_event.event_class.toLowerCase() === 'sprengung' && cur_event.event_region.toLowerCase() == 'steinbruch pfaffenberg'));
+                    break;
+                case 'earthquake':
+                    archive_events = archive_events.filter(cur_event => (cur_event.event_class.toLowerCase() === 'erdbeben'));
                     break;
             }
             
@@ -171,7 +205,7 @@ export default {
                 let cur_end = moment.utc(cur_event.end_time);
                 let cur_magnitude = cur_event.magnitude
                 if (cur_magnitude) {
-                    cur_magnitude = cur_magnitude.toFixed(1)
+                    cur_magnitude = cur_magnitude.toFixed(2)
                 }
                 items.push(
                     { 
