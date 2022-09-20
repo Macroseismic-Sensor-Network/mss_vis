@@ -33,10 +33,21 @@
         -->
 
         <div id="mapid">
-            <w-menu v-model="show_display_menu" z-index="600" align-right="align-right">
+          <w-menu v-model="show_display_menu"
+                  z-index="600"
+                  align-right="align-right">
+
                 <template #activator="{ on }">
-                    <w-button v-on="on" color="black" lg="lg" bg-color="white" class="display-menu">{{ display_mode_label }}</w-button>
+                  <w-button v-on="on"
+                            color="black"
+                            lg="lg"
+                            bg-color="white"
+                            class="display-menu">
+                    {{ display_mode_label }}
+                  </w-button>
                 </template>
+
+                <p>Anzeigemodus</p>
                 <w-radios v-model="display_mode_selection"
                           :items="display_menu_items"
                           @input="on_select_display_mode"></w-radios>
