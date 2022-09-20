@@ -64,7 +64,10 @@ export default {
                 pgvsequence: {
                     pgvstation: 'PGV Stationsmarker Zeitreihe',
                     pgvvoronoi: 'PGV Voronoizellen Zeitreihe',
-                }
+                },
+                localize: {
+                    origins: 'Hypozentren',
+                },
             },
         };
     },
@@ -195,6 +198,10 @@ export default {
             let supplement_id = this.category + '/' + this.name
             switch (supplement_id)
             {
+                case 'localize/origins':
+                    this.plot_origins();
+                    break;
+                
                 case 'eventpgv/pgvstation':
                     this.plot_pgvstation();
                     break;
@@ -215,6 +222,30 @@ export default {
                     this.plot_pgvsequence_pgvvoronoi();
                     break;
             }
+        },
+
+        plot_origins: function() {
+            var self = this;
+            let marker_style = {
+                radius: 10,
+                fillColor: "#ff7800",
+                color: "#000",
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.8
+            };
+            this.logger.debug('Plotting the event origins.');
+            this.layer = L.geoJSON(this.supplement_data,
+                                   {
+                                       pointToLayer: function(feature, lat_lon) {
+                                           //let marker = L.circleMarker(lat_lon, marker_style);
+                                           let marker = L.marker(lat_lon);
+                                           return marker;
+                                       },
+                                   }
+                                  );
+            this.supplement_group.addLayer(this.layer);
+            this.layer.bringToFront();
         },
 
         plot_pgvstation: function() {

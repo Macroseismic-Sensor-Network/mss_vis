@@ -387,6 +387,8 @@ export default new Vuex.Store({
 
         // The supported event supplements.
         supported_supplements: [
+            { category: 'localize',
+              name: 'origins'},
             { category: 'eventpgv',
               name: 'pgvstation'},
             { category: 'eventpgv',
@@ -1360,7 +1362,9 @@ export default new Vuex.Store({
                                                        { category: 'pgvsequence',
                                                          name: 'pgvstation'},
                                                        { category: 'pgvsequence',
-                                                         name: 'pgvvoronoi'}]
+                                                         name: 'pgvvoronoi'},
+                                                       { category: 'localize',
+                                                         name: 'origins'}]
                                          };
                 commit('set_show_archive_event', mutation_payload);
                 dispatch('request_event_supplement', supplement_payload)
