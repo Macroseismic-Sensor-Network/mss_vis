@@ -94,7 +94,10 @@ export default {
                 pgvsequence: {
                     pgvstation: 'PGV Stationsmarker Zeitreihe',
                     pgvvoronoi: 'PGV Voronoizellen Zeitreihe',
-                }
+                },
+                localize: {
+                    origins: 'Epizentrum',
+                },
             },
         };
     },

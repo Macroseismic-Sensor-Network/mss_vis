@@ -58,6 +58,11 @@
             </w-flex>
 
             <w-flex wrap>
+                <div class="pr2 text-bold">Klasse:</div>
+                <div class="grow">{{ event_class }}</div>
+            </w-flex>
+
+            <w-flex wrap>
                 <div class="pr2 text-bold">Anzahl der Detektionsdreiecke:</div>
                 <div class="grow">{{ num_detections }}</div>
             </w-flex>
@@ -137,6 +142,10 @@ export default {
             {
                 return undefined;
             }
+        },
+
+        event_class: function() {
+            return this.active_event.event_class;
         },
 
         pgv: function() {

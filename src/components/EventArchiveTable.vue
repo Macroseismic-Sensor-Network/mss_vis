@@ -40,8 +40,29 @@
                 v-on:click="filter = 'felt'">
                 Wahrnehmbar
             </w-button>
+
+            <w-button round
+                class="ma1"
+                :outline="!filter_earthquake"
+                v-on:click="filter = 'earthquake'">
+                Erdbeben
+            </w-button>
+
+            <w-button round
+                class="ma1"
+                :outline="!filter_blast_duernbach"
+                v-on:click="filter = 'blast_duernbach'">
+                Sprengung Dürnbach
+            </w-button>
+
+            <w-button round
+                class="ma1"
+                :outline="!filter_blast_hainburg"
+                v-on:click="filter = 'blast_hainburg'">
+                Sprengung Hainburg
+            </w-button>
     </w-flex>
-    <w-table :headers="table_headers"
+    <w-table :headers="table_header"
              :items="table_items"
              :fixed-headers="true"
              :selectable-rows="1"
@@ -72,15 +93,6 @@ export default {
     },
     data() {
         return {
-            table_headers: [
-                    { label: 'public ID', key: 'public_id' },
-                    { label: 'Start', key: 'start_time' },
-                    { label: 'Ende', key: 'end_time' },
-                    { label: 'Dauer [s]', key: 'duration' },
-                    { label: 'PGV [mm/s]', key: 'pgv' },
-                    { label: '#Detektionen', key: 'num_detections' },
-                    { label: '#Stationen', key: 'num_stations' },
-            ],
             filter: 'felt',
         };
     },
@@ -98,6 +110,31 @@ export default {
             else
                 return false;
         },
+
+        filter_blast_duernbach: function() {
+            if (this.filter === 'blast_duernbach')
+                return true;
+            else
+                return false;
+        },
+
+        filter_blast_hainburg: function() {
+            if (this.filter === 'blast_hainburg')
+                return true;
+            else
+                return false;
+        },
+
+        filter_earthquake: function() {
+            if (this.filter === 'earthquake')
+                return true;
+            else
+                return false;
+        },
+
+        active_event: function() {
+            return this.$store.getters.active_recent_event;
+        },
         
         archive_events: function() {
             let archive_events = this.$store.getters.archive_events;
@@ -107,7 +144,15 @@ export default {
                 case 'felt':
                     archive_events = archive_events.filter(cur_event => cur_event.max_pgv >= 0.0001);
                     break;
-                
+                case 'blast_duernbach':
+                    archive_events = archive_events.filter(cur_event => (cur_event.event_class.toLowerCase() === 'sprengung' && cur_event.event_region.toLowerCase() == 'steinbruch dürnbach'));
+                    break;
+                case 'blast_hainburg':
+                    archive_events = archive_events.filter(cur_event => (cur_event.event_class.toLowerCase() === 'sprengung' && cur_event.event_region.toLowerCase() == 'steinbruch pfaffenberg'));
+                    break;
+                case 'earthquake':
+                    archive_events = archive_events.filter(cur_event => (cur_event.event_class.toLowerCase() === 'erdbeben'));
+                    break;
             }
             
             return archive_events.sort((a, b) => (a.start_time < b.start_time) ? 1 : -1)
@@ -117,6 +162,40 @@ export default {
             return this.$store.getters.utc_offset;
         },
 
+        table_header: function() {
+            let header = [];
+
+            if (this.filter_blast_duernbach) {
+                header = [{ label: 'public ID', key: 'public_id' },
+                          { label: 'Start', key: 'start_time' },
+                          { label: 'Dauer [s]', key: 'duration' },
+                          { label: 'PGV [mm/s]', key: 'pgv' },
+                          { label: 'Magnitude', key: 'magnitude'},
+                          { label: 'f dom. [Hz]', key: 'f_dom'},
+                          { label: 'Klasse', key: 'event_class'},
+                          { label: 'Region', key: 'event_region'},
+                          { label: 'Modus', key: 'event_class_mode'},
+                          { label: 'Sprengnr.', key: 'foreign_id'},
+                          { label: '#Detektionen', key: 'num_detections' },
+                          { label: '#Stationen', key: 'num_stations' }];
+                
+            }
+            else {
+                header = [{ label: 'public ID', key: 'public_id' },
+                          { label: 'Start', key: 'start_time' },
+                          //{ label: 'Ende', key: 'end_time' },
+                          { label: 'Dauer [s]', key: 'duration' },
+                          { label: 'PGV [mm/s]', key: 'pgv' },
+                          { label: 'Magnitude', key: 'magnitude'},
+                          { label: 'Klasse', key: 'event_class'},
+                          { label: 'Region', key: 'event_region'},
+                          { label: 'Modus', key: 'event_class_mode'},
+                          { label: '#Detektionen', key: 'num_detections' },
+                          { label: '#Stationen', key: 'num_stations' }];
+            }
+            return header;
+        },
+
         table_items: function() {
             let items = [];
             for (let cur_key in this.archive_events)
@@ -124,13 +203,23 @@ export default {
                 let cur_event = this.archive_events[cur_key]
                 let cur_start = moment.utc(cur_event.start_time);
                 let cur_end = moment.utc(cur_event.end_time);
+                let cur_magnitude = cur_event.magnitude
+                if (cur_magnitude) {
+                    cur_magnitude = cur_magnitude.toFixed(2)
+                }
                 items.push(
                     { 
                         public_id: cur_event.public_id,
                         start_time: this.get_local_time_str(cur_start),
                         end_time: this.get_local_time_str(cur_end),
                         duration: cur_event.length.toString(),
+                        event_class: cur_event.event_class,
+                        event_class_mode: cur_event.event_class_mode,
+                        event_region: cur_event.event_region,
+                        f_dom: cur_event.f_dom,
+                        foreign_id: cur_event.foreign_id,
                         pgv: (cur_event.max_pgv * 1000).toFixed(3),
+                        magnitude: cur_magnitude,
                         num_detections: cur_event.num_detections.toString(),
                         num_stations: cur_event.triggered_stations.length.toString()
                     });
