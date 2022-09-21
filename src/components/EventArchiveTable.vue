@@ -139,14 +139,14 @@ export default {
         archive_events: function() {
             let archive_events = this.$store.getters.archive_events;
             archive_events = Object.values(archive_events);
+            let duernbach_regions = ['steinbruch dürnbach',
+                                             'hohe wand'];
             switch (this.filter)
             {
                 case 'felt':
                     archive_events = archive_events.filter(cur_event => cur_event.max_pgv >= 0.0001);
                     break;
                 case 'blast_duernbach':
-                    let duernbach_regions = ['steinbruch dürnbach',
-                                             'hohe wand'];
                     archive_events = archive_events.filter(cur_event => (cur_event.event_class.toLowerCase() === 'sprengung' && duernbach_regions.includes(cur_event.event_region.toLowerCase())));
                     break;
                 case 'blast_hainburg':
