@@ -225,6 +225,7 @@ export default {
         },
 
         plot_origins: function() {
+            /*
             var self = this;
             let marker_style = {
                 radius: 10,
@@ -234,6 +235,7 @@ export default {
                 opacity: 1,
                 fillOpacity: 0.8
             };
+            */
             this.logger.debug('Plotting the event origins.');
             this.layer = L.geoJSON(this.supplement_data,
                                    {
