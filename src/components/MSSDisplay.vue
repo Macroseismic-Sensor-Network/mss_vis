@@ -257,9 +257,13 @@ export default {
                          {id: 'supplement_data'}];
             if (this.active_event) {
                 if (this.active_event.event_class === 'sprengung') {
-                    items = [{id: 'event_details'},
-                             {id: 'blast_info'},
-                             {id: 'supplement_data'}];
+                    let duernbach_regions = ['Steinbruch Dürnbach',
+                                             'Hohe Wand'];
+                    if (duernbach_regions.includes(this.active_event.event_region)) {
+                        items = [{id: 'event_details'},
+                                 {id: 'blast_info'},
+                                 {id: 'supplement_data'}];
+                    }
                 }
             }
             return items;

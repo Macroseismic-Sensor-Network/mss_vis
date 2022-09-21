@@ -145,7 +145,9 @@ export default {
                     archive_events = archive_events.filter(cur_event => cur_event.max_pgv >= 0.0001);
                     break;
                 case 'blast_duernbach':
-                    archive_events = archive_events.filter(cur_event => (cur_event.event_class.toLowerCase() === 'sprengung' && cur_event.event_region.toLowerCase() == 'steinbruch dürnbach'));
+                    let duernbach_regions = ['steinbruch dürnbach',
+                                             'hohe wand'];
+                    archive_events = archive_events.filter(cur_event => (cur_event.event_class.toLowerCase() === 'sprengung' && duernbach_regions.includes(cur_event.event_region.toLowerCase())));
                     break;
                 case 'blast_hainburg':
                     archive_events = archive_events.filter(cur_event => (cur_event.event_class.toLowerCase() === 'sprengung' && cur_event.event_region.toLowerCase() == 'steinbruch pfaffenberg'));
