@@ -317,7 +317,8 @@ export default new Vuex.Store({
                     },
                     diagram_view: {
                         size: 0,
-                        visible: false,
+                        visible: true,
+                        max_size: 0
                     },
                     map: {
                         size: 80,
@@ -1060,6 +1061,7 @@ export default new Vuex.Store({
             state.logger.debug(state);
         },
 
+        /*
         load_station_metadata(state) {
             d3.csv("/assets/vue/nrt/data/current_mss_stations.csv").then( function(data) {
                 for (var k = 0; k < data.length; k++)
@@ -1081,6 +1083,7 @@ export default new Vuex.Store({
                 //self.plot_stationize();
             });
         },
+        */
 
         reset_stations(state) {
             state.stations_imported=false;
@@ -1183,9 +1186,21 @@ export default new Vuex.Store({
             }
         },
 
-        set_map_container_right_pane_size(state, payload) {
-            state.layout.panes.map_container.info.size = payload['map_info_size']
-            state.layout.panes.map_container.event_info.size = payload['map_info_size']
+        set_map_container_pane_size(state, payload) {
+            if (!state.display.changing_mode) {
+                if (payload.mode === 'realtime') {
+                    state.layout.panes.map_container.map.size = Math.floor(payload.map_size);
+                    state.layout.panes.map_container.info.size = Math.floor(payload.info_size);
+                }
+                else if (payload.mode === 'archive') {
+                    state.layout.panes.map_container.map.size = Math.floor(payload.map_size);
+                    state.layout.panes.map_container.event_info.size = Math.floor(payload.info_size);
+                    state.layout.panes.map_container.diagram_view.size = Math.floor(payload.diagram_view_size);
+                }
+            }
+            else {
+                state.logger.debug('Setting the map_container_pane size during mode change is not allowed.');
+            }
         },
 
         set_display_container_pane_size(state, payload) {
@@ -1238,6 +1253,7 @@ export default new Vuex.Store({
             state.logger.debug('activating realtime mode')
             state.layout.panes.map_container.size = 100 - state.layout.panes.tracks.size;
             state.layout.panes.map_container.info.visible = true;
+            state.layout.panes.map_container.diagram_view.max_size = 0;
             state.display.mode = 'realtime';
         },
 
@@ -1252,6 +1268,7 @@ export default new Vuex.Store({
             state.layout.panes.map_container.event_info.visible = true;
             state.layout.panes.content.visible = true;
             state.layout.panes.content.max_size = 100;
+            state.layout.panes.map_container.diagram_view.max_size = 100;
             state.layout.panes.content.size = 30;
             state.layout.panes.map_container.size = 100 - state.layout.panes.tracks.size - state.layout.panes.content.size;
             state.leaflet_map.layer_groups.event_supplement.addTo(state.leaflet_map.map_object);

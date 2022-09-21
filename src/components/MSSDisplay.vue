@@ -51,6 +51,7 @@
 
                     <!-- The diagram view pane. -->
                     <pane :size="layout.panes.map_container.diagram_view.size.toString() + '%'"
+                          :max-size="layout.panes.map_container.diagram_view.max_size"
                           v-if="layout.panes.map_container.diagram_view.visible"
                           ref="diagram_view_pane">
                       Diagram View
@@ -187,13 +188,28 @@ export default {
         on_splitpanes_resized() {
             this.logger.debug('on_splitpanes_resized()');
             let payload = undefined;
-            if (this.layout.panes.map_container.info.visible === true) {
-                payload = {'map_info_size': parseFloat(this.$refs.map_info_pane.style.width)};
+            if (this.is_realtime) {
+                payload = { mode: 'realtime',
+                            map_size: 80,
+                            info_size: 20 };
+                payload.map_size = parseFloat(this.$refs.map_pane.style.width);
+                payload.info_size = parseFloat(this.$refs.map_info_pane.style.width);
             }
-            else {
-                payload = {'event_info_size': parseFloat(this.$refs.event_info_pane.style.width)};
+            else if (this.is_archive) {
+                payload = { mode: 'archive',
+                            map_size: 80,
+                            info_size: 20,
+                            diagram_view_size: 0 };
+                payload.map_size = parseFloat(this.$refs.map_pane.style.width);
+                payload.info_size = parseFloat(this.$refs.event_info_pane.style.width);
+                payload.diagram_view_size = parseFloat(this.$refs.diagram_view_pane.style.width);
             }
-            this.$store.commit('set_map_container_right_pane_size', payload);
+            this.logger.debug('Commit payload: ', payload);
+            this.$store.commit('set_map_container_pane_size', payload);
+
+            if (this.is_realtime) {
+                this.logger.debug('map_info style: ', this.$refs.map_info_pane.style.width);
+            }
         },
 
         on_display_container_splitpanes_resized() {
