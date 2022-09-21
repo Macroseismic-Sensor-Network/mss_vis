@@ -29,69 +29,91 @@
             <splitpanes class="default-theme"
                         horizontal
                         @resized="on_display_container_splitpanes_resized()">
+                <!-- The tracks pane. --> 
                 <pane :size="layout.panes.tracks.size.toString() + '%'"
                     :max-size="layout.panes.tracks.max_size"  
                     v-if="layout.panes.tracks.visible"
                     ref="tracks_pane">
                     <TracksPanel :key="tracksPanelKey"/>
                 </pane>
+
+                <!-- The main container. -->
                 <pane :size="layout.panes.map_container.size.toString() + '%'"
                       ref="map_container_pane">
-                    <splitpanes @resized="on_splitpanes_resized()">
-                        <pane :size="layout.panes.map_container.menu.size"
-                              v-if="layout.panes.map_container.menu.visible">
-                            Menu Pane
-                        </pane>
-                        <pane :size="layout.panes.map_container.map.size"
-                              v-if="layout.panes.map_container.map.visible">
-                            <PGVMap :key="mapKey" 
-                                    v-resize:debounce="on_pgv_map_resize"/>
-                        </pane>
-                        <pane :size="layout.panes.map_container.info.size"
-                              v-if="layout.panes.map_container.info.visible"
-                              ref="map_info_pane">
-                            <div style="overflow: scroll; height: 100%; background-color: white;">
-                                <w-accordion :items="map_info_accordion_items"
-                                             v-model="map_info_accordion_expanded" >
-                                  <template #item-title.supporter="">Unterstützt von</template>
-                                  <template #item-content.supporter=""><SupporterPanel key="supporter_panel_key"/></template>
-                                  <template #item-title.status="">Status</template>
-                                  <template #item-content.status=""><MapInfoPanel key="map_info_panel_key"/></template>
-                                  <template #item-title.event_monitor="">Ereignis Monitor</template>
-                                  <template #item-content.event_monitor=""><EventMonitorPanel key="event_monitor_panel_key"/></template>
-                                  <template #item-title.station_info="">Stationsdetails</template>
-                                  <template #item-content.station_info=""><StationInfoPanel key="station_info_panel_key"/></template>
-                                  <template #item-title.recent_events="">Aktuelle Ereignisse</template>
-                                  <template #item-content.recent_events=""><RecentEventInfoPanel key="archive_info_panel_key"/></template>
-                                </w-accordion>
-                            </div>
-                        </pane>
-                        <pane :size="layout.panes.map_container.event_info.size"
-                              v-if="layout.panes.map_container.event_info.visible"
-                              ref="event_info_pane">
-                            <div style="overflow: scroll; height: 100%; background-color: white;">
-                                <w-accordion :items="event_info_accordion_items"
-                                    v-model="event_info_accordion_expanded">
-                                    <template #item-title.event_details="">Ereignisdetails</template>
-                                    <template #item-content.event_details=""><EventDetailsPanel key="event_details_panel_key"/></template>
-                                    <template #item-title.supplement_data="">Zusatzdaten</template>
-                                    <template #item-content.supplement_data=""><EventSupplementPanel key="event_supplement_panel_key"/></template>
-                                    <template #item-title.blast_info="">Spezifische Parameter</template>
-                                    <template #item-content.blast_info=""><BlastInfoPanel key="blast_info_panel_key"/></template>
-                                </w-accordion>
-                            </div>
+                  <splitpanes @resized="on_splitpanes_resized()">
 
-                        </pane>
-                    </splitpanes>
+                    <!-- The menu pane. -->
+                    <pane :size="layout.panes.map_container.menu.size.toString() + '%'"
+                          v-if="layout.panes.map_container.menu.visible"
+                          ref="menu_pane">
+                      Menu Pane
+                    </pane>
+
+                    <!-- The diagram view pane. -->
+                    <pane :size="layout.panes.map_container.diagram_view.size.toString() + '%'"
+                          v-if="layout.panes.map_container.diagram_view.visible"
+                          ref="diagram_view_pane">
+                      Diagram View
+                    </pane>
+
+                    <!-- The map pane. -->
+                    <pane :size="layout.panes.map_container.map.size.toString() + '%'"
+                          v-if="layout.panes.map_container.map.visible"
+                          ref="map_pane">
+                      <PGVMap :key="mapKey" 
+                              v-resize:debounce="on_pgv_map_resize"/>
+                    </pane>
+
+                    <!-- The info pane for the realtime view. -->
+                    <pane :size="layout.panes.map_container.info.size.toString() + '%'"
+                          v-if="layout.panes.map_container.info.visible"
+                          ref="map_info_pane">
+                      <div style="overflow: scroll; height: 100%; background-color: white;">
+                        <w-accordion :items="map_info_accordion_items"
+                                     v-model="map_info_accordion_expanded" >
+                          <template #item-title.supporter="">Unterstützt von</template>
+                          <template #item-content.supporter=""><SupporterPanel key="supporter_panel_key"/></template>
+                          <template #item-title.status="">Status</template>
+                          <template #item-content.status=""><MapInfoPanel key="map_info_panel_key"/></template>
+                          <template #item-title.event_monitor="">Ereignis Monitor</template>
+                          <template #item-content.event_monitor=""><EventMonitorPanel key="event_monitor_panel_key"/></template>
+                          <template #item-title.station_info="">Stationsdetails</template>
+                          <template #item-content.station_info=""><StationInfoPanel key="station_info_panel_key"/></template>
+                          <template #item-title.recent_events="">Aktuelle Ereignisse</template>
+                          <template #item-content.recent_events=""><RecentEventInfoPanel key="archive_info_panel_key"/></template>
+                        </w-accordion>
+                      </div>
+                    </pane>
+
+                    <!-- The info pane for thearchive view.  -->
+                    <pane :size="layout.panes.map_container.event_info.size.toString() + '%'"
+                          v-if="layout.panes.map_container.event_info.visible"
+                          ref="event_info_pane">
+                      <div style="overflow: scroll; height: 100%; background-color: white;">
+                        <w-accordion :items="event_info_accordion_items"
+                                     v-model="event_info_accordion_expanded">
+                          <template #item-title.event_details="">Ereignisdetails</template>
+                          <template #item-content.event_details=""><EventDetailsPanel key="event_details_panel_key"/></template>
+                          <template #item-title.supplement_data="">Zusatzdaten</template>
+                          <template #item-content.supplement_data=""><EventSupplementPanel key="event_supplement_panel_key"/></template>
+                          <template #item-title.blast_info="">Spezifische Parameter</template>
+                          <template #item-content.blast_info=""><BlastInfoPanel key="blast_info_panel_key"/></template>
+                        </w-accordion>
+                      </div>
+                      
+                    </pane>
+                  </splitpanes>
                 </pane>
+
+                <!-- The table pane. -->
                 <pane :size="layout.panes.content.size.toString() + '%'"
                       v-if="layout.panes.content.visible"
                       :max-size="layout.panes.content.max_size"
                       ref="content_pane">
-                    <EventArchivePanel key="event_archive_panel_key" 
-                                       v-if="is_archive"/>
-                    <StationRealtimePanel key="station_realtime_panel_key"
-                                          v-if="is_realtime"/>
+                  <EventArchivePanel key="event_archive_panel_key" 
+                                     v-if="is_archive"/>
+                  <StationRealtimePanel key="station_realtime_panel_key"
+                                        v-if="is_realtime"/>
                 </pane>
             </splitpanes>
     </w-app>

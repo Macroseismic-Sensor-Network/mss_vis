@@ -315,6 +315,10 @@ export default new Vuex.Store({
                         size: 0,
                         visible: false,
                     },
+                    diagram_view: {
+                        size: 0,
+                        visible: false,
+                    },
                     map: {
                         size: 80,
                         visible: true,
