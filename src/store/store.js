@@ -1369,7 +1369,9 @@ export default new Vuex.Store({
                                                          name: 'origins'}]
                                          };
                 commit('set_show_archive_event', mutation_payload);
-                dispatch('request_event_supplement', supplement_payload)
+                if (!(payload.public_id in state.event_supplement)) {
+                    dispatch('request_event_supplement', supplement_payload)
+                }
             }
         },
 
