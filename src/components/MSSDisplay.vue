@@ -72,11 +72,11 @@
                             <div style="overflow: scroll; height: 100%; background-color: white;">
                                 <w-accordion :items="event_info_accordion_items"
                                     v-model="event_info_accordion_expanded">
-                                    <template #item-title.details="">Ereignisdetails</template>
-                                    <template #item-content.details=""><EventDetailsPanel key="event_details_panel_key"/></template>
-                                    <template #item-title.supplement="">Zusatzdaten</template>
-                                    <template #item-content.supplement=""><EventSupplementPanel key="event_supplement_panel_key"/></template>
-                                    <template #item-title.blast_info="">Sprengdaten</template>
+                                    <template #item-title.event_details="">Ereignisdetails</template>
+                                    <template #item-content.event_details=""><EventDetailsPanel key="event_details_panel_key"/></template>
+                                    <template #item-title.supplement_data="">Zusatzdaten</template>
+                                    <template #item-content.supplement_data=""><EventSupplementPanel key="event_supplement_panel_key"/></template>
+                                    <template #item-title.blast_info="">Spezifische Parameter</template>
                                     <template #item-content.blast_info=""><BlastInfoPanel key="blast_info_panel_key"/></template>
                                 </w-accordion>
                             </div>
@@ -253,13 +253,13 @@ export default {
         },
 
         event_info_accordion_items: function() {
-            let items = [{id: 'details'},
-                         {id: 'supplement'}];
+            let items = [{id: 'event_details'},
+                         {id: 'supplement_data'}];
             if (this.active_event) {
                 if (this.active_event.event_class === 'sprengung') {
-                    items = [{id: 'details'},
+                    items = [{id: 'event_details'},
                              {id: 'blast_info'},
-                             {id: 'supplement'}];
+                             {id: 'supplement_data'}];
                 }
             }
             return items;
@@ -267,26 +267,41 @@ export default {
 
         map_info_accordion_expanded: {
             get() {
-                return [this.map_info_accordion.supporter.expanded,
-                        this.map_info_accordion.map_info.expanded,
-                        this.map_info_accordion.event_monitor.expanded,
-                        this.map_info_accordion.station_info.expanded,
-                        this.map_info_accordion.recent_events.expanded];
+                let ret = [];
+                for (let k = 0; k < this.map_info_accordion_items.length; k++) {
+                    let item = this.map_info_accordion_items[k]
+                    ret.push(this.map_info_accordion[item.id].expanded)
+                }
+                return ret
             },
 
             set(value) {
-                this.$store.commit('set_map_info_accordion_expanded', value);
+                let payload = {};
+                for (let k = 0; k < this.map_info_accordion_items.length; k++) {
+                    let item = this.map_info_accordion_items[k]
+                    payload[item.id] = value[k]
+                }
+                this.$store.commit('set_map_info_accordion_expanded', payload);
             },
         },
 
         event_info_accordion_expanded: {
             get() {
-                return [this.event_info_accordion.event_details.expanded,
-                        this.event_info_accordion.supplement_data.expanded];
+                let ret = [];
+                for (let k = 0; k < this.event_info_accordion_items.length; k++) {
+                    let item = this.event_info_accordion_items[k]
+                    ret.push(this.event_info_accordion[item.id].expanded)
+                }
+                return ret
             },
 
             set(value) {
-                this.$store.commit('set_event_info_accordion_expanded', value);
+                let payload = {};
+                for (let k = 0; k < this.event_info_accordion_items.length; k++) {
+                    let item = this.event_info_accordion_items[k]
+                    payload[item.id] = value[k]
+                }
+                this.$store.commit('set_event_info_accordion_expanded', payload);
             },
         },
 

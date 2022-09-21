@@ -341,7 +341,7 @@ export default new Vuex.Store({
             supporter: {
                 expanded: true,
             },
-            map_info: {
+            status: {
                 expanded: true,
             },
             event_monitor: {
@@ -361,6 +361,9 @@ export default new Vuex.Store({
                 expanded: true,
             },
             supplement_data: {
+                expanded: true,
+            },
+            blast_info: {
                 expanded: true,
             }
         },
@@ -1216,16 +1219,15 @@ export default new Vuex.Store({
         },
 
         set_map_info_accordion_expanded(state, payload) {
-            state.map_info_accordion.supporter.expanded = payload[0];
-            state.map_info_accordion.map_info.expanded = payload[1];
-            state.map_info_accordion.event_monitor.expanded = payload[2];
-            state.map_info_accordion.station_info.expanded = payload[3];
-            state.map_info_accordion.recent_events.expanded = payload[4];
+            for (let key in payload) {
+                state.map_info_accordion[key].expanded = payload[key];
+            }
         },
 
         set_event_info_accordion_expanded(state, payload) {
-            state.event_info_accordion.event_details.expanded = payload[0];
-            state.event_info_accordion.supplement_data.expanded = payload[1];
+            for (let key in payload) {
+                state.event_info_accordion[key].expanded = payload[key];
+            }
         },
 
         activate_realtime_mode(state) {
