@@ -37,11 +37,11 @@
             </w-flex>
             <w-flex wrap>
                 <div class="pr2 text-bold">PGV DUBA:</div>
-                <div class="grow"></div>
+                <div class="grow">{{ pgv_duba }}</div>
             </w-flex>
             <w-flex wrap>
-                <div class="pr2 text-bold">PGV DUBAM:</div>
-                <div class="grow"></div>
+                <div class="pr2 text-bold">PGV-3D DUBA:</div>
+                <div class="grow">{{ pgv3D_duba }}</div>
             </w-flex>
             <w-flex wrap>
                 <div class="pr2 text-bold">f dom. DUBA:</div>
@@ -93,6 +93,30 @@ export default {
             return this.$store.getters.active_recent_event;
         },
 
+        pgv_duba: function() {
+            if (this.pgv_data) {
+                let value = (this.pgv_data['MSSNet:DUBA:00'].pgv * 1000).toFixed(3);
+                value += ' mm/s';
+                return value;
+            }
+            else {
+                return undefined;
+            }
+        },
+
+        pgv3D_duba: function() {
+            if (this.active_event) {
+                if (this.active_event.pgv_3d) {
+                    let value = (this.active_event.pgv_3d['MSSNet:DUBA:00'] * 1000).toFixed(3);
+                    value += ' mm/s';
+                    return value;
+                }
+            }
+            else {
+                return undefined;
+            }
+        },
+
         pgv: function() {
             if (this.active_event)
             {
@@ -100,6 +124,37 @@ export default {
             }
             else
             {
+                return undefined;
+            }
+        },
+
+        pgvstation_supplement: function() {
+            if (this.active_event) {
+                return this.$store.getters.get_event_supplement(this.public_id,
+                                                                'eventpgv',
+                                                                'pgvstation');
+                
+                //return undefined;
+            }
+            else {
+                return undefined;
+            }
+        },
+        
+        pgv_data: function() {
+            let pgvstation = this.pgvstation_supplement;
+            if (pgvstation) {
+                let ret = {}
+                for (let k = 0; k < pgvstation.features.length; k++) {
+                    let feature = pgvstation.features[k];
+                    let key = feature.properties.nsl;
+                    let data = { pgv: feature.properties.pgv,
+                                 triggered: feature.properties.triggered}
+                    ret[key] = data
+                }
+                return ret;
+            }
+            else {
                 return undefined;
             }
         },
