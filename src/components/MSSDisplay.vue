@@ -43,18 +43,20 @@
                   <splitpanes @resized="on_splitpanes_resized()">
 
                     <!-- The menu pane. -->
+                    <!--
                     <pane :size="layout.panes.map_container.menu.size.toString() + '%'"
                           v-if="layout.panes.map_container.menu.visible"
                           ref="menu_pane">
                       Menu Pane
                     </pane>
+                    -->
 
                     <!-- The diagram view pane. -->
                     <pane :size="layout.panes.map_container.diagram_view.size.toString() + '%'"
                           :max-size="layout.panes.map_container.diagram_view.max_size"
                           v-if="layout.panes.map_container.diagram_view.visible"
                           ref="diagram_view_pane">
-                      Diagram View
+                      <DiagramsPanel />
                     </pane>
 
                     <!-- The map pane. -->
@@ -122,6 +124,7 @@
 
 <script>
 
+import DiagramsPanel from '../components/DiagramsPanel.vue'
 import PGVMap from '../components/PGVMap.vue'
 import TracksPanel from '../components/TracksPanel.vue'
 import MapInfoPanel from '../components/MapInfoPanel.vue'
@@ -150,11 +153,13 @@ export default {
                     mapKey: 0,
                     stationInfoPanelKey: 0,
                     tracksPanelKey: 0,
+                    diagramsPanelKey:0
             }
     },
     components: {
         // eslint-disable-next-line
         PGVMap,
+        DiagramsPanel,
         MapInfoPanel,
         EventArchivePanel,
         EventMonitorPanel,
