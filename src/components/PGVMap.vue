@@ -88,6 +88,11 @@
         <svg id="svg_legend" width="300px" height="140">
             <PGVLegend name="map_legend" v-if="showLegend"/>
         </svg>
+
+        <div class="overlay">
+          <w-spinner />
+        </div>
+          
     </div>
 
 
@@ -247,6 +252,28 @@ export default {
     },
 
     computed: {
+        active_event: function() {
+            return this.$store.getters.active_recent_event;
+        },
+        
+        show_loading_spinner: function() {
+            if (this.active_event) {
+                let public_id = this.active_event.public_id;
+                let pgv_supplement = this.$store.getters.get_event_supplement(public_id,
+                                                                              'eventpgv',
+                                                                              'pgvstation');
+                if (pgv_supplement) {
+                    return false;
+                }
+                else {
+                    return true;
+                }
+            }
+            else {
+                return false;
+            }
+        },
+        
         leaflet_map: {
             get() {
                 return this.$store.getters.leaflet_map.map_object;
@@ -540,6 +567,19 @@ div#mapcontainer
     height: 100%
     position: relative
     font-family: Helvetica, sans-serif
+
+div.overlay
+  width: 100%
+  height: 100%
+  position: absolute
+  top: 0
+  left: 0
+  z-index: 500
+  background-color: burlywood
+  opacity: 0.4
+  display: flex
+  align-items: center
+  justify-content: center
 
 .display-menu
     position: relative
