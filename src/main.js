@@ -97,11 +97,13 @@ Vue.component('mss-display', MSSDisplay);
 Vue.component('lwz-display', LWZDisplay);
 
 Vue.use(WaveUI)
-const waveui = new WaveUI(
-    {
-        // Some Wave UI options.
+const waveui = new WaveUI({
+    // Some Wave UI options.
+    colors: {
+        primary: '#65b9cb',
+        secondary: 'beb161'
     }
-);
+});
 
 new Vue({
     store,
