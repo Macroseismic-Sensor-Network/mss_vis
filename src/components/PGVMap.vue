@@ -302,10 +302,6 @@ export default {
                 return "Lade die Daten des Ereignisses.";
             }
         },
-
-        server_state: function() {
-            return this.$store.getters.server_state;
-        },
         
         leaflet_map: {
             get() {

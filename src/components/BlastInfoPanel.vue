@@ -133,8 +133,6 @@ export default {
                 return this.$store.getters.get_event_supplement(this.public_id,
                                                                 'eventpgv',
                                                                 'pgvstation');
-                
-                //return undefined;
             }
             else {
                 return undefined;
