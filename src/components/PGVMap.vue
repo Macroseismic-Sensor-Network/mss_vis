@@ -89,8 +89,12 @@
             <PGVLegend name="map_legend" v-if="showLegend"/>
         </svg>
 
-        <div class="overlay">
-          <w-spinner />
+        <div class="overlay"
+             v-if="show_loading_overlay">
+          <w-alert md bg-color="primary" color="white">
+            {{ loading_message }}
+          </w-alert>
+          <w-spinner md color="primary"/>
         </div>
           
     </div>
@@ -256,13 +260,12 @@ export default {
             return this.$store.getters.active_recent_event;
         },
         
-        show_loading_spinner: function() {
-            if (this.active_event) {
-                let public_id = this.active_event.public_id;
-                let pgv_supplement = this.$store.getters.get_event_supplement(public_id,
-                                                                              'eventpgv',
-                                                                              'pgvstation');
-                if (pgv_supplement) {
+        show_loading_overlay: function() {
+            if (this.server_state != 'online') {
+                    return true;
+            }
+            else if (this.is_realtime) {
+                if (this.stations) {
                     return false;
                 }
                 else {
@@ -270,8 +273,38 @@ export default {
                 }
             }
             else {
-                return false;
+                if (this.active_event) {
+                    let public_id = this.active_event.public_id;
+                    let pgv_supplement = this.$store.getters.get_event_supplement(public_id,
+                                                                                  'eventpgv',
+                                                                                  'pgvstation');
+                    if (pgv_supplement) {
+                        return false;
+                    }
+                    else {
+                        return true;
+                    }
+                }
+                else {
+                    return false;
+                }
+            }      
+        },
+
+        loading_message: function() {
+            if (this.server_state != 'online') {
+                    return "Warte auf Verbindung zum MSS Server.";
             }
+            else if (this.is_realtime) {
+                return "Warte auf die Daten der Stationen.";
+            }
+            else {
+                return "Lade die Daten des Ereignisses.";
+            }
+        },
+
+        server_state: function() {
+            return this.$store.getters.server_state;
         },
         
         leaflet_map: {
@@ -575,16 +608,16 @@ div.overlay
   top: 0
   left: 0
   z-index: 500
-  background-color: burlywood
-  opacity: 0.4
+  background-color: rgba(190, 177, 97, 0.4)
   display: flex
   align-items: center
   justify-content: center
+  flex-direction: column
 
 .display-menu
     position: relative
     float: right
-    z-index: 500
+    z-index: 1000
     font-size: 14pt
     font-weight: bold
     margin-top: 10px
