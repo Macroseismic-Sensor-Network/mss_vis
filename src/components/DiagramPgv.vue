@@ -82,7 +82,9 @@ export default {
                 },
                 yaxis: {
                     type: 'log',
-                    autorange: true,
+                    autorange: false,
+                    fixedrange: true,
+                    range: [-3, 1], 
                     showticklabels: true,
                     ticklabelposition: 'inside',
                     showline: true,
@@ -115,6 +117,24 @@ export default {
             return 'diagram_pgv';
         },
 
+        is_sprengung_duernbach: function() {
+            if (this.active_event) {
+                let active_event = this.active_event;
+                let duernbach_regions = ['steinbruch dürnbach',
+                                         'hohe wand'];
+                
+                if (active_event.event_class.toLowerCase() == 'sprengung' && duernbach_regions.includes(active_event.event_region.toLowerCase())) {
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+            else {
+                return false;
+            }
+        },
+
         pgvstation_supplement: function() {
             if (this.active_event) {
                 return this.$store.getters.get_event_supplement(this.public_id,
@@ -132,13 +152,23 @@ export default {
                 let ret = {};
                 let nsl = [];
                 let pgv = [];
+                let hypo_dist = [];
+                let epi_dist = [];
+           
                 for (let k = 0; k < pgvstation.features.length; k++) {
                     let feature = pgvstation.features[k];
-                    nsl.push(feature.properties.nsl);
+                    let cur_nsl = feature.properties.nsl
+                    nsl.push(cur_nsl);
                     pgv.push(feature.properties.pgv);
+                    if (this.active_event.hypo) {
+                        hypo_dist.push(this.active_event.hypo_dist[cur_nsl])
+                        epi_dist.push(this.active_event.epi_dist[cur_nsl])
+                    }
                 }
                 ret['nsl'] = nsl;
                 ret['pgv'] = pgv;
+                ret['hypo_dist'] = hypo_dist;
+                ret['epi_dist'] = epi_dist;
                 return ret;
             }
             else {
@@ -153,15 +183,73 @@ export default {
             let x_data = [];
             let y_data = [];
             if (this.pgv_data) {
-                x_data = this.pgv_data.nsl
-                y_data = this.pgv_data.pgv
+                let pgv_data = this.pgv_data;
+                let hypo_dist = pgv_data.hypo_dist;
+
+                if (this.is_sprengung_duernbach) {
+                    let stations_list = ['MSSNet:DUBA:00',
+                                         'MSSNet:DUBAM:00',
+                                         'MSSNet:WADE:00',
+                                         'MSSNet:WAPE:00',
+                                         'MSSNet:HOPO:00',
+                                         'MSSNet:HOWA:00',
+                                         'MSSNet:RETA:00',
+                                         'MSSNet:MIBA:00',
+                                         'MSSNet:MAPI:00',
+                                         'MSSNet:GRBA:00'];
+                    
+                    for (let k = 0; k < stations_list.length; k++) {
+                        let cur_nsl = stations_list[k];
+                        let match_ind = pgv_data.nsl.indexOf(cur_nsl);
+                        this.logger.debug("match_ind: ", match_ind);
+                        if (match_ind >= 0) {
+                            x_data.push(pgv_data.nsl[match_ind]);
+                            y_data.push(pgv_data.pgv[match_ind]);
+                        }
+                    }
+                }
+                else if (hypo_dist.length > 0) {
+                    // Sort the data according to the hypo distance.
+                    // Create an index mapping of the hypo_dist array.
+                    let sort_map = hypo_dist.map(function(x, k) {
+                        return {index: k, value: x};
+                    });
+
+                    // Sort the map according to the valie.
+                    sort_map.sort(function(a, b) {
+                        return (a.value > b.value) ?1:-1;
+                    });
+
+                    // Sort the nsl and pgv using the sorted sort_map index.
+                    x_data = sort_map.map(function(x) {
+                        return pgv_data.nsl[x.index];
+                    });
+                    y_data = sort_map.map(function(x) {
+                        return pgv_data.pgv[x.index];
+                    });
+                }
+                else {
+                    x_data = pgv_data.nsl;
+                    y_data = pgv_data.pgv;
+                }
             }
+
+            // Get the stationname only.
+            for (let k = 0; k < x_data.length; k++) {
+                let comps = x_data[k].split(':');
+                x_data[k] = comps[1];
+            }
+
+            // Convert the PGV data to mm/s.
+            y_data = y_data.map(function(x) {return x * 1000});
            
             trace = {
                 x: x_data,
                 y: y_data,
                 mode: 'markers',
-                type: 'scatter'
+                type: 'scatter',
+                hovertemplate: '%{y:.3f} mm/s' +
+                    '<extra></extra>'
             }
 
             data = [trace, ]
