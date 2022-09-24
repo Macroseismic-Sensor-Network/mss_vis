@@ -52,6 +52,12 @@
                 <div class="grow">{{ pgv }} mm/s</div>
             </w-flex>
 
+            <w-flex wrap
+                    v-if="magnitude != undefined">
+                <div class="pr2 text-bold">Magnitude:</div>
+                <div class="grow">{{ magnitude }}</div>
+            </w-flex>
+
             <w-flex wrap>
                 <div class="pr2 text-bold">Dauer:</div>
                 <div class="grow">{{ duration }} s</div>
@@ -205,6 +211,15 @@ export default {
             }
             else
             {
+                return undefined;
+            }
+        },
+
+        magnitude: function() {
+            if (this.active_event) {
+                return this.active_event.magnitude.toFixed(2);
+            }
+            else {
                 return undefined;
             }
         },
