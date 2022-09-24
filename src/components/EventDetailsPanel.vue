@@ -217,7 +217,12 @@ export default {
 
         magnitude: function() {
             if (this.active_event) {
-                return this.active_event.magnitude.toFixed(2);
+                if (this.active_event.magnitude) {
+                    return this.active_event.magnitude.toFixed(2);
+                }
+                else {
+                    return undefined;
+                }
             }
             else {
                 return undefined;
