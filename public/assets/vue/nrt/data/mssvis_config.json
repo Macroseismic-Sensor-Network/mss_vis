@@ -1,4 +1,4 @@
 {
-    "websocket_server": "ws://localhost:8083/ws_vis/",
-    "_websocket_server": "wss://mss.mertl-research.at/ws_vis/"
+    "_comment_websocket_server": "ws://localhost:8083/ws_vis/",
+    "websocket_server": "wss://mss.mertl-research.at/ws_vis/"
 }
