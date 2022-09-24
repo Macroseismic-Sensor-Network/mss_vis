@@ -33,7 +33,7 @@
         <w-flex column
                  v-if="active_event != undefined">
             <w-flex wrap>
-                <div class="xs12 pa1">Spezifische Daten für die Sprengung Klasse.</div>
+                <div class="xs12 pa1">Spezifische Daten für Sprengungen im Steinbruch Dürnbach.</div>
             </w-flex>
             <w-flex wrap>
                 <div class="pr2 text-bold">PGV DUBA:</div>
@@ -43,6 +43,7 @@
                 <div class="pr2 text-bold">PGV-3D DUBA:</div>
                 <div class="grow">{{ pgv3D_duba }}</div>
             </w-flex>
+            <!--
             <w-flex wrap>
                 <div class="pr2 text-bold">f dom. DUBA:</div>
                 <div class="grow"></div>
@@ -51,6 +52,7 @@
                 <div class="pr2 text-bold">f dom. DUBAM:</div>
                 <div class="grow"></div>
             </w-flex>
+            -->
         </w-flex>
     </div>
 </template>
