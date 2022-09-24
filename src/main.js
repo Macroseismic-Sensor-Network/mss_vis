@@ -51,6 +51,7 @@ Vue.use(VueNativeSock,
         {
             store: store,
             format: 'json',
+            connectManually: true,
             reconnection: true,
             reconnectionDelay: 3000,
             passToStoreHandler: function (event_name, event) {

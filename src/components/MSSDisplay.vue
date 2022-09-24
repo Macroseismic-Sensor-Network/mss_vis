@@ -194,6 +194,7 @@ export default {
             this.$store.getters.prefix_options);
 
         this.$store.dispatch("init_store");
+        this.$store.dispatch("connect_websocket");
     },
     mounted() {
     },

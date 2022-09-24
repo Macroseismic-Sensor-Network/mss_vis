@@ -259,6 +259,7 @@ export default new Vuex.Store({
         log_level: 'info',
         logger: log.getLogger("store"),
         language: 'de',
+        ws_url: undefined,
         service_status: {status: 'operational',
                          msg: undefined},
         stations: [],
@@ -1340,8 +1341,28 @@ export default new Vuex.Store({
         init_store({ commit, state }) {
             state.logger.debug('Initializing the store.');
             //commit('load_station_metadata');
-            commit('load_service_status');
+            //commit('load_service_status');
+            state.logger.debug('Loading the service status.');
+            fetch("/assets/vue/nrt/data/service_status.json").then(response => {
+                return response.json();
+            }).then(json_data => {
+                state.logger.debug('Loaded service status: ', json_data);
+                state.service_status.status = json_data.status;
+                state.service_status.msg = json_data.status_messages[json_data.msg_key];
+            });
+            state.logger.debug('After fetch.');
             moment.locale(state.language);
+        },
+
+        connect_websocket({ state }) {
+            state.logger.debug('Connecting to the websocket server.');
+            fetch("/assets/vue/nrt/data/mssvis_config.json").then(response => {
+                return response.json();
+            }).then(config => {
+                state.logger.debug('Loaded config: ', config);
+                state.ws_url = config.websocket_server;
+                this._vm.$connect(state.ws_url);
+            });
         },
 
         set_display_mode({ commit, state }, payload) {
