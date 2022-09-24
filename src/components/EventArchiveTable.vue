@@ -173,7 +173,7 @@ export default {
                           { label: 'Dauer [s]', key: 'duration' },
                           { label: 'PGV [mm/s]', key: 'pgv' },
                           { label: 'Magnitude', key: 'magnitude'},
-                          { label: 'f dom. [Hz]', key: 'f_dom'},
+                          //{ label: 'f dom. [Hz]', key: 'f_dom'},
                           { label: 'Klasse', key: 'event_class'},
                           { label: 'Region', key: 'event_region'},
                           { label: 'Modus', key: 'event_class_mode'},
