@@ -1,0 +1,8 @@
+{
+    "status": "operational",
+    "msg_key": "upgrading",
+    "status_messages": {
+        "operational": "Das Service ist voll funktionsfähig.",
+        "upgrading": "Es werden zur Zeit Arbeiten am MSS Server durchgeführt. Das Service ist deshalb kurzfristig nicht verfügbar. Bitte versuche es etwas später erneut."
+    }
+}

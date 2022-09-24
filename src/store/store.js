@@ -259,6 +259,8 @@ export default new Vuex.Store({
         log_level: 'info',
         logger: log.getLogger("store"),
         language: 'de',
+        service_status: {status: 'operational',
+                         msg: undefined},
         stations: [],
         station_meta: [],
         stations_imported:false,
@@ -932,6 +934,10 @@ export default new Vuex.Store({
             return state.event_info_accordion;
         },
 
+        service_status(state) {
+            return state.service_status;
+        },  
+
         is_realtime(state) {
             if (state.display.mode === 'realtime')
             {
@@ -1059,6 +1065,17 @@ export default new Vuex.Store({
             state.server_state = 'reconnection error';
             state.logger.error("Error while reconnecting.");
             state.logger.debug(state);
+        },
+
+        load_service_status(state) {
+            state.logger.debug('Loading the service status.');
+            fetch("/assets/vue/nrt/data/service_status.json").then(response => {
+                return response.json();
+            }).then(json_data => {
+                state.logger.debug('Loaded service status: ', json_data);
+                state.service_status.status = json_data.status;
+                state.service_status.msg = json_data.status_messages[json_data.msg_key];
+            });
         },
 
         /*
@@ -1317,9 +1334,10 @@ export default new Vuex.Store({
     },
 
     actions: {
-        init_store({ state }) {
+        init_store({ commit, state }) {
             state.logger.debug('Initializing the store.');
             //commit('load_station_metadata');
+            commit('load_service_status');
             moment.locale(state.language);
         },
 

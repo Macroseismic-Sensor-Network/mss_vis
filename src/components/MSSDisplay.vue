@@ -25,9 +25,17 @@
 -->
 
 <template>
-    <w-app id="mss-display-container" class="cell auto">
+    <w-app id="mss-display-container"
+           class="cell auto">
+            <div class="status-msg-container"
+                 v-if="!is_operational">
+              <w-alert info>
+                {{ service_status_msg }}
+              </w-alert>
+            </div>
             <splitpanes class="default-theme"
                         horizontal
+                        v-if="is_operational"
                         @resized="on_display_container_splitpanes_resized()">
                 <!-- The tracks pane. --> 
                 <pane :size="layout.panes.tracks.size.toString() + '%'"
@@ -259,6 +267,20 @@ export default {
         },
     },
     computed: {
+        is_operational: function() {
+            let status = this.$store.getters.service_status.status;
+            if (status === 'operational') {
+                return true;
+            }
+            else {
+                return false;
+            }
+        },
+
+        service_status_msg: function() {
+            return this.$store.getters.service_status.msg;
+        },
+        
         is_realtime: function() {
             return this.$store.getters.is_realtime; 
         },
@@ -426,5 +448,11 @@ export default {
             height: 100%
             width: 100%
 
+    div.status-msg-container
+      width: 100%
+      height: 100%
+      padding-top: 30px
+      padding-left: 50px
+      padding-right: 50px
 
 </style>
