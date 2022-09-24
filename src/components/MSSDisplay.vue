@@ -103,6 +103,8 @@
                       <div style="overflow: scroll; height: 100%; background-color: white;">
                         <w-accordion :items="event_info_accordion_items"
                                      v-model="event_info_accordion_expanded">
+                          <template #item-title.supporter="">Unterstützt von</template>
+                          <template #item-content.supporter=""><SupporterPanel key="supporter_panel_key"/></template>
                           <template #item-title.event_details="">Ereignisdetails</template>
                           <template #item-content.event_details=""><EventDetailsPanel key="event_details_panel_key"/></template>
                           <template #item-title.supplement_data="">Zusatzdaten</template>
@@ -318,14 +320,16 @@ export default {
         },
 
         event_info_accordion_items: function() {
-            let items = [{id: 'event_details'},
+            let items = [{id: 'supporter'},
+                         {id: 'event_details'},
                          {id: 'supplement_data'}];
             if (this.active_event) {
                 if (this.active_event.event_class === 'sprengung') {
                     let duernbach_regions = ['Steinbruch Dürnbach',
                                              'Hohe Wand'];
                     if (duernbach_regions.includes(this.active_event.event_region)) {
-                        items = [{id: 'event_details'},
+                        items = [{id: 'supporter'},
+                                 {id: 'event_details'},
                                  {id: 'blast_info'},
                                  {id: 'supplement_data'}];
                     }

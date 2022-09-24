@@ -364,6 +364,9 @@ export default new Vuex.Store({
 
         // The event info accordion state.
         event_info_accordion: {
+            supporter: {
+                expanded: true,
+            },
             event_details: {
                 expanded: true,
             },
