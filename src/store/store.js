@@ -260,7 +260,7 @@ export default new Vuex.Store({
         logger: log.getLogger("store"),
         language: 'de',
         ws_url: undefined,
-        service_status: {status: 'operational',
+        service_status: {status: undefined,
                          msg: undefined},
         stations: [],
         station_meta: [],
@@ -1338,7 +1338,7 @@ export default new Vuex.Store({
     },
 
     actions: {
-        init_store({ commit, state }) {
+        init_store({ state }) {
             state.logger.debug('Initializing the store.');
             //commit('load_station_metadata');
             //commit('load_service_status');
