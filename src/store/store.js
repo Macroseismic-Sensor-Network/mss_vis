@@ -1274,7 +1274,7 @@ export default new Vuex.Store({
             state.logger.debug('activating realtime mode')
             state.layout.panes.map_container.size = 100 - state.layout.panes.tracks.size;
             state.layout.panes.map_container.info.visible = true;
-            state.layout.panes.map_container.diagram_view.max_size = 0;
+            state.layout.panes.map_container.map.size = 100 - state.layout.panes.map_container.info.size;
             state.display.mode = 'realtime';
         },
 
@@ -1302,6 +1302,8 @@ export default new Vuex.Store({
             state.layout.panes.content.visible = true;
             state.layout.panes.content.size = 0;
             state.layout.panes.content.max_size = 100;
+            state.layout.panes.map_container.diagram_view.size = 0;
+            state.layout.panes.map_container.diagram_view.max_size = 0;
             state.leaflet_map.layer_groups.event_supplement.clearLayers();
             state.leaflet_map.layer_groups.event_supplement.remove();
         },
