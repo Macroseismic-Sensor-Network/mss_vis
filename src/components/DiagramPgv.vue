@@ -248,7 +248,10 @@ export default {
                 y: y_data,
                 mode: 'markers',
                 type: 'scatter',
-                hovertemplate: '%{y:.3f} mm/s' +
+                marker: { size: 10
+                        },
+                hovertemplate: '%{x}<br>' +
+                    '%{y:.3f} mm/s' +
                     '<extra></extra>'
             }
 
