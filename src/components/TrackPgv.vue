@@ -128,7 +128,7 @@ export default {
                         xanchor: 'left',
                         y: 1,
                         yanchor: 'top',
-                        text: 'Station Lable',
+                        text: 'Station Label',
                         showarrow: false,
                     },
                 ],
