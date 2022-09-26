@@ -66,7 +66,7 @@ export default {
     },
     data: function () {
         return {
-            title: 'PGV des Ereignisses',
+            title: 'PGV der Stationen',
             layout: {
                 margin: {
                     l: 40,
