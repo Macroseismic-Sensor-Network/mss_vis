@@ -25,13 +25,17 @@
 -->
 
 <template>
-    <div class="graph_container">
-        <div class="diagram_pgv_axes"
-             ref="diagram_pgv_axes"
-             v-bind:id="element_id"
-             v-resize:debounce="on_resize">
-        </div>
+  <div class="graph_container">
+    <div class="diagram_header">
+      <div class="title">{{ title }}</div>
     </div>
+  
+    <div class="diagram_pgv_axes"
+         ref="diagram_pgv_axes"
+         v-bind:id="element_id"
+         v-resize:debounce="on_resize">
+    </div>
+  </div>
 </template>
 
 <script>
@@ -62,13 +66,15 @@ export default {
     },
     data: function () {
         return {
+            title: 'PGV des Ereignisses',
             layout: {
                 margin: {
-                    l: 2,
+                    l: 40,
                     r: 2,
                     t: 2,
-                    b: 2
+                    b: 40
                 },
+                /*
                 title: { text:'PGV',
                          font: {
                              family: 'Courier New, monospace',
@@ -81,6 +87,7 @@ export default {
                          xanchor: 'left',
                          yanchor: 'top'
                        },
+                */
                 xaxis: {
                     type: 'station',
                     autorange: true,
@@ -91,6 +98,8 @@ export default {
                     showline: true,
                     ticks: 'inside',
                     zeroline: false,
+                    title: { text: 'Station',
+                       },
                 },
                 yaxis: {
                     type: 'log',
@@ -102,7 +111,9 @@ export default {
                     showline: true,
                     mirror: 'ticks',
                     ticks: 'inside',
-                    zeroline: false
+                    zeroline: false,
+                    title: { text:'PGV [mm/s]',
+                       },
                 },
             },
 
@@ -310,22 +321,33 @@ export default {
 
 </script>
 
-<style scoped>
-div.graph_container {
-    margin: 0px;
-    padding: 0px;
-    background-color: Azure;
-    width: 100%;
-    height: 100%;
-    overflow: visible;
-}
+<style scoped lang="sass">
+  
+div.graph_container 
+  margin: 0px
+  padding: 0px
+  background-color: Azure
+  width: 100%
+  height: 100%
+  overflow: visible
+  display: flex
+  flex-flow: column
+           
+  div.diagram_header
+    width: 100%
+    padding-left: 5px
+    padding-right: 5px
+    background-color: white
 
-div.diagram_pgv_axes {
-    margin: 0px;
-    padding: 0px;
-    background-color: Grey;
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
-}
+    .title
+      font-weight: bold
+                      
+  div.diagram_pgv_axes 
+    margin: 0px
+    padding: 0px
+    background-color: Grey
+    width: 100%
+    height: 100%
+    overflow: hidden
+            
 </style>
