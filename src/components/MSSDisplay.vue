@@ -437,27 +437,27 @@ export default {
 <style scoped lang="sass">
 
 #mss-display-container
+  height: 100%
+  width: 100%
+  min-height: 100%
+  
+  //The z-index is needed to raise the offCanvas item above the map.
+  #off_canvas_settings
+    z-index: 1000
+
+  .off-canvas-wrapper
     height: 100%
     width: 100%
-    min-height: 100%
 
-    //The z-index is needed to raise the offCanvas item above the map.
-    #off_canvas_settings
-        z-index: 1000
+  .off-canvas-content
+    height: 100%
+    width: 100%
 
-    .off-canvas-wrapper
-        height: 100%
-        width: 100%
-
-        .off-canvas-content
-            height: 100%
-            width: 100%
-
-    div.status-msg-container
-      width: 100%
-      height: 100%
-      padding-top: 30px
-      padding-left: 50px
-      padding-right: 50px
-
+  div.status-msg-container
+    width: 100%
+    height: 100%
+    padding-top: 30px
+    padding-left: 50px
+    padding-right: 50px
+    
 </style>
