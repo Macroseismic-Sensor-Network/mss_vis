@@ -89,7 +89,7 @@ export default {
                        },
                 */
                 xaxis: {
-                    type: 'station',
+                    type: 'category',
                     autorange: true,
                     fixedrange: false,
                     showticklabels: true,
@@ -274,8 +274,8 @@ export default {
                 marker: { size: 10
                         },
                 hovertemplate: '%{x}<br>' +
-                    '%{y:.3f} mm/s' +
-                    '<extra></extra>'
+                               '%{y:.3f} mm/s' +
+                               '<extra></extra>'
             }
 
             data = [trace, ]
