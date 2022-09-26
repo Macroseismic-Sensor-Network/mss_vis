@@ -88,6 +88,10 @@ export default {
                          yanchor: 'top'
                        },
                 */
+                legend: { x: 1,
+                          xanchor: 'right',
+                          y: 1
+                        },
                 xaxis: {
                     type: 'category',
                     autorange: true,
@@ -199,12 +203,24 @@ export default {
             }
         },
 
+        pgv_3d_data: function() {
+            let ret_val = undefined;
+            
+            if (this.active_event) {
+                ret_val = this.active_event.pgv_3d;
+            }
+            return ret_val;
+        },
+
         plotly_data: function() {
             let data = [];
             let trace = {};
+            let trace_pgv_3d = {};
 
             let x_data = [];
             let y_data = [];
+
+            let d3_colors = Plotly.d3.scale.category10();
             if (this.pgv_data) {
                 let pgv_data = this.pgv_data;
                 let hypo_dist = pgv_data.hypo_dist;
@@ -265,20 +281,58 @@ export default {
 
             // Convert the PGV data to mm/s.
             y_data = y_data.map(function(x) {return x * 1000});
+
+            this.logger.debug('colors: ', d3_colors(0));
            
             trace = {
                 x: x_data,
                 y: y_data,
+                name: 'PGV',
                 mode: 'markers',
                 type: 'scatter',
-                marker: { size: 10
+                marker: { size: 10,
+                          color: d3_colors(0)
                         },
                 hovertemplate: '%{x}<br>' +
                                '%{y:.3f} mm/s' +
                                '<extra></extra>'
             }
 
-            data = [trace, ]
+            // Create the PGV-3D data if available.
+            x_data = []
+            y_data = []
+            if (this.pgv_3d_data) {
+                let pgv_3d = this.pgv_3d_data;
+
+                for (let nsl in pgv_3d) {
+                    let stat_name = nsl.split(':')[1];
+                    let cur_pgv = pgv_3d[nsl];
+                    // Convert the pgv data to mm/s;
+                    cur_pgv = cur_pgv * 1000;
+                    x_data.push(stat_name);
+                    y_data.push(cur_pgv);
+                }
+
+                trace_pgv_3d = { x: x_data,
+                                 y: y_data,
+                                 name: 'PGV-3D',
+                                 mode: 'markers',
+                                 type: 'scatter',
+                                 marker: { size: 10,
+                                           color: d3_colors(1)
+                                         },
+                                 hovertemplate: '%{x}<br>' +
+                                                '3D: %{y:.3f} mm/s' +
+                                 '<extra></extra>'
+                               }
+            }
+
+            if (trace_pgv_3d) {
+                data = [trace_pgv_3d, trace];
+            }
+            else {
+                data = [trace]
+            }
             return data;
         },
 
