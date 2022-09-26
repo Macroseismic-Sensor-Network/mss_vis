@@ -67,8 +67,20 @@ export default {
                     l: 2,
                     r: 2,
                     t: 2,
-                    b: 2,
+                    b: 2
                 },
+                title: { text:'PGV',
+                         font: {
+                             family: 'Courier New, monospace',
+                             size: 24
+                         },
+                         xref: 'paper',
+                         yref: 'paper',
+                         x: 0.025,
+                         y: 0.975,
+                         xanchor: 'left',
+                         yanchor: 'top'
+                       },
                 xaxis: {
                     type: 'station',
                     autorange: true,
