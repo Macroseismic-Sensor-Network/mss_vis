@@ -164,6 +164,7 @@ export default {
             return this.$store.getters.utc_offset;
         },
 
+
         table_header: function() {
             let header = [];
 
@@ -173,7 +174,7 @@ export default {
                           { label: 'Dauer [s]', key: 'duration' },
                           { label: 'PGV [mm/s]', key: 'pgv' },
                           { label: 'Magnitude', key: 'magnitude'},
-                          //{ label: 'f dom. [Hz]', key: 'f_dom'},
+                          { label: 'f dom. [Hz]', key: 'f_dom'},
                           { label: 'Klasse', key: 'event_class'},
                           { label: 'Region', key: 'event_region'},
                           { label: 'Modus', key: 'event_class_mode'},
@@ -205,9 +206,16 @@ export default {
                 let cur_event = this.archive_events[cur_key]
                 let cur_start = moment.utc(cur_event.start_time);
                 let cur_end = moment.utc(cur_event.end_time);
-                let cur_magnitude = cur_event.magnitude
+                let cur_magnitude = cur_event.magnitude;
+                let cur_f_dom = undefined;
                 if (cur_magnitude) {
                     cur_magnitude = cur_magnitude.toFixed(2)
+                }
+                if (cur_event.f_dom) {
+                    if (cur_event.f_dom.hasOwnProperty('MSSNet:DUBA:00')) {
+                        cur_f_dom = cur_event.f_dom['MSSNet:DUBA:00']
+                        cur_f_dom = cur_f_dom.toFixed(1);
+                    }
                 }
                 items.push(
                     { 
@@ -218,7 +226,7 @@ export default {
                         event_class: cur_event.event_class,
                         event_class_mode: cur_event.event_class_mode,
                         event_region: cur_event.event_region,
-                        f_dom: cur_event.f_dom,
+                        f_dom: cur_f_dom,
                         foreign_id: cur_event.foreign_id,
                         pgv: (cur_event.max_pgv * 1000).toFixed(3),
                         magnitude: cur_magnitude,

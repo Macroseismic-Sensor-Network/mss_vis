@@ -43,11 +43,11 @@
                 <div class="pr2 text-bold">PGV-3D DUBA:</div>
                 <div class="grow">{{ pgv3D_duba }}</div>
             </w-flex>
-            <!--
             <w-flex wrap>
                 <div class="pr2 text-bold">f dom. DUBA:</div>
-                <div class="grow"></div>
+                <div class="grow">{{ f_dom_duba }}</div>
             </w-flex>
+            <!--
             <w-flex wrap>
                 <div class="pr2 text-bold">f dom. DUBAM:</div>
                 <div class="grow"></div>
@@ -95,28 +95,49 @@ export default {
             return this.$store.getters.active_recent_event;
         },
 
+        ref_station: function() {
+            return 'MSSNet:DUBA:00';
+        },
+
         pgv_duba: function() {
+            let ret_val = undefined;
+            
             if (this.pgv_data) {
-                let value = (this.pgv_data['MSSNet:DUBA:00'].pgv * 1000).toFixed(3);
-                value += ' mm/s';
-                return value;
+                if (this.pgv_data.hasOwnProperty(this.ref_station)) {
+                    let value = (this.pgv_data[this.ref_station].pgv * 1000).toFixed(3);
+                    value += ' mm/s';
+                    ret_val = value;
+                }
             }
-            else {
-                return undefined;
-            }
+            return ret_val;
         },
 
         pgv3D_duba: function() {
+            let ret_val = undefined;
+            
             if (this.active_event) {
                 if (this.active_event.pgv_3d) {
-                    let value = (this.active_event.pgv_3d['MSSNet:DUBA:00'] * 1000).toFixed(3);
+                    let value = (this.active_event.pgv_3d[this.ref_station] * 1000).toFixed(3);
                     value += ' mm/s';
-                    return value;
+                    ret_val = value;
                 }
             }
-            else {
-                return undefined;
+            return ret_val;
+        },
+
+        f_dom_duba: function() {
+            let ret_val = undefined;
+            
+            if (this.active_event) {
+                if (this.active_event.f_dom) {
+                    if (this.active_event.f_dom.hasOwnProperty(this.ref_station)) {
+                        let value = (this.active_event.f_dom[this.ref_station]).toFixed(1);
+                        value += ' [Hz]';
+                        ret_val = value;
+                    }
+                }
             }
+            return ret_val;
         },
 
         pgv: function() {
