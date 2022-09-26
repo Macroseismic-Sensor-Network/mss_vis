@@ -245,6 +245,10 @@ export default {
                             x_data.push(pgv_data.nsl[match_ind]);
                             y_data.push(pgv_data.pgv[match_ind]);
                         }
+                        else {
+                            x_data.push(cur_nsl);
+                            y_data.push(undefined);
+                        }
                     }
                 }
                 else if (hypo_dist.length > 0) {
@@ -273,6 +277,9 @@ export default {
                 }
             }
 
+            // Copy the sorted nsl for later use.
+            let nsl_sorted = x_data.slice();
+            
             // Get the stationname only.
             for (let k = 0; k < x_data.length; k++) {
                 let comps = x_data[k].split(':');
@@ -304,11 +311,21 @@ export default {
             if (this.pgv_3d_data) {
                 let pgv_3d = this.pgv_3d_data;
 
-                for (let nsl in pgv_3d) {
+                // Loop over the pgv array to make sure, that the initial
+                // sorting of the stations is used.
+                for (let k = 0; k < nsl_sorted.length; k++) {
+                    let nsl = nsl_sorted[k];
+                    this.logger.debug('nsl:', nsl);
+                    this.logg
+                    let cur_pgv = undefined;
                     let stat_name = nsl.split(':')[1];
-                    let cur_pgv = pgv_3d[nsl];
-                    // Convert the pgv data to mm/s;
-                    cur_pgv = cur_pgv * 1000;
+                    
+                    if (pgv_3d.hasOwnProperty(nsl)) {
+                        cur_pgv = pgv_3d[nsl];
+                        // Convert the pgv data to mm/s;
+                        cur_pgv = cur_pgv * 1000;
+                    }
+                    
                     x_data.push(stat_name);
                     y_data.push(cur_pgv);
                 }
