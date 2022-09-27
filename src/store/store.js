@@ -1290,8 +1290,10 @@ export default new Vuex.Store({
             state.layout.panes.content.visible = true;
             state.layout.panes.content.max_size = 100;
             state.layout.panes.map_container.diagram_view.max_size = 100;
+            state.layout.panes.map_container.diagram_view.size = 20;
             state.layout.panes.content.size = 30;
             state.layout.panes.map_container.size = 100 - state.layout.panes.tracks.size - state.layout.panes.content.size;
+            state.layout.panes.map_container.map.size = 100 - state.layout.panes.map_container.info.size - state.layout.panes.map_container.diagram_view.size;
             state.leaflet_map.layer_groups.event_supplement.addTo(state.leaflet_map.map_object);
             state.display.mode = 'archive';
         },
