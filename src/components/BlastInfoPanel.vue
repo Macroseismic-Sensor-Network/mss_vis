@@ -132,7 +132,7 @@ export default {
                 if (this.active_event.f_dom) {
                     if (this.active_event.f_dom.hasOwnProperty(this.ref_station)) {
                         let value = (this.active_event.f_dom[this.ref_station]).toFixed(1);
-                        value += ' [Hz]';
+                        value += ' Hz';
                         ret_val = value;
                     }
                 }
