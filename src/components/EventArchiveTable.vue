@@ -266,6 +266,6 @@ export default {
 
 div.event-archive-table
   background-color: white
-  
+  height: 100%
 
 </style>

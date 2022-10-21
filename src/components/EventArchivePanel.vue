@@ -62,6 +62,6 @@ export default {
 div.event-archive-panel
     height: 100%
     width: 100%
-    overflow: auto
+    overflow: hidden
 
 </style>
