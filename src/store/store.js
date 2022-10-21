@@ -147,7 +147,7 @@ function handle_msg_data(msg_id, payload, state) {
         case 'recent_events':
             state.logger.debug("Received an event archive.");
             state.recent_events = payload;
-
+            state.archive_events = payload;
             // Add the dummy event class to the events.
             /*
             for (let cur_key in state.recent_events) {
@@ -264,12 +264,13 @@ export default new Vuex.Store({
                          msg: undefined},
         stations: [],
         station_meta: [],
-        stations_imported:false,
+        stations_imported: false,
         pgv_data: {},
         detection_result_data: {},
         event_data: {},
         event_warning: {},
         archive_events: {},
+        filtered_events: undefined,
         recent_events: {},
         connected: false,
         message: '',
@@ -286,6 +287,9 @@ export default new Vuex.Store({
         },
         time_format: "YYYY-MM-DD HH:mm:ss zZZ",
 
+        // The event archive selection parameters.
+        event_filter: 'felt',
+        
         // The data received from the mss_dataserver.
         mssds_data: {
             history_period: undefined,
@@ -896,6 +900,14 @@ export default new Vuex.Store({
             return state.archive_events;
         },
 
+        filtered_events: (state) => {
+            return state.filtered_events;
+        },
+
+        event_filter: (state) => {
+            return state.event_filter;
+        },
+        
         active_recent_event: (state) => {
             if (state.display.settings.archive.active_event != undefined)
             {
@@ -905,7 +917,6 @@ export default new Vuex.Store({
             {
                 return undefined;
             }
-
         },
 
         // eslint-disable-next-line
@@ -1040,6 +1051,9 @@ export default new Vuex.Store({
                     break;
                 case 'data':
                     handle_msg_data(msg_id, payload.payload, state)
+                    if (msg_id == 'recent_events') {
+                        this.commit('filter_events');
+                    }
                     break;
             }
         },
@@ -1296,6 +1310,7 @@ export default new Vuex.Store({
             state.layout.panes.map_container.map.size = 100 - state.layout.panes.map_container.info.size - state.layout.panes.map_container.diagram_view.size;
             state.leaflet_map.layer_groups.event_supplement.addTo(state.leaflet_map.map_object);
             state.display.mode = 'archive';
+            state.logger.debug('finished activating the archive mode');
         },
 
         deactivate_archive_mode(state) {
@@ -1338,6 +1353,36 @@ export default new Vuex.Store({
             state.logger.debug(state.display.settings.archive.supplement_layers);
         },
 
+        filter_events(state) {
+            state.filtered_events = undefined;
+            let archive_events = state.archive_events;
+            archive_events = Object.values(archive_events);
+            let duernbach_regions = ['steinbruch dürnbach',
+                                     'hohe wand'];
+            state.logger.debug('Event filter: ', state.event_filter);
+            switch (state.event_filter)
+            {
+                case 'felt':
+                    archive_events = archive_events.filter(cur_event => cur_event.max_pgv >= 0.0001);
+                    break;
+                case 'blast_duernbach':
+                    archive_events = archive_events.filter(cur_event => (cur_event.event_class.toLowerCase() === 'sprengung' && duernbach_regions.includes(cur_event.event_region.toLowerCase())));
+                    break;
+                case 'blast_hainburg':
+                    archive_events = archive_events.filter(cur_event => (cur_event.event_class.toLowerCase() === 'sprengung' && cur_event.event_region.toLowerCase() == 'steinbruch pfaffenberg'));
+                    break;
+                case 'earthquake':
+                    archive_events = archive_events.filter(cur_event => (cur_event.event_class.toLowerCase() === 'erdbeben'));
+                    break;
+            }
+            
+            state.filtered_events = archive_events.sort((a, b) => (a.start_time < b.start_time) ? 1 : -1);
+            state.logger.debug('Finished filtering the events.');
+        },
+
+        set_event_filter(state, payload) {
+            state.event_filter = payload.filter;
+        },
 
     },
 
@@ -1369,7 +1414,7 @@ export default new Vuex.Store({
             });
         },
 
-        set_display_mode({ commit, state }, payload) {
+        set_display_mode({ commit, state}, payload) {
             if (payload.mode != state.display.mode)
             {
                 state.display.changing_mode = true;
@@ -1384,7 +1429,7 @@ export default new Vuex.Store({
                         // Set the event archive to the recents events.
                         // TODO: Remove this part if the dynamic loading of the
                         // archive events for a give timespan is implemented.
-                        state.archive_events = state.recent_events;
+                        //state.archive_events = state.recent_events;
 
                         commit('deactivate_realtime_mode');
                         commit('activate_archive_mode');
@@ -1407,9 +1452,9 @@ export default new Vuex.Store({
             commit('remove_track_pgv_timeseries', payload);
         },
 
-        view_recent_event_in_archive({dispatch, state}, payload) {
+        view_recent_event_in_archive({dispatch}, payload) {
             // Set the event archive to the recents events.
-            state.archive_events = state.recent_events;
+            //state.archive_events = state.recent_events;
             dispatch('view_event_in_archive', payload);
         },
 

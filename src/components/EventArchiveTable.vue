@@ -30,35 +30,35 @@
             <w-button round 
                 class="ma1"
                 :outline="!filter_no_filter"
-                v-on:click="filter = 'no'">
+                v-on:click="set_filter('no')">
                 Kein Filter
             </w-button>
             
             <w-button round
                 class="ma1"
                 :outline="!filter_felt"
-                v-on:click="filter = 'felt'">
+                v-on:click="set_filter('felt')">
                 Wahrnehmbar
             </w-button>
 
             <w-button round
                 class="ma1"
                 :outline="!filter_earthquake"
-                v-on:click="filter = 'earthquake'">
+                v-on:click="set_filter('earthquake')">
                 Erdbeben
             </w-button>
 
             <w-button round
                 class="ma1"
                 :outline="!filter_blast_duernbach"
-                v-on:click="filter = 'blast_duernbach'">
+                v-on:click="set_filter('blast_duernbach')">
                 Sprengung Dürnbach
             </w-button>
 
             <w-button round
                 class="ma1"
                 :outline="!filter_blast_hainburg"
-                v-on:click="filter = 'blast_hainburg'">
+                v-on:click="set_filter('blast_hainburg')">
                 Sprengung Hainburg
             </w-button>
     </w-flex>
@@ -66,6 +66,7 @@
              :items="table_items"
              :fixed-headers="true"
              :selectable-rows="1"
+             :loading="is_table_loading"
              v-bind:select-row="true"
              style="height: 100%;"
              @row-select="on_row_select($event)">
@@ -90,13 +91,22 @@ export default {
         log_prefix.apply(this.logger,
             this.$store.getters.prefix_options);
         moment.locale(this.$store.getters.language);
+        this.logger.debug('Table created.');
+    },
+    mounted() {
+        this.logger.debug('Table mounted.');
+        this.is_mounted = true;
     },
     data() {
         return {
-            filter: 'felt',
+            is_mounted: false,
         };
     },
     computed: {
+        filter: function() {
+            return this.$store.event_filter;
+        },
+        
         filter_no_filter: function() {
             if (this.filter === 'no')
                 return true;
@@ -136,34 +146,22 @@ export default {
             return this.$store.getters.active_recent_event;
         },
         
-        archive_events: function() {
-            let archive_events = this.$store.getters.archive_events;
-            archive_events = Object.values(archive_events);
-            let duernbach_regions = ['steinbruch dürnbach',
-                                             'hohe wand'];
-            switch (this.filter)
-            {
-                case 'felt':
-                    archive_events = archive_events.filter(cur_event => cur_event.max_pgv >= 0.0001);
-                    break;
-                case 'blast_duernbach':
-                    archive_events = archive_events.filter(cur_event => (cur_event.event_class.toLowerCase() === 'sprengung' && duernbach_regions.includes(cur_event.event_region.toLowerCase())));
-                    break;
-                case 'blast_hainburg':
-                    archive_events = archive_events.filter(cur_event => (cur_event.event_class.toLowerCase() === 'sprengung' && cur_event.event_region.toLowerCase() == 'steinbruch pfaffenberg'));
-                    break;
-                case 'earthquake':
-                    archive_events = archive_events.filter(cur_event => (cur_event.event_class.toLowerCase() === 'erdbeben'));
-                    break;
-            }
-            
-            return archive_events.sort((a, b) => (a.start_time < b.start_time) ? 1 : -1)
+        filtered_events: function() {
+            return this.$store.getters.filtered_events;
         },
 
         utc_offset: function() {
             return this.$store.getters.utc_offset;
         },
 
+        is_table_loading: function() {
+            if (this.filtered_events === undefined) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        },
 
         table_header: function() {
             let header = [];
@@ -201,9 +199,12 @@ export default {
 
         table_items: function() {
             let items = [];
-            for (let cur_key in this.archive_events)
+            this.logger.debug('Start computing the table items.')
+            if (this.is_mounted) {
+                this.logger.debug('Looping.');
+            for (let cur_key in this.filtered_events)
             {
-                let cur_event = this.archive_events[cur_key]
+                let cur_event = this.filtered_events[cur_key]
                 let cur_start = moment.utc(cur_event.start_time);
                 let cur_end = moment.utc(cur_event.end_time);
                 let cur_magnitude = cur_event.magnitude;
@@ -234,9 +235,12 @@ export default {
                         num_stations: cur_event.triggered_stations.length.toString()
                     });
             }
+            }
+            this.logger.debug('Finished computing the table items.');
             return items;
         },
     },
+    
     methods: {
         get_local_time_str(time_utc) {
             let local_time = this.utc_to_local_time(time_utc);
@@ -257,6 +261,12 @@ export default {
             var payload = { public_id: selected_row.item.public_id };
             this.$store.dispatch('view_event_in_archive', payload);
         },
+
+        set_filter(filter) {
+            let payload = {filter: filter};
+            this.$store.commit('set_event_filter', payload);
+            this.$store.commit('filter_events');
+        }
     },
 }
 
