@@ -1462,7 +1462,11 @@ export default new Vuex.Store({
             let action_payload = { mode: 'archive' }
             dispatch('set_display_mode', action_payload)
 
-            if (payload.public_id != state.display.settings.archive.active_event)
+            if (payload.public_id === undefined) {
+                let mutation_payload = { public_id: payload.public_id };
+                commit('set_show_archive_event', mutation_payload);
+            }
+            else if (payload.public_id != state.display.settings.archive.active_event)
             {
                 state.leaflet_map.layer_groups.event_supplement.clearLayers();
                 let mutation_payload = { public_id: payload.public_id };

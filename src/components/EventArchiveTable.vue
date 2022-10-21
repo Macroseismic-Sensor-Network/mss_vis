@@ -25,51 +25,61 @@
 -->
 
 <template>
-  <div class="event-archive-table">
-    <w-flex wrap>
-            <w-button round 
+<div class="event-archive-table">
+  <w-flex justify-space-between>
+    <w-flex wrap justify-start>
+      <w-button round 
                 class="ma1"
                 :outline="!filter_no_filter"
                 v-on:click="set_filter('no')">
-                Kein Filter
-            </w-button>
-            
-            <w-button round
+        Kein Filter
+      </w-button>
+      
+      <w-button round
                 class="ma1"
                 :outline="!filter_felt"
                 v-on:click="set_filter('felt')">
-                Wahrnehmbar
-            </w-button>
-
-            <w-button round
+        Wahrnehmbar
+      </w-button>
+      
+      <w-button round
                 class="ma1"
                 :outline="!filter_earthquake"
                 v-on:click="set_filter('earthquake')">
-                Erdbeben
-            </w-button>
-
-            <w-button round
+        Erdbeben
+      </w-button>
+      
+      <w-button round
                 class="ma1"
                 :outline="!filter_blast_duernbach"
                 v-on:click="set_filter('blast_duernbach')">
-                Sprengung Dürnbach
-            </w-button>
-
-            <w-button round
+        Sprengung Dürnbach
+      </w-button>
+      
+      <w-button round
                 class="ma1"
                 :outline="!filter_blast_hainburg"
                 v-on:click="set_filter('blast_hainburg')">
-                Sprengung Hainburg
-            </w-button>
+        Sprengung Hainburg
+      </w-button>
     </w-flex>
-    <w-table :headers="table_header"
-             :items="table_items"
-             :fixed-headers="true"
-             :selectable-rows="1"
-             :loading="is_table_loading"
-             v-bind:select-row="true"
-             style="height: 100%;"
-             @row-select="on_row_select($event)">
+    <w-flex justify-end>
+      <w-button round
+                class="ma1"
+                v-on:click="deselect_event()">
+        Auswahl aufheben
+      </w-button>
+    </w-flex>
+  </w-flex>
+  <w-table :headers="table_header"
+           :items="table_items"
+           :fixed-headers="true"
+           :selectable-rows="1"
+           :loading="is_table_loading"
+           v-bind:select-row="true"
+           style="height: 100%;"
+           :selected-rows.sync="selected_rows"
+           @row-select="on_row_select($event)">
     </w-table>
   </div>
 </template>
@@ -100,6 +110,7 @@ export default {
     data() {
         return {
             is_mounted: false,
+            selected_rows: []
         };
     },
     computed: {
@@ -266,7 +277,13 @@ export default {
             let payload = {filter: filter};
             this.$store.commit('set_event_filter', payload);
             this.$store.commit('filter_events');
-        }
+        },
+
+        deselect_event() {
+            let payload = { public_id: undefined };
+            this.$store.dispatch('view_event_in_archive', payload);
+            this.selected_rows = [];
+        },
     },
 }
 
