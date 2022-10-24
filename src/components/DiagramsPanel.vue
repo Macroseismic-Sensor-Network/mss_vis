@@ -28,7 +28,11 @@
     <splitpanes horizontal
                 @resized="on_splitpanes_resized()">
       <pane>
-        <DiagramPgv />
+        <DiagramPgv v-if="is_single_event_view"/>
+        <DiagramOverviewMagnitude v-if="is_overview"
+                                  parameter="magnitude"/>
+        <DiagramOverviewMagnitude v-if="is_overview"
+                                  parameter="pgv"/>
       </pane>
     </splitpanes>
 </template>
@@ -36,6 +40,7 @@
 <script>
 
 import DiagramPgv from '../components/DiagramPgv.vue'
+import DiagramOverviewMagnitude from '../components/DiagramOverviewMagnitude.vue'
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 import * as log from 'loglevel';
@@ -47,18 +52,38 @@ export default {
     components: {
         Splitpanes,
         Pane,
-        DiagramPgv
+        DiagramPgv,
+        DiagramOverviewMagnitude
     },
     created() {
         this.logger = log.getLogger(this.$options.name)
         this.logger.setLevel(this.$store.getters.log_level);
         log_prefix.apply(this.logger,
-            this.$store.getters.prefix_options);
+                         this.$store.getters.prefix_options);
     },
     computed: {
         is_realtime: function() {
             return this.$store.getters.is_realtime; 
         },
+
+        is_single_event_view: function() {
+            if (this.active_event === undefined) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        },
+
+        is_overview: function() {
+            return !this.is_single_event_view;
+        },
+        
+        active_event: function() {
+            return this.$store.getters.active_recent_event;
+        },
+
+        
 
     },
     methods: {
