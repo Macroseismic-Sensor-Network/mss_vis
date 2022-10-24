@@ -115,7 +115,7 @@ export default {
     },
     computed: {
         filter: function() {
-            return this.$store.event_filter;
+            return this.$store.getters.event_filter;
         },
         
         filter_no_filter: function() {
