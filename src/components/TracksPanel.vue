@@ -31,12 +31,16 @@
               :key="cur_nsl">
             <TrackPgv :nsl_code="cur_nsl"/>
         </pane>
+        <pane v-if="is_archive">
+          <TrackTimeline />
+        </pane>
     </splitpanes>
 </template>
 
 <script>
 
 import TrackPgv from '../components/TrackPgv.vue'
+import TrackTimeline from '../components/TrackTimeline.vue'
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 import * as log from 'loglevel';
@@ -49,6 +53,7 @@ export default {
         Splitpanes,
         Pane,
         TrackPgv,
+        TrackTimeline
     },
     created() {
         this.logger = log.getLogger(this.$options.name)
@@ -70,6 +75,10 @@ export default {
         
         is_realtime: function() {
             return this.$store.getters.is_realtime; 
+        },
+
+        is_archive: function() {
+            return this.$store.getters.is_archive; 
         },
 
     },
