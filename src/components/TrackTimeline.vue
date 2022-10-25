@@ -27,7 +27,7 @@
 <template>
     <div class="graph_container">
         <div class="track_timeline_axes"
-             ref="timeline_axes"
+             v-bind:ref="element_id"
              v-bind:id="element_id"
              v-resize:debounce="on_resize">
         </div>
@@ -38,9 +38,10 @@
 
 import resize from 'vue-resize-directive'
 import Plotly from 'plotly.js/dist/plotly'
-import * as moment from 'moment';
+//import * as moment from 'moment';
 import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
+import _ from "lodash"
 
 export default {
     name: 'TrackTimeline',
@@ -52,7 +53,8 @@ export default {
     },
     mounted() { 
         this.new_plot();
-        this.update_range();
+        //this.update_range();
+        this.bind_events();
     },
     created() {
         this.logger = log.getLogger(this.$options.name)
@@ -60,10 +62,24 @@ export default {
         log_prefix.apply(this.logger,
                          this.$store.getters.prefix_options);
         this.$watch('plotly_data', this.update);
-        this.$watch('display_range', this.update_range);
+        this.$watch('archive_range', this.update_range);
     },
     data: function () {
         var self = this;
+        let selector_options = {
+            buttons: [
+                {
+                    step: 'month',
+                    stepmode: 'backward',
+                    count: 1,
+                    label: '1m'
+                },
+                {
+                    step: 'all'
+                },
+            ]
+        };
+        
         return {
             layout: {
                 //title: 'Zeitleiste',
@@ -76,9 +92,8 @@ export default {
                 },
                 xaxis: {
                     type: 'date',
-                    //range: ['2019-07-05T11:00:00', '2019-07-05T13:00:00'],
-                    autorange: false,
-                    fixedrange: true,
+                    autorange: true,
+                    fixedrange: false,
                     showticklabels: true,
                     ticklabelposition: 'inside',
                     mirror: 'ticks',
@@ -86,7 +101,8 @@ export default {
                     ticks: 'inside',
                     zeroline: false,
                     hoverformat: '%H:%M:%S',
-                    //title: {text: 'Zeit'}
+                    rangeselector: selector_options,
+                    rangeslider: {}
                 },
                 yaxis: {
                     type: 'linear',
@@ -99,7 +115,6 @@ export default {
                     mirror: 'ticks',
                     ticks: 'inside',
                     zeroline: true,
-                    //title: {text: 'Ereignis'}
                 },
             },
             
@@ -115,6 +130,14 @@ export default {
         }
     },
     computed: {
+        element_id: function() {
+            return 'track_overview_timeline';
+        },
+
+        dom_element: function() {
+            return this.$refs[this.element_id];
+        },
+        
         filtered_events: function() {
             return this.$store.getters.filtered_events;
         },
@@ -129,7 +152,8 @@ export default {
             for (let cur_key in this.filtered_events)
             {
                 let cur_event = this.filtered_events[cur_key]
-                let cur_start = moment.utc(cur_event.start_time).valueOf();
+                //let cur_start = moment.utc(cur_event.start_time).valueOf();
+                let cur_start = cur_event.start_time;
                 let cur_marker = 0;
                 let cur_pub_id = cur_event.public_id
                 data_time.push(cur_start);
@@ -150,26 +174,8 @@ export default {
             return data;
         },
 
-        element_id: function() {
-            return 'tracks_timeline';
-        },
-
-        display_range: function() {
-            //let range = this.$store.getters.display_time_range;
-            //this.logger.debug("range[0]: ", range[0].toISOString());
-            //this.logger.debug("range[1]: ", range[1].toISOString());
-            //this.logger.debug("server_time: ", this.$store.getters.server_time.toISOString());
-            let range_start = moment.utc('2018-01-01');
-            let range_end = moment.utc('2022-10-24');
-            this.logger.debug("range_start: ", range_start.toISOString());
-            this.logger.debug("range_end: ", range_end.toISOString());
-            let range = [range_start.valueOf(), range_end.valueOf()];
-            return range;
-        },
-
-        station: function() {
-            var res = this.nsl_code.split(':');
-            return res[1];
+        archive_time_range: function() {
+            return this.$store.getters.archive_full_time_range;
         },
 
         resize_toggle: function() {
@@ -198,21 +204,32 @@ export default {
         },
 
         update_range() {
-            this.logger.debug('Updating the range.' + this.display_range);
-            this.layout.xaxis.range = this.display_range;
+            let range = [this.archive_time_range[0].toISOString(),
+                         this.archive_time_range[1].toISOString()]
+            this.logger.debug('Updating the range.', range);
+            this.layout.xaxis.range = range;
             Plotly.relayout(this.element_id, this.layout);
         },
 
         on_resize() {
             console.log('Resizing track ' + this.element_id);
-            console.log('timeline height:' + this.$refs.timeline_axes.clientHeight);
-            console.log('timeline width:' + this.$refs.timeline_axes.clientWidth);
+            console.log('timeline height:' + this.dom_element.clientHeight);
+            console.log('timeline width:' + this.dom_element.clientWidth);
             let update = {
-                height: this.$refs.timeline_axes.clientHeight,
-                width: this.$refs.timeline_axes.clientWidth,
+                height: this.dom_element.clientHeight,
+                width: this.dom_element.clientWidth,
             };
             Plotly.relayout(this.element_id, update);
         },
+
+        bind_events() {
+            this.dom_element.on('plotly_relayout', this.on_plotly_relayout);
+        },
+
+        on_plotly_relayout: _.debounce(function() {
+            this.logger.debug('plotly_relayout');
+            this.logger.debug('layout.xaxis.range: ', this.layout.xaxis.range);
+        }, 1000),
     }
 }
 
