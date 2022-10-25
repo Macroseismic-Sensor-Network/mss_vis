@@ -83,8 +83,8 @@ export default {
             return 'diagram_overview_' + this.parameter;
         },
 
-        filtered_events: function() {
-            return this.$store.getters.filtered_events;
+        selected_events: function() {
+            return this.$store.getters.selected_events;
         },
 
         dom_element: function() {
@@ -116,7 +116,7 @@ export default {
                         },
                 xaxis: {
                     type: 'category',
-                    autorange: true,
+                    autorange: 'reversed',
                     fixedrange: false,
                     showticklabels: false,
                     ticklabelposition: 'inside',
@@ -124,15 +124,14 @@ export default {
                     showline: true,
                     ticks: 'inside',
                     zeroline: false,
-                    autorange: 'reversed',
                     title: { text: 'Ereignis',
                        },
                 },
                 yaxis: {
                     type: 'linear',
-                    autorange: false,
+                    autorange: true,
+                    rangemode: 'tozero',
                     fixedrange: false,
-                    //range: [0, 4], 
                     showticklabels: true,
                     ticklabelposition: 'inside',
                     showline: true,
@@ -151,9 +150,9 @@ export default {
             let data_mag = [];
             let data_pgv = [];
             let data_pubid = [];
-            for (let cur_key in this.filtered_events)
+            for (let cur_key in this.selected_events)
             {
-                let cur_event = this.filtered_events[cur_key];
+                let cur_event = this.selected_events[cur_key];
                 let cur_start = moment.utc(cur_event.start_time).valueOf();
                 let cur_mag = cur_event.magnitude;
                 let cur_pgv = cur_event.max_pgv * 1000;

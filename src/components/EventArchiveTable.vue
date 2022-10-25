@@ -157,8 +157,8 @@ export default {
             return this.$store.getters.active_recent_event;
         },
         
-        filtered_events: function() {
-            return this.$store.getters.filtered_events;
+        selected_events: function() {
+            return this.$store.getters.selected_events;
         },
 
         utc_offset: function() {
@@ -166,7 +166,7 @@ export default {
         },
 
         is_table_loading: function() {
-            if (this.filtered_events === undefined) {
+            if (this.selected_events === undefined) {
                 return true;
             }
             else {
@@ -213,9 +213,9 @@ export default {
             this.logger.debug('Start computing the table items.')
             if (this.is_mounted) {
                 this.logger.debug('Looping.');
-            for (let cur_key in this.filtered_events)
+            for (let cur_key in this.selected_events)
             {
-                let cur_event = this.filtered_events[cur_key]
+                let cur_event = this.selected_events[cur_key]
                 let cur_start = moment.utc(cur_event.start_time);
                 let cur_end = moment.utc(cur_event.end_time);
                 let cur_magnitude = cur_event.magnitude;
