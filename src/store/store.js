@@ -289,6 +289,12 @@ export default new Vuex.Store({
 
         // The event archive selection parameters.
         event_filter: 'felt',
+        archive: {
+            full_start_time: moment.utc('2018-08-01'),
+            full_end_time: undefined,
+            selected_start_time: moment.utc('2022-01-01'),
+            selected_end_time: moment.utc('2022-10-01'),
+        },
         
         // The data received from the mss_dataserver.
         mssds_data: {
@@ -731,6 +737,24 @@ export default new Vuex.Store({
             }
         },
 
+        archive_full_time_range: (state) => {
+            let range_start = state.archive.full_start_time;
+            let range_end = undefined;
+            let events = Object.values(state.archive_events);
+            
+            if (events.length > 0) {
+                events = events.sort((a, b) => (a.start_time < b.start_time) ? 1 : -1);
+                let last_event = events[events.length - 1];
+                range_end = moment.utc(last_event.start_time);
+            }
+            return [range_start, range_end];
+        },
+
+        archive_selected_time_range: (state) => {
+            return [state.archive.selected_start_time,
+                    state.archive.selected_end_time];
+        },
+
         data_time_range: (state) => {
             let max_time = undefined;
             let min_time = undefined;
@@ -902,6 +926,16 @@ export default new Vuex.Store({
 
         filtered_events: (state) => {
             return state.filtered_events;
+        },
+
+        selected_events(state) {
+            let selected_start = state.archive.selected_start_time;
+            let filtered_events = state.filtered_events;
+            let selected_events = undefined;
+            if (filtered_events != undefined) {
+                selected_events = filtered_events.filter(cur_event => (moment.utc(cur_event.start_time) >= selected_start));
+            }
+            return selected_events;
         },
 
         event_filter: (state) => {
@@ -1385,6 +1419,10 @@ export default new Vuex.Store({
         set_event_filter(state, payload) {
             state.event_filter = payload.filter;
         },
+
+        /*set_archive_time_range(state, payload) {
+            state.archive.start_time
+        },*/
 
     },
 
