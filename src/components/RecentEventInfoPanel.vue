@@ -42,6 +42,15 @@
             </w-button>
         </w-flex>
         <w-divider class="my2"></w-divider>
+        <w-flex column
+                justify-center
+                align-center
+                v-if="no_events_available">
+          <w-alert info>
+            Lade die Ereignisse.
+          </w-alert>
+          <w-spinner md color="primary"/>
+        </w-flex>
         <RecentEvent v-for="cur_event in filtered_events"
                      v-bind:key="cur_event.public_id"
                      v-bind:public_id = "cur_event.public_id"
@@ -96,6 +105,15 @@ export default {
             }
             
             return filtered_events;
+        },
+
+        no_events_available: function() {
+            if (this.recent_events === undefined) {
+                return true;
+            }
+            else {
+                return false;
+            }
         },
 
         filter_no_filter: function() {
