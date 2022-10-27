@@ -84,7 +84,7 @@ export default {
     },
     methods: {
         on_splitpanes_resized() {
-            this.logger.info('TrackPanel resized');
+            this.logger.debug('TrackPanel resized');
             this.$store.commit('toggle_tracks_resize');
         },
     },
