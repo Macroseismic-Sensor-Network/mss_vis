@@ -42,7 +42,7 @@
             </w-button>
         </w-flex>
         <w-divider class="my2"></w-divider>
-        <RecentEvent v-for="cur_event in recent_events"
+        <RecentEvent v-for="cur_event in filtered_events"
                      v-bind:key="cur_event.public_id"
                      v-bind:public_id = "cur_event.public_id"
                      v-bind:db_id="cur_event.db_id"
@@ -77,15 +77,25 @@ export default {
     },
     computed: {
         recent_events: function() {
-            let recent_events = this.$store.getters.recent_events;
-            recent_events = Object.values(recent_events);
-            switch (this.filter)
-            {
-                case 'felt':
-                    recent_events = recent_events.filter(cur_event => cur_event.max_pgv >= 0.0001);
-                    break;
+            return this.$store.getters.recent_events;
+        },
+
+        filtered_events: function() {
+            let filtered_events = [];
+            
+            if (this.recent_events != undefined) {
+                filtered_events = Object.values(this.recent_events);
+                switch (this.filter)
+                {
+                    case 'felt':
+                        filtered_events = filtered_events.filter(cur_event => cur_event.max_pgv >= 0.0001);
+                        break;
+                }
+
+                filtered_events = filtered_events.sort((a, b) => (a.start_time < b.start_time) ? 1 : -1);
             }
-            return recent_events.sort((a, b) => (a.start_time < b.start_time) ? 1 : -1);
+            
+            return filtered_events;
         },
 
         filter_no_filter: function() {

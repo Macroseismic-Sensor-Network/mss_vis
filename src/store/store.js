@@ -146,31 +146,8 @@ function handle_msg_data(msg_id, payload, state) {
 
         case 'recent_events':
             state.logger.debug("Received an event archive.");
-            state.recent_events = payload;
+            //state.recent_events = payload;
             state.archive_events = payload;
-            // Add the dummy event class to the events.
-            /*
-            for (let cur_key in state.recent_events) {
-                //let event_class = 'unbekannt';
-                //let event_region = 'unbekannt';
-                //let event_class_mode = 'automatisch';
-                let foreign_id = null;
-                let f_dom = null;
-                //let sprengungen = ['mss_dsrt_2022-08-24T120921500000',
-                //                   'mss_dsrt_2022-08-24T115735500000',
-                //                   'mss_dsrt_2022-08-19T091407500000'];
-                //if (sprengungen.includes(state.recent_events[cur_key].public_id)) {
-                //    event_class = 'sprengung';
-                //    event_region = 'dürnbach';
-                //    event_class_mode = 'überprüft';
-                //}
-                //state.recent_events[cur_key].event_class = event_class;
-                //state.recent_events[cur_key].event_region = event_region;
-                //state.recent_events[cur_key].event_class_mode = event_class_mode;
-                state.recent_events[cur_key].foreign_id = foreign_id;
-                state.recent_events[cur_key].f_dom = f_dom;
-            }
-            */
             break;
 
         case 'event_archive':
@@ -269,9 +246,8 @@ export default new Vuex.Store({
         detection_result_data: {},
         event_data: {},
         event_warning: {},
-        archive_events: {},
+        archive_events: undefined,
         filtered_events: undefined,
-        recent_events: {},
         connected: false,
         message: '',
         server_id: '',
@@ -895,29 +871,22 @@ export default new Vuex.Store({
 
         archive_event_max_pgv: (state) => (pos) =>  {
             return state.recent_events[pos].max_pgv
-
-            /*
-            var max_pgv = [];
-
-            if (state.event_archive[pos].max_station_pgv)
-            {
-                max_pgv = Math.max.apply(null, Object.values(state.event_archive[pos].max_station_pgv));
-            }
-
-            if (max_pgv.length === 0)
-            {
-                max_pgv = undefined;
-            }
-            return max_pgv;
-            */
         },
 
         map_control: (state) => {
             return state.map_control;
         },
 
-        recent_events: (state) => {
-            return state.recent_events;
+        recent_events: (state, getters) => {
+            let recent_events = undefined
+            
+            if (state.archive_events != undefined && getters.archive_full_time_range != undefined) {
+                let start_time = moment.utc(getters.archive_full_time_range[1])
+                let archive_events = Object.values(state.archive_events);
+                start_time.subtract(14, 'days');
+                recent_events = archive_events.filter(cur_event => (moment.utc(cur_event.start_time) >= start_time));
+            }
+            return recent_events;
         },
 
         archive_events: (state) => {
