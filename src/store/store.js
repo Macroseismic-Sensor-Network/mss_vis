@@ -292,8 +292,8 @@ export default new Vuex.Store({
         archive: {
             full_start_time: moment.utc('2018-08-01'),
             full_end_time: undefined,
-            selected_start_time: moment.utc('2022-01-01'),
-            selected_end_time: moment.utc('2022-10-01'),
+            selected_start_time: undefined,
+            selected_end_time: undefined,
         },
         
         // The data received from the mss_dataserver.
@@ -744,7 +744,7 @@ export default new Vuex.Store({
             
             if (events.length > 0) {
                 events = events.sort((a, b) => (a.start_time < b.start_time) ? 1 : -1);
-                let last_event = events[events.length - 1];
+                let last_event = events[0];
                 range_end = moment.utc(last_event.start_time);
             }
             return [range_start, range_end];
@@ -930,10 +930,12 @@ export default new Vuex.Store({
 
         selected_events(state) {
             let selected_start = state.archive.selected_start_time;
+            let selected_end = state.archive.selected_end_time;
             let filtered_events = state.filtered_events;
             let selected_events = undefined;
             if (filtered_events != undefined) {
                 selected_events = filtered_events.filter(cur_event => (moment.utc(cur_event.start_time) >= selected_start));
+                selected_events = selected_events.filter(cur_event => (moment.utc(cur_event.start_time) <= selected_end));
             }
             return selected_events;
         },
@@ -1341,7 +1343,7 @@ export default new Vuex.Store({
             state.layout.panes.map_container.diagram_view.size = 20;
             state.layout.panes.tracks.max_size = 100;
             state.layout.panes.content.size = 30;
-            state.layout.panes.tracks.size = 10;
+            state.layout.panes.tracks.size = 20;
             state.layout.panes.map_container.size = 100 - state.layout.panes.tracks.size - state.layout.panes.content.size;
             state.layout.panes.map_container.map.size = 100 - state.layout.panes.map_container.info.size - state.layout.panes.map_container.diagram_view.size;
             state.leaflet_map.layer_groups.event_supplement.addTo(state.leaflet_map.map_object);
@@ -1420,9 +1422,10 @@ export default new Vuex.Store({
             state.event_filter = payload.filter;
         },
 
-        /*set_archive_time_range(state, payload) {
-            state.archive.start_time
-        },*/
+        set_selected_time_range(state, payload) {
+            state.archive.selected_start_time = payload.start_time;
+            state.archive.selected_end_time = payload.end_time;
+        },
 
     },
 
@@ -1438,9 +1441,16 @@ export default new Vuex.Store({
                 state.logger.debug('Loaded service status: ', json_data);
                 state.service_status.status = json_data.status;
                 state.service_status.msg = json_data.status_messages[json_data.msg_key];
-            });
+            })
             state.logger.debug('After fetch.');
             moment.locale(state.language);
+
+            // Initialize the selected time range for the archive mode.
+            let now = moment().endOf('day');
+            let start_date = moment(now);
+            start_date.subtract(30, 'days');
+            state.archive.selected_start_time = start_date;
+            state.archive.selected_end_time = now;
         },
 
         connect_websocket({ state }) {

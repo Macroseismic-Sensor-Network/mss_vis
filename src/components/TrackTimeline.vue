@@ -38,7 +38,7 @@
 
 import resize from 'vue-resize-directive'
 import Plotly from 'plotly.js/dist/plotly'
-//import * as moment from 'moment';
+import * as moment from 'moment';
 import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
 import _ from "lodash"
@@ -55,6 +55,7 @@ export default {
         this.new_plot();
         //this.update_range();
         this.bind_events();
+        this.logger.debug('mounted - rangeslider range: ', this.layout.xaxis.rangeslider.range);
     },
     created() {
         this.logger = log.getLogger(this.$options.name)
@@ -62,7 +63,7 @@ export default {
         log_prefix.apply(this.logger,
                          this.$store.getters.prefix_options);
         this.$watch('plotly_data', this.update);
-        this.$watch('archive_range', this.update_range);
+        //this.$watch('selected_time_range', this.update_range);
     },
     data: function () {
         var self = this;
@@ -92,7 +93,8 @@ export default {
                 },
                 xaxis: {
                     type: 'date',
-                    autorange: true,
+                    autorange: false,
+                    range: ['2018-01-01', '2019-01-01'],
                     fixedrange: false,
                     showticklabels: true,
                     ticklabelposition: 'inside',
@@ -102,7 +104,9 @@ export default {
                     zeroline: false,
                     hoverformat: '%H:%M:%S',
                     rangeselector: selector_options,
-                    rangeslider: {}
+                    rangeslider: {
+                        autorange: false
+                    }
                 },
                 yaxis: {
                     type: 'linear',
@@ -178,12 +182,26 @@ export default {
             return this.$store.getters.archive_full_time_range;
         },
 
+        selected_time_range: function() {
+            return this.$store.getters.archive_selected_time_range;
+        },
+
         resize_toggle: function() {
             return this.$store.getters.tracks.resize_toggle;
         },
     },
     methods: {
         new_plot() {
+            let range = [this.selected_time_range[0].toISOString(),
+                         this.selected_time_range[1].toISOString()]
+            this.layout.xaxis.range = range;
+
+            let end_time = moment(this.archive_time_range[1]);
+            end_time.add(30, 'days');
+            range = [this.archive_time_range[0].toISOString(),
+                     end_time.toISOString()];
+            this.layout.xaxis.rangeslider.range = range;
+            
             Plotly.newPlot(this.element_id, this.plotly_data, this.layout, this.config);
         },
 
@@ -192,6 +210,9 @@ export default {
             //var layout = this.layout;
             //this.layout.xaxis.range = ['2019-07-05T11:30:00', '2019-07-05T14:00']
             //this.layout.xaxis.range = this.display_range;
+            //let range = [this.selected_time_range[0].toISOString(),
+            //             this.selected_time_range[1].toISOString()]
+            //this.layout.xaxis.rangeslider.range = range;
 
             if (this.plotly_data.length > 0) {
                 var element_exists = !!document.getElementById(this.element_id);
@@ -204,11 +225,15 @@ export default {
         },
 
         update_range() {
-            let range = [this.archive_time_range[0].toISOString(),
-                         this.archive_time_range[1].toISOString()]
+            let range = [this.selected_time_range[0].toISOString(),
+                         this.selected_time_range[1].toISOString()]
             this.logger.debug('Updating the range.', range);
-            this.layout.xaxis.range = range;
+            this.layout.xaxis.range = range;            
             Plotly.relayout(this.element_id, this.layout);
+        },
+
+        update_selected_range() {
+            this.logger.debug('Updating the selected range: ', this.selected_time_range);
         },
 
         on_resize() {
@@ -229,7 +254,14 @@ export default {
         on_plotly_relayout: _.debounce(function() {
             this.logger.debug('plotly_relayout');
             this.logger.debug('layout.xaxis.range: ', this.layout.xaxis.range);
-        }, 1000),
+            this.logger.debug('layout.xaxis.rangeslider.range: ', this.layout.xaxis.rangeslider.range);
+            // Set the selected time range in the store.
+            let payload = {
+                start_time: moment.utc(this.layout.xaxis.range[0]),
+                end_time: moment.utc(this.layout.xaxis.range[1])
+            }
+            this.$store.commit('set_selected_time_range', payload);                     
+        }, 300),
     }
 }
 
