@@ -1291,6 +1291,15 @@ export default new Vuex.Store({
 
         activate_realtime_mode(state) {
             state.logger.debug('activating realtime mode')
+            let n_realtime_tracks = state.tracks.realtime.pgv_timeseries.length
+            if (n_realtime_tracks == 1) {
+                state.layout.panes.tracks.size = 15;
+                state.layout.panes.tracks.max_size = 100;
+            }
+            else {
+                state.layout.panes.tracks.size = 0;
+                state.layout.panes.tracks.max_size = 100;
+            }
             state.layout.panes.map_container.size = 100 - state.layout.panes.tracks.size;
             state.layout.panes.map_container.info.visible = true;
             state.layout.panes.map_container.map.size = 100 - state.layout.panes.map_container.info.size;
