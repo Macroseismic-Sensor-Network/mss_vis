@@ -243,9 +243,9 @@ export default {
         },
 
         on_resize() {
-            console.log('Resizing track ' + this.element_id);
-            console.log('timeline height:' + this.dom_element.clientHeight);
-            console.log('timeline width:' + this.dom_element.clientWidth);
+            this.logger.debug('Resizing track ' + this.element_id);
+            this.logger.debug('timeline height:' + this.dom_element.clientHeight);
+            this.logger.debug('timeline width:' + this.dom_element.clientWidth);
             let update = {
                 height: this.dom_element.clientHeight,
                 width: this.dom_element.clientWidth,
