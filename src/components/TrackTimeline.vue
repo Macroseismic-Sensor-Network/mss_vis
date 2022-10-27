@@ -123,6 +123,7 @@ export default {
             },
             
             config: {
+                displayModeBar: false,
                 modeBarButtonsToAdd: [{
                     name: 'color toggler',
                     // eslint-disable-next-line
@@ -145,6 +146,10 @@ export default {
         filtered_events: function() {
             return this.$store.getters.filtered_events;
         },
+
+        utc_offset: function() {
+            return this.$store.getters.utc_offset;
+        },
         
         plotly_data: function() {
             var data = [];
@@ -157,7 +162,8 @@ export default {
             {
                 let cur_event = this.filtered_events[cur_key]
                 //let cur_start = moment.utc(cur_event.start_time).valueOf();
-                let cur_start = cur_event.start_time;
+                let cur_start = this.utc_to_local_time(moment.utc(cur_event.start_time));
+                cur_start = cur_start.toISOString(true);
                 let cur_marker = 0;
                 let cur_pub_id = cur_event.public_id
                 data_time.push(cur_start);
@@ -262,6 +268,11 @@ export default {
             }
             this.$store.commit('set_selected_time_range', payload);                     
         }, 300),
+
+        utc_to_local_time(time_utc) {
+            let time_local = time_utc.utcOffset(this.utc_offset / 60);
+            return time_local;
+        },
     }
 }
 
