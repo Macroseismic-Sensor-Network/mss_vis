@@ -70,7 +70,7 @@ export default {
     data: function () {
         return {
             config: {
-                //responsive: true
+                displayModeBar: false
             }
         }
     },
