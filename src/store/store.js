@@ -916,7 +916,7 @@ export default new Vuex.Store({
         active_recent_event: (state) => {
             if (state.display.settings.archive.active_event != undefined)
             {
-                return state.recent_events[state.display.settings.archive.active_event];
+                return state.archive_events[state.display.settings.archive.active_event];
             }
             else
             {
