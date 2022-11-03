@@ -102,7 +102,7 @@ export default {
                     showline: true,
                     ticks: 'inside',
                     zeroline: false,
-                    hoverformat: '%H:%M:%S',
+                    hoverformat: '%Y-%m-%d %H:%M:%S',
                     rangeselector: selector_options,
                     rangeslider: {
                         autorange: false
@@ -150,6 +150,13 @@ export default {
         utc_offset: function() {
             return this.$store.getters.utc_offset;
         },
+
+        colormap: function() {
+            let domain = ['undefiniert', 'störsignal', 'sprengung', 'erdbeben']
+            let cmap = this.$store.getters.colormap_categorical;
+            cmap.domain(domain);
+            return cmap;
+        },
         
         plotly_data: function() {
             var data = [];
@@ -158,6 +165,8 @@ export default {
             let data_time = [];
             let data_marker = [];
             let marker_text = [];
+            let color = [];
+            let event_type = [];
             for (let cur_key in this.filtered_events)
             {
                 let cur_event = this.filtered_events[cur_key]
@@ -165,10 +174,13 @@ export default {
                 let cur_start = this.utc_to_local_time(moment.utc(cur_event.start_time));
                 cur_start = cur_start.toISOString(true);
                 let cur_marker = 0;
-                let cur_pub_id = cur_event.public_id
+                let cur_pub_id = cur_event.public_id;
+                let cur_event_type = cur_event.event_class;
                 data_time.push(cur_start);
                 data_marker.push(cur_marker);
                 marker_text.push(cur_pub_id);
+                color.push(this.colormap(cur_event_type));
+                event_type.push(cur_event_type);
             }
             
             
@@ -178,6 +190,11 @@ export default {
                 text: marker_text,
                 type: 'scatter',
                 mode: 'markers',
+                meta: event_type,
+                hovertemplate: '%{text}<br>%{meta}<extra></extra>',
+                marker: {
+                    color: color,
+                },
             }
             
             data = [trace, ]
