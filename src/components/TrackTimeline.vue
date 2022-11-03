@@ -86,6 +86,7 @@ export default {
             layout: {
                 //title: 'Zeitleiste',
                 //titlefont: {size: 10},
+                dragmode: false,
                 margin: {
                     l: 2,
                     r: 2,
@@ -228,6 +229,7 @@ export default {
     },
     methods: {
         new_plot() {
+            let d3 = Plotly.d3;
             let range = [this.selected_time_range[0].toISOString(),
                          this.selected_time_range[1].toISOString()]
             this.layout.xaxis.range = range;
@@ -239,6 +241,8 @@ export default {
             this.layout.xaxis.rangeslider.range = range;
             
             Plotly.newPlot(this.element_id, this.plotly_data, this.layout, this.config);
+
+            d3.select(this.element_id).select('.nsewdrag').style('cursor', 'crosshair');
         },
 
         update() {
@@ -308,6 +312,7 @@ export default {
 
         on_plotly_hover(event_data) {
             //this.logger.debug('hover', event_data);
+            Plotly.d3.select('#' + this.element_id).select('.nsewdrag').style('cursor', 'pointer');
             let public_id = event_data.points[0].text;
 
             if (this.hover_active_event != public_id) {
@@ -319,7 +324,7 @@ export default {
         },
 
         on_plotly_unhover() {
-            this.logger.debug('unhover');
+            Plotly.d3.select('#' + this.element_id).select('.nsewdrag').style('cursor', 'crosshair');
             if (this.hover_active_event != undefined) {
                 let payload = {
                     public_id: undefined

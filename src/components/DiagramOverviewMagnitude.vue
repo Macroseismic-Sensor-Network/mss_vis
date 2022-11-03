@@ -270,6 +270,7 @@ export default {
         
         on_plotly_hover(event_data) {
             //this.logger.debug('hover', event_data);
+            Plotly.d3.select('#' + this.element_id).select('.nsewdrag').style('cursor', 'pointer');
             let public_id = event_data.points[0].x;
             
             if (this.hover_active_event != public_id) {
@@ -281,6 +282,7 @@ export default {
         },
 
         on_plotly_unhover() {
+            Plotly.d3.select('#' + this.element_id).select('.nsewdrag').style('cursor', '');
             if (this.hover_active_event != undefined) {
                 let payload = {
                     public_id: undefined
