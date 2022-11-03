@@ -280,8 +280,17 @@ export default {
         },
 
         deselect_event() {
+            // Disable the selected event view.
             let payload = { public_id: undefined };
             this.$store.dispatch('view_event_in_archive', payload);
+
+            // Reset the diagram hover event.
+            payload = {
+                public_id: undefined
+            }
+            this.$store.commit('set_hover_active_event', payload);
+
+            // Disable the selected table row.
             this.selected_rows = [];
         },
     },
