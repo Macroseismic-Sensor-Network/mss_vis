@@ -602,6 +602,13 @@ export default new Vuex.Store({
         colormap_categorical: state => {
             return d3.scaleOrdinal(state.colorway.categorical_map);
         },
+
+        colormap_events: state => {
+            let domain = ['undefiniert', 'störsignal', 'sprengung', 'erdbeben']
+            let cmap = d3.scaleOrdinal(state.colorway.categorical_map);
+            cmap.domain(domain);
+            return cmap;
+        },
         
 
         current_pgv: state => {

@@ -152,10 +152,7 @@ export default {
         },
 
         colormap: function() {
-            let domain = ['undefiniert', 'störsignal', 'sprengung', 'erdbeben']
-            let cmap = this.$store.getters.colormap_categorical;
-            cmap.domain(domain);
-            return cmap;
+            return this.$store.getters.colormap_events;
         },
         
         plotly_data: function() {
