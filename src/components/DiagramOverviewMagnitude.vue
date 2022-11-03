@@ -102,6 +102,10 @@ export default {
             return title;
         },
 
+        colormap: function() {
+            return this.$store.getters.colormap_events;
+        },
+
         layout: function() {
             let layout = {
                 margin: {
@@ -150,6 +154,8 @@ export default {
             let data_mag = [];
             let data_pgv = [];
             let data_pubid = [];
+            let event_type = [];
+            let color = [];
             for (let cur_key in this.selected_events)
             {
                 let cur_event = this.selected_events[cur_key];
@@ -157,15 +163,20 @@ export default {
                 let cur_mag = cur_event.magnitude;
                 let cur_pgv = cur_event.max_pgv * 1000;
                 let cur_pub_id = cur_event.public_id;
+                let cur_event_type = cur_event.event_class;
                 data_time.push(cur_start);
                 data_mag.push(cur_mag);
                 data_pgv.push(cur_pgv);
                 data_pubid.push(cur_pub_id);
+                event_type.push(cur_event_type);
+                color.push(this.colormap(cur_event_type));
             }
             return {time: data_time,
                     mag: data_mag,
                     pgv: data_pgv,
-                    pub_id: data_pubid};
+                    pub_id: data_pubid,
+                    event_type: event_type,
+                    color: color};
         },
 
         plotly_data: function() {
@@ -192,6 +203,9 @@ export default {
                 name: 'Magnitude',
                 mode: 'markers',
                 type: 'scatter',
+                marker: {
+                    color: this.event_data.color,
+                },
             }
             
             data = [trace]
