@@ -158,10 +158,6 @@ export default {
         return {
             logger: undefined,
             showLegend:false,	//toggles the visibility off the legend
-            display_menu_items: [
-                    { label: 'Aktuell', value: 'realtime'},
-                    { label: 'Archiv', value: 'archive'},
-                ],
             show_display_menu: false,
             test_model: undefined,
             leaflet_baselayers: {},
@@ -258,6 +254,35 @@ export default {
     computed: {
         active_event: function() {
             return this.$store.getters.active_recent_event;
+        },
+
+        selected_events: function() {
+            return this.$store.getters.selected_events;
+        },
+        
+        is_events_loading: function() {
+            if (this.selected_events === undefined) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        },
+
+        display_menu_items: function() {
+            let items = [];
+            if (!this.is_events_loading) {
+                items = [
+                    { label: 'Aktuell', value: 'realtime'},
+                    { label: 'Archiv', value: 'archive'},
+                ];
+            }
+            else {
+                items = [
+                    { label: 'Aktuell', value: 'realtime'},
+                ];
+            }
+            return items;
         },
         
         show_loading_overlay: function() {
