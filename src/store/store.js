@@ -263,7 +263,7 @@ export default new Vuex.Store({
         },
         time_format: "YYYY-MM-DD HH:mm:ss zZZ",
         colorway: {
-            categorical_map: d3.schemeSet2
+            categorical_map: d3.schemeSet3
         },
 
         // The event archive selection parameters.
@@ -610,7 +610,19 @@ export default new Vuex.Store({
         },
 
         colormap_events: state => {
-            let domain = ['undefiniert', 'störsignal', 'sprengung', 'erdbeben']
+            let domain = [
+                'reserved_1',
+                'reserved_2',
+                'reserved_3',
+                'erdbeben',
+                'sprengung',
+                'reserved_4',
+                'reserved_5',
+                'reserved_6',
+                'störsignal',
+                'reserveed_7',
+                'undefiniert',
+                'reserved_8']
             let cmap = d3.scaleOrdinal(state.colorway.categorical_map);
             cmap.domain(domain);
             return cmap;
