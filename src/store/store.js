@@ -281,6 +281,12 @@ export default new Vuex.Store({
             current_pgv: {},
         },
 
+        // The state of the overview display.
+        overview: {
+            // The public id of the active hover event in a diagram.
+            hover_active_event: undefined,
+        },
+
         // The tracks dictionary.
         tracks: {
             realtime: {
@@ -1040,6 +1046,10 @@ export default new Vuex.Store({
         supported_supplements(state) {
             return state.supported_supplements;
         },
+
+        hover_active_event(state) {
+            return state.overview.hover_active_event;
+        },
     },
 
     mutations: {
@@ -1418,6 +1428,11 @@ export default new Vuex.Store({
         set_selected_time_range(state, payload) {
             state.archive.selected_start_time = payload.start_time;
             state.archive.selected_end_time = payload.end_time;
+        },
+
+        set_hover_active_event(state, payload) {
+            // Set the public id of the hover active event.
+            state.overview.hover_active_event = payload.public_id;
         },
 
     },
