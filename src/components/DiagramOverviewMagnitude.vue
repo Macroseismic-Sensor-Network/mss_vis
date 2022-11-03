@@ -113,6 +113,14 @@ export default {
             return label;
         },
 
+        y_axis_type: function() {
+            let type = 'linear'
+            if (this.parameter === 'pgv')
+                type = 'log';
+
+            return type;
+        },
+
         colormap: function() {
             return this.$store.getters.colormap_events;
         },
@@ -144,7 +152,7 @@ export default {
                        },
                 },
                 yaxis: {
-                    type: 'linear',
+                    type: this.y_axis_type,
                     autorange: true,
                     rangemode: 'tozero',
                     fixedrange: false,
@@ -217,6 +225,7 @@ export default {
                 type: 'scatter',
                 marker: {
                     color: this.event_data.color,
+                    size: 7,
                 },
             }
             
