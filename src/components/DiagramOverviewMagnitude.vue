@@ -65,6 +65,7 @@ export default {
         log_prefix.apply(this.logger,
                          this.$store.getters.prefix_options);
         this.$watch('plotly_data', this.update);
+        this.$watch('hover_active_event', this.trigger_hover);
         //this.$watch('display_range', this.update_range);
     },
     data: function () {
@@ -123,6 +124,10 @@ export default {
 
         colormap: function() {
             return this.$store.getters.colormap_events;
+        },
+
+        hover_active_event: function() {
+            return this.$store.getters.hover_active_event;
         },
 
         layout: function() {
@@ -220,13 +225,14 @@ export default {
             trace = {
                 x: x_data,
                 y: y_data,
-                name: 'Magnitude',
+                name: this.parameter,
                 mode: 'markers',
                 type: 'scatter',
                 marker: {
                     color: this.event_data.color,
                     size: 7,
                 },
+                hovertemplate: '%{y}<extra></extra>'
             }
             
             data = [trace]
@@ -264,7 +270,25 @@ export default {
         },
 
         hover(event_data) {
-            this.logger.debug('hover', event_data);
+            //this.logger.debug('hover', event_data);
+            let public_id = event_data.points[0].x;
+
+            if (this.hover_active_event != public_id) {
+                let payload = {
+                    public_id: public_id
+                }
+                this.$store.commit('set_hover_active_event', payload);
+            }
+        },
+
+        trigger_hover() {
+            let point_number = this.event_data.pub_id.indexOf(this.hover_active_event);
+            Plotly.Fx.hover(this.element_id, [
+                {
+                    curveNumber: 0,
+                    pointNumber: point_number,
+                }
+            ]);
         },
     }
 }
