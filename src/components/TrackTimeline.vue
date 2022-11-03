@@ -63,6 +63,7 @@ export default {
         log_prefix.apply(this.logger,
                          this.$store.getters.prefix_options);
         this.$watch('plotly_data', this.update);
+        this.$watch('hover_active_event', this.trigger_hover);
         //this.$watch('selected_time_range', this.update_range);
     },
     data: function () {
@@ -154,16 +155,18 @@ export default {
         colormap: function() {
             return this.$store.getters.colormap_events;
         },
-        
-        plotly_data: function() {
-            var data = [];
-            var trace = {};
 
+        hover_active_event: function() {
+            return this.$store.getters.hover_active_event;
+        },
+
+        event_data: function() {
             let data_time = [];
             let data_marker = [];
-            let marker_text = [];
             let color = [];
             let event_type = [];
+            let pub_id = []
+            
             for (let cur_key in this.filtered_events)
             {
                 let cur_event = this.filtered_events[cur_key]
@@ -175,22 +178,34 @@ export default {
                 let cur_event_type = cur_event.event_class;
                 data_time.push(cur_start);
                 data_marker.push(cur_marker);
-                marker_text.push(cur_pub_id);
+                pub_id.push(cur_pub_id);
                 color.push(this.colormap(cur_event_type));
                 event_type.push(cur_event_type);
             }
             
-            
+            return {
+                time: data_time,
+                marker: data_marker,
+                pub_id: pub_id,
+                event_type: event_type,
+                color: color
+            };
+        },
+        
+        plotly_data: function() {
+            var data = [];
+            var trace = {};
+                        
             trace = {
-                x: data_time,
-                y: data_marker,
-                text: marker_text,
+                x: this.event_data.time,
+                y: this.event_data.marker,
+                text: this.event_data.pub_id,
                 type: 'scatter',
                 mode: 'markers',
-                meta: event_type,
+                meta: this.event_data.event_type,
                 hovertemplate: '%{text}<br>%{meta}<extra></extra>',
                 marker: {
-                    color: color,
+                    color: this.event_data.color,
                     size: 7,
                 },
             }
@@ -270,6 +285,8 @@ export default {
 
         bind_events() {
             this.dom_element.on('plotly_relayout', this.on_plotly_relayout);
+            this.dom_element.on('plotly_hover', this.on_plotly_hover);
+            this.dom_element.on('plotly_unhover', this.on_plotly_unhover);
         },
 
         on_plotly_relayout: _.debounce(function() {
@@ -287,6 +304,48 @@ export default {
         utc_to_local_time(time_utc) {
             let time_local = time_utc.utcOffset(this.utc_offset / 60);
             return time_local;
+        },
+
+        on_plotly_hover(event_data) {
+            //this.logger.debug('hover', event_data);
+            let public_id = event_data.points[0].text;
+
+            if (this.hover_active_event != public_id) {
+                let payload = {
+                    public_id: public_id
+                }
+                this.$store.commit('set_hover_active_event', payload);
+            }
+        },
+
+        on_plotly_unhover() {
+            this.logger.debug('unhover');
+            if (this.hover_active_event != undefined) {
+                let payload = {
+                    public_id: undefined
+                }
+                this.$store.commit('set_hover_active_event', payload);
+            }
+        },
+
+        trigger_hover() {
+            if (this.hover_active_event != undefined) {
+                let point_number = this.event_data.pub_id.indexOf(this.hover_active_event);
+                Plotly.Fx.hover(this.element_id, [
+                    {
+                        curveNumber: 0,
+                        pointNumber: point_number,
+                    }
+                ]);
+            }
+            else {
+                Plotly.Fx.hover(this.element_id, [
+                    {
+                        curveNumber: 0,
+                        pointNumber: undefined,
+                    }
+                ]);
+            }
         },
     }
 }

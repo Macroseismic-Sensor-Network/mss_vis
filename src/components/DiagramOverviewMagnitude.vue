@@ -83,15 +83,15 @@ export default {
         element_id: function() {
             return 'diagram_overview_' + this.parameter;
         },
-
+        
         selected_events: function() {
             return this.$store.getters.selected_events;
         },
-
+        
         dom_element: function() {
             return this.$refs[this.element_id];
         },
-
+        
         title: function() {
             let title = undefined;
             
@@ -99,10 +99,10 @@ export default {
                 title = 'Magnitude';
             else if (this.parameter === 'pgv')
                 title = 'PGV';
-                
+            
             return title;
         },
-
+        
         ylabel: function () {
             let label = undefined;
             
@@ -110,26 +110,26 @@ export default {
                 label = 'Magnitude [MSS]';
             else if (this.parameter === 'pgv')
                 label = 'PGV [mm/s]';
-                
+            
             return label;
         },
-
+        
         y_axis_type: function() {
             let type = 'linear'
             if (this.parameter === 'pgv')
                 type = 'log';
-
+            
             return type;
         },
-
+        
         colormap: function() {
             return this.$store.getters.colormap_events;
         },
-
+        
         hover_active_event: function() {
             return this.$store.getters.hover_active_event;
         },
-
+        
         layout: function() {
             let layout = {
                 dragmode: false,
@@ -154,7 +154,7 @@ export default {
                     ticks: 'inside',
                     zeroline: false,
                     title: { text: 'Ereignis',
-                       },
+                           },
                 },
                 yaxis: {
                     type: this.y_axis_type,
@@ -203,18 +203,16 @@ export default {
                     event_type: event_type,
                     color: color};
         },
-
+        
         plotly_data: function() {
             let data = [];
             let trace = {};
-
+            
             let x_data = [];
             let y_data = [];
-
-            //let d3_colors = Plotly.d3.scale.category10();
-
+            
             x_data = this.event_data.pub_id;
-
+            
             if (this.parameter === 'magnitude') {
                 y_data = this.event_data.mag;
             }
@@ -244,7 +242,7 @@ export default {
         new_plot() {
             Plotly.newPlot(this.element_id, this.plotly_data, this.layout, this.config);
         },
-
+        
         update() {
             this.logger.debug('Updating Graph ' + this.element_id);
             if (this.plotly_data.length > 0) {
@@ -256,7 +254,7 @@ export default {
                 }
             }
         },
-
+        
         on_resize() {
             let update = {
                 height: this.dom_element.clientHeight,
@@ -264,15 +262,16 @@ export default {
             };
             Plotly.relayout(this.element_id, update);
         },
-
+        
         bind_events() {
-            this.dom_element.on('plotly_hover', this.hover);
+            this.dom_element.on('plotly_hover', this.on_plotly_hover);
+            this.dom_element.on('plotly_unhover', this.on_plotly_unhover);
         },
-
-        hover(event_data) {
+        
+        on_plotly_hover(event_data) {
             //this.logger.debug('hover', event_data);
             let public_id = event_data.points[0].x;
-
+            
             if (this.hover_active_event != public_id) {
                 let payload = {
                     public_id: public_id
@@ -281,14 +280,33 @@ export default {
             }
         },
 
-        trigger_hover() {
-            let point_number = this.event_data.pub_id.indexOf(this.hover_active_event);
-            Plotly.Fx.hover(this.element_id, [
-                {
-                    curveNumber: 0,
-                    pointNumber: point_number,
+        on_plotly_unhover() {
+            if (this.hover_active_event != undefined) {
+                let payload = {
+                    public_id: undefined
                 }
-            ]);
+                this.$store.commit('set_hover_active_event', payload);
+            }
+        },
+        
+        trigger_hover() {
+            if (this.hover_active_event != undefined) {
+                let point_number = this.event_data.pub_id.indexOf(this.hover_active_event);
+                Plotly.Fx.hover(this.element_id, [
+                    {
+                        curveNumber: 0,
+                        pointNumber: point_number,
+                    }
+                ]);
+            }
+            else {
+                Plotly.Fx.hover(this.element_id, [
+                    {
+                        curveNumber: 0,
+                        pointNumber: undefined,
+                    }
+                ]);
+            }
         },
     }
 }
