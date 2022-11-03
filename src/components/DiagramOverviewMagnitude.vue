@@ -266,6 +266,7 @@ export default {
         bind_events() {
             this.dom_element.on('plotly_hover', this.on_plotly_hover);
             this.dom_element.on('plotly_unhover', this.on_plotly_unhover);
+            this.dom_element.on('plotly_click', this.on_plotly_click);
         },
         
         on_plotly_hover(event_data) {
@@ -289,6 +290,11 @@ export default {
                 }
                 this.$store.commit('set_hover_active_event', payload);
             }
+        },
+
+        on_plotly_click() {
+            let payload = { public_id: this.hover_active_event };
+            this.$store.dispatch('view_event_in_archive', payload);
         },
         
         trigger_hover() {
