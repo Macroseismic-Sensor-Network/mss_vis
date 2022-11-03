@@ -113,7 +113,7 @@ export default {
                     autorange: false,
                     range: [-1, 1],
                     fixedrange: true,
-                    showticklabels: true,
+                    showticklabels: false,
                     ticklabelposition: 'inside',
                     showline: true,
                     mirror: 'ticks',
@@ -191,6 +191,7 @@ export default {
                 hovertemplate: '%{text}<br>%{meta}<extra></extra>',
                 marker: {
                     color: color,
+                    size: 7,
                 },
             }
             
