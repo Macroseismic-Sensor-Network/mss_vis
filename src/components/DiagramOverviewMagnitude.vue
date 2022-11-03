@@ -102,12 +102,24 @@ export default {
             return title;
         },
 
+        ylabel: function () {
+            let label = undefined;
+            
+            if (this.parameter === 'magnitude')
+                label = 'Magnitude [MSS]';
+            else if (this.parameter === 'pgv')
+                label = 'PGV [mm/s]';
+                
+            return label;
+        },
+
         colormap: function() {
             return this.$store.getters.colormap_events;
         },
 
         layout: function() {
             let layout = {
+                dragmode: false,
                 margin: {
                     l: 40,
                     r: 2,
@@ -142,7 +154,7 @@ export default {
                     mirror: 'ticks',
                     ticks: 'inside',
                     zeroline: true,
-                    title: { text: this.title,
+                    title: { text: this.ylabel,
                            },
                 },
             }
