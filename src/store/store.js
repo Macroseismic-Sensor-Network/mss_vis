@@ -262,6 +262,9 @@ export default new Vuex.Store({
             show_map_info:true,
         },
         time_format: "YYYY-MM-DD HH:mm:ss zZZ",
+        colorway: {
+            categorical_map: d3.schemeSet2
+        },
 
         // The event archive selection parameters.
         event_filter: 'felt',
@@ -595,6 +598,11 @@ export default new Vuex.Store({
         supporter: state => {
             return state.supporter;
         },
+
+        colormap_categorical: state => {
+            return d3.scaleOrdinal(state.colorway.categorical_map);
+        },
+        
 
         current_pgv: state => {
             var tmp = {}
