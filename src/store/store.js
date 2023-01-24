@@ -473,21 +473,6 @@ export default new Vuex.Store({
         },
 
         supporter: {
-            baumit: {
-                name: 'Baumit GmbH',
-                url: 'https://www.baumit.com',
-                logo: 'logo_baumit.jpg',
-            },
-            zamg: {
-                name: 'Zentralanstalt für Meteorologie und Geodynamik',
-                url: 'https://www.zamg.ac.at',
-                logo: 'logo_zamg.jpg',
-            },
-            hainburg: {
-                name: 'Stadtgemeinde Hainburg',
-                url: 'https://www.hainburg-donau.gv.at/',
-                logo: 'stadtgemeinde_hainburg_wappen.jpg',
-            }
         },
 
         ems98: {
@@ -1461,6 +1446,13 @@ export default new Vuex.Store({
                 state.logger.debug('Loaded service status: ', json_data);
                 state.service_status.status = json_data.status;
                 state.service_status.msg = json_data.status_messages[json_data.msg_key];
+            })
+            state.logger.debug('Loading supporter info.');
+            fetch("/assets/vue/nrt/data/supporter.json").then(response => {
+                return response.json();
+            }).then(json_data => {
+                state.logger.debug('Loaded supporter info: ', json_data);
+                state.supporter = json_data;
             })
             state.logger.debug('After fetch.');
             moment.locale(state.language);

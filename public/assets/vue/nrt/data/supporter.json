@@ -1,0 +1,17 @@
+{
+    "baumit": {
+        "name": "Baumit GmbH",
+        "url": "https://www.baumit.com",
+        "logo": "logo_baumit.jpg"
+    },
+    "geosphere": {
+        "name": "Geosphere Austria",
+        "url": "https://www.geosphere.at",
+        "logo": "logo_geosphere.png"
+    },
+    "hainburg": {
+        "name": "Stadtgemeinde Hainburg",
+        "url": "https://www.hainburg-donau.gv.at/",
+        "logo": "stadtgemeinde_hainburg_wappen.jpg"
+    }
+}
