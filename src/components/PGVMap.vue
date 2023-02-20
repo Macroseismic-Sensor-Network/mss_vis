@@ -491,6 +491,7 @@ export default {
                 minSpeed: 1,
                 maxSpeed: 5,
                 speedStep: 1,
+                timeZones: ['CET', 'UTC'],
                 player: this.leaflet_time_dimension_player,
             };
             this.leaflet_time_dimension_control = new L.Control.TimeDimension(control_options);

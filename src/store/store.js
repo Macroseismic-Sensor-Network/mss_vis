@@ -26,7 +26,7 @@ import Vuex from 'vuex'
 import Vue from 'vue'
 import * as d3 from "d3";
 import * as log from 'loglevel';
-import * as moment from 'moment';
+import * as moment from 'moment-timezone';
 import proj4 from 'proj4';
 import L from 'leaflet';
 
@@ -261,7 +261,7 @@ export default new Vuex.Store({
             show_legend:true,
             show_map_info:true,
         },
-        time_format: "YYYY-MM-DD HH:mm:ss zZZ",
+        time_format: "YYYY-MM-DD HH:mm:ss z",
         colorway: {
             categorical_map: d3.schemeSet3
         },
@@ -562,7 +562,8 @@ export default new Vuex.Store({
         },
 
         server_time_local: state => {
-            return moment.utc(state.server_time).utcOffset(state.utc_offset / 60);
+            //return moment.utc(state.server_time).utcOffset(state.utc_offset / 60);
+            return moment.utc(state.server_time).tz('Europe/Vienna');
         },
 
         utc_offset: state => {

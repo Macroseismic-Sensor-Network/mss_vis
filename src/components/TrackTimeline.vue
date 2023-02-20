@@ -38,7 +38,7 @@
 
 import resize from 'vue-resize-directive'
 import Plotly from 'plotly.js/dist/plotly'
-import * as moment from 'moment';
+import * as moment from 'moment-timezone';
 import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
 import _ from "lodash"
@@ -307,7 +307,8 @@ export default {
         }, 300),
 
         utc_to_local_time(time_utc) {
-            let time_local = time_utc.utcOffset(this.utc_offset / 60);
+            //let time_local = time_utc.utcOffset(this.utc_offset / 60);
+            let time_local = time_utc.tz("Europe/Vienna");
             return time_local;
         },
 

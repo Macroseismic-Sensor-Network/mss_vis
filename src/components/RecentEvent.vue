@@ -40,7 +40,7 @@
 <script>
 import * as log from 'loglevel';
 import * as log_prefix from 'loglevel-plugin-prefix';
-import * as moment from 'moment';
+import * as moment from 'moment-timezone';
 
 export default {
     name: 'RecentEvent',
@@ -127,7 +127,8 @@ export default {
         },
 
         utc_to_local_time(time_utc) {
-            let time_local = time_utc.utcOffset(this.utc_offset / 60);
+            //let time_local = time_utc.utcOffset(this.utc_offset / 60);
+            let time_local = time_utc.tz("Europe/Vienna");
             return time_local;
         },
 

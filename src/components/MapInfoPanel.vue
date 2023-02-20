@@ -83,7 +83,7 @@ export default {
         },
 
         server_time_local_string: function() {
-            return this.$store.getters.server_time_local.format("YYYY-MM-DD HH:mm:ss zZZ");
+            return this.$store.getters.server_time_local.format("YYYY-MM-DD HH:mm:ss z");
         },
     },
 }
