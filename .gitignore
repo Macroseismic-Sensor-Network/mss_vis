@@ -23,8 +23,13 @@ yarn-error.log*
 # Map tiles
 /public/assets/vue/nrt/data/map
 
+# Archive data
+/public/assets/vue/nrt/data/archive
+
 # File link to station data.
 current_mss_stations.csv
+
+docs/
 
 # Emacs backup and temp files.
 *~

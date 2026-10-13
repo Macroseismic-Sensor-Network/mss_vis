@@ -33,6 +33,8 @@ import L from 'leaflet';
 Vue.use(Vuex)
 
 function handle_msg_soh(msg_id, payload, state) {
+    state.logger.warning("Handling of websocket soh messages is disabled.")
+    /*
     switch (msg_id) {
         case 'connection':
             state.server_id = payload.server_id
@@ -46,10 +48,13 @@ function handle_msg_soh(msg_id, payload, state) {
                 state.server_state = payload.state;
             }
             break
-    }
+            }
+    */
 }
 
 function handle_msg_data(msg_id, payload, state) {
+    state.logger.warning("Handling of websocket data messages is disabled.")
+    /*
     switch (msg_id) {
         case 'station_metadata':
             state.logger.debug('Received the station metadata.');
@@ -155,7 +160,7 @@ function handle_msg_data(msg_id, payload, state) {
             //state.event_archive = payload;
             break;
     }
-
+    */
 
 }
 
@@ -251,7 +256,7 @@ export default new Vuex.Store({
         connected: false,
         message: '',
         server_id: '',
-        server_state: '',
+        server_state: 'inaktiv',
         utc_offset: undefined,
         server_time: undefined,
         transparent_period: 60,
@@ -1051,6 +1056,7 @@ export default new Vuex.Store({
     },
 
     mutations: {
+        /*
         SOCKET_ONOPEN(state, event) {
             state.logger.debug('SOCKET_ONOPEN event: ', event);
             Vue.prototype.$socket = event.currentTarget;
@@ -1111,7 +1117,8 @@ export default new Vuex.Store({
             state.server_state = 'reconnection error';
             state.logger.error("Error while reconnecting.");
             state.logger.debug(state);
-        },
+            },
+        */
 
         load_service_status(state) {
             state.logger.debug('Loading the service status.');
@@ -1147,6 +1154,91 @@ export default new Vuex.Store({
             });
         },
         */
+
+        load_station_metadata(state) {
+            state.logger.debug('Loading the station metadata from static archive.');
+            fetch("/assets/vue/nrt/data/archive/station_metadata.json.gz").then(response => {
+                state.logger.debug("Got response: ", response);
+
+                var encoding = response.headers.get("content-encoding");
+                encoding = encoding ? encoding.toLowerCase() : "";
+                if (encoding.indexOf("gzip") !== -1) {
+                    return response.json();
+                }
+                
+                const decompressed =  response.body.pipeThrough(
+                    new DecompressionStream("gzip")
+                )
+                return new Response(decompressed).json();
+            }).then(json_data => {
+                state.logger.debug('Loaded station metadata from static archive: ', json_data);
+                state.station_meta = json_data;
+                state.stations_imported = true;
+            })
+        },
+
+        load_recent_events(state) {
+            state.logger.debug('Loading the recent from static archive.');
+            fetch("/assets/vue/nrt/data/archive/recent_events.json.gz").then(response => {
+                state.logger.debug("Got response: ", response);
+
+                var encoding = response.headers.get("content-encoding");
+                encoding = encoding ? encoding.toLowerCase() : "";
+                if (encoding.indexOf("gzip") !== -1) {
+                    return response.json();
+                }
+                
+                const decompressed =  response.body.pipeThrough(
+                    new DecompressionStream("gzip")
+                )
+                return new Response(decompressed).json();
+            }).then(json_data => {
+                state.logger.debug('Loaded recent events from static archive: ', json_data);
+                state.archive_events = json_data;
+                this.commit('filter_events');
+            })
+
+        },
+
+        load_event_supplement_data(state, public_id) {
+            state.logger.debug("Loading the supplement data for event " + public_id);
+
+            Vue.set(state.event_supplement, public_id, {});
+            Vue.set(state.event_supplement[public_id], 'state', 'loading');
+
+            const year = public_id.split("_")[2].split("-")[0];
+            const filepath = "/assets/vue/nrt/data/archive/supplements/" +
+                  year + "/" +
+                  public_id + "_supplements.json.gz"
+            fetch(filepath).then(response => {
+                state.logger.debug("Got response: ", response);
+
+                var encoding = response.headers.get("content-encoding");
+                encoding = encoding ? encoding.toLowerCase() : "";
+                if (encoding.indexOf("gzip") !== -1) {
+                    return response.json();
+                }
+                
+                const decompressed =  response.body.pipeThrough(
+                    new DecompressionStream("gzip")
+                )
+                return new Response(decompressed).json();
+            }).then(json_data => {
+                state.logger.debug('Loaded recent events from static archive: ', json_data);
+                const loaded_public_id = json_data.public_id;
+                state.logger.debug("loaded_public_id: ", loaded_public_id);
+                if ('data' in state.event_supplement[loaded_public_id])
+                {
+                    state.event_supplement[loaded_public_id].data = json_data.data;
+                }
+                else
+                {
+                    Vue.set(state.event_supplement[loaded_public_id], 'data', json_data.data);
+                    
+                }
+                state.event_supplement[loaded_public_id].state = 'loaded';
+            })
+        },
 
         reset_stations(state) {
             state.stations_imported=false;
@@ -1440,6 +1532,7 @@ export default new Vuex.Store({
             state.logger.debug('Initializing the store.');
             //commit('load_station_metadata');
             //commit('load_service_status');
+            
             state.logger.debug('Loading the service status.');
             fetch("/assets/vue/nrt/data/service_status.json").then(response => {
                 return response.json();
@@ -1466,6 +1559,7 @@ export default new Vuex.Store({
             state.archive.selected_end_time = now;
         },
 
+        /*
         connect_websocket({ state }) {
             state.logger.debug('Connecting to the websocket server.');
             fetch("/assets/vue/nrt/data/mssvis_config.json").then(response => {
@@ -1475,7 +1569,8 @@ export default new Vuex.Store({
                 state.ws_url = config.websocket_server;
                 this._vm.$connect(state.ws_url);
             });
-        },
+            },
+        */
 
         set_display_mode({ commit, state}, payload) {
             if (payload.mode != state.display.mode)
@@ -1549,7 +1644,8 @@ export default new Vuex.Store({
                                          };
                 commit('set_show_archive_event', mutation_payload);
                 if (!(payload.public_id in state.event_supplement)) {
-                    dispatch('request_event_supplement', supplement_payload)
+                    commit('load_event_supplement_data', payload.public_id)
+                    //dispatch('request_event_supplement', supplement_payload)
                 }
             }
         },
@@ -1566,8 +1662,9 @@ export default new Vuex.Store({
             let msg = {'header': msg_header,
                        'payload': msg_payload};
 
-            Vue.prototype.$socket.send(JSON.stringify(msg));
-            state.logger.debug("Sent websocket message: ", msg);
+            //Vue.prototype.$socket.send(JSON.stringify(msg));
+
+            //state.logger.debug("Sent websocket message: ", msg);
         },
 
         request_pgv_timeseries({state}, payload) {
@@ -1581,8 +1678,8 @@ export default new Vuex.Store({
             let msg = {'header': msg_header,
                        'payload': msg_payload};
 
-            Vue.prototype.$socket.send(JSON.stringify(msg));
-            state.logger.debug("Sent websocket message: ", msg);
+            //Vue.prototype.$socket.send(JSON.stringify(msg));
+            //state.logger.debug("Sent websocket message: ", msg);
         },
 
         cancel_pgv_timeseries({state}, payload) {
@@ -1592,8 +1689,8 @@ export default new Vuex.Store({
             let msg = {'header': msg_header,
                        'payload': msg_payload};
 
-            Vue.prototype.$socket.send(JSON.stringify(msg));
-            state.logger.debug("Sent websocket message: ", msg);
+            //Vue.prototype.$socket.send(JSON.stringify(msg));
+            //state.logger.debug("Sent websocket message: ", msg);
 
         }
     }

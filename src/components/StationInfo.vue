@@ -52,7 +52,8 @@
         <div class="station-info-item"><span class="text-right station-info-attribute">   max.PGV:</span>{{ (pgv_history * 1000).toFixed(3) }} mm/s</div>
         <div class="station-info-item"><span class="text-right station-info-attribute">      Verzögerung:</span>{{ delay }} s</div>
         <w-flex class="wrap">
-            <w-button class="ma1" 
+            <w-button class="ma1"
+                      :disabled="true"
                       v-on:click="on_show_pgv_timeseries">
                 {{ pgv_track_label }}
             </w-button>
@@ -159,16 +160,20 @@ export default {
     methods: {
         on_remove_from_inspect: function() {
             let payload = {'nsl_code': this.nsl_code}
+            
             this.$store.commit('remove_inspect_station', payload);
 
+            /*
             if (this.pgv_track_shown)
             {
                 this.$store.dispatch('remove_track_pgv_timeseries', payload);
             }
+            */
         },
 
         on_show_pgv_timeseries: function() {
             let payload = {'nsl_code': this.nsl_code}
+            /*
             if (this.pgv_track_shown)
             {
                 this.$store.dispatch('remove_track_pgv_timeseries', payload);
@@ -177,6 +182,7 @@ export default {
             {
                 this.$store.dispatch('add_track_pgv_timeseries', payload);
             }
+            */
 
         },
 

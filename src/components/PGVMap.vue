@@ -55,6 +55,15 @@
             </w-menu>
 
         </div>
+
+        <div class="status-msg-container"
+             v-if="is_realtime">
+              <w-alert md bg-color="primary" color="black">
+                <b>Die Datenverarbeitung und die Darstellung der aktuellen Daten des MSS Netzwerks wurde beendet.</b><br>
+                <b>Die Archivdaten des MSS Netzwerks sind weiterhin verfügbar.</b><br>
+              </w-alert>
+        </div>
+        
         <EventSupplementLayer v-for="cur_supplement in supported_supplements"
                               v-bind:key="cur_supplement.category + '_' + cur_supplement.name"
                               v-bind:category="cur_supplement.category"
@@ -184,7 +193,11 @@ export default {
         );
         this.init_map();
         //this.$watch('radius', this.plot_stations);
-        //this.$store.commit("LOAD_STATION_METADATA");
+
+        // Load the archive data.
+        this.$store.commit("load_station_metadata");
+        this.$store.commit("load_recent_events");
+        
         const vm = this;
         var checkExist = setInterval(function() {
             if (vm.$store.getters.stations_imported == true) {
@@ -233,8 +246,8 @@ export default {
                 let filter = [];
                 this.leaflet_base_layers.mss_oe3d.updateFilter(filter);
                 this.leaflet_base_layers.osm_osmde.updateFilter(filter);
-                this.leaflet_base_layers.stamen_toner.updateFilter(filter);
-                this.leaflet_base_layers.stamen_terrain.updateFilter(filter);
+                //this.leaflet_base_layers.stamen_toner.updateFilter(filter);
+                //this.leaflet_base_layers.stamen_terrain.updateFilter(filter);
             }
             else
             {
@@ -243,8 +256,8 @@ export default {
                 let filter = ['saturate:10%'];
                 this.leaflet_base_layers.mss_oe3d.updateFilter(filter);
                 this.leaflet_base_layers.osm_osmde.updateFilter(filter);
-                this.leaflet_base_layers.stamen_toner.updateFilter(filter);
-                this.leaflet_base_layers.stamen_terrain.updateFilter(filter);
+                //this.leaflet_base_layers.stamen_toner.updateFilter(filter);
+                //this.leaflet_base_layers.stamen_terrain.updateFilter(filter);
             }
         },
     },
@@ -286,10 +299,12 @@ export default {
         },
         
         show_loading_overlay: function() {
+            /*
             if (this.server_state != 'online') {
                     return true;
             }
-            else if (this.is_realtime) {
+            */
+            if (this.is_realtime) {
                 if (this.stations) {
                     return false;
                 }
@@ -317,10 +332,12 @@ export default {
         },
 
         loading_message: function() {
+            /*
             if (this.server_state != 'online') {
                     return "Warte auf Verbindung zum MSS Server.";
             }
-            else if (this.is_realtime) {
+            */        
+            if (this.is_realtime) {
                 return "Warte auf die Daten der Stationen.";
             }
             else {
@@ -436,6 +453,7 @@ export default {
                     id: 'osm/osm_de',
                 });
 
+            /*
             var stamen_toner = L.tileLayer.colorFilter('https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png',
                 {
                     minZoom: 10,
@@ -454,20 +472,21 @@ export default {
                     attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>.' + 
                     'Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://www.openstreetmap.org/copyright">ODbL</a>.',
                     id: 'stamen/terrain',
-                });
+                    });
+            */
 
             this.leaflet_base_layers = {
                 mss_oe3d: oe3d,
                 osm_osmde: osm,
-                stamen_toner: stamen_toner,
-                stamen_terrain: stamen_terrain,
+                //stamen_toner: stamen_toner,
+                //stamen_terrain: stamen_terrain,
             };
 
             var layer_options = {
                 "MSS OE3D": oe3d,
                 "OpenStreetMap": osm,
-                "Stamen Terrain": stamen_terrain,
-                "Stamen Toner": stamen_toner,
+                //"Stamen Terrain": stamen_terrain,
+                //"Stamen Toner": stamen_toner,
             }
 
             oe3d.addTo(this.leaflet_map);
@@ -644,6 +663,19 @@ div.overlay
     font-weight: bold
     margin-top: 10px
     margin-right: 10px
+
+div.status-msg-container
+  width: 100%
+  height: 20%
+  position: absolute
+  top: 0
+  left: 0
+  z-index: 500
+  background-color: rgba(190, 177, 97, 0.4)
+  display: flex
+  align-items: center
+  justify-content: center
+  flex-direction: column
 
 div#map_config
     position: absolute
