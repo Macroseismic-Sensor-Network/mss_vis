@@ -25,8 +25,9 @@
 -->
 
 <template>
-    <div class="map-info-panel">
-        <span id="map_info_server_time" class="map-info"><b>Server Zeit:</b> {{ server_time_local_string }}</span>
+<div class="map-info-panel">
+        <span id="map_info_deactivate_note" class="map-info"><b>Datenauswertung beendet</b><br>Im Oktober 2026 wurde die automatisierte Datenauswertung des MSS Netzwerks beendet. Die Archivdaten vom Beginn der Auswertung im Jahr 2018 bis zur Deaktivierung im Oktober 2026 stehen in der Archiv-Ansicht weiterhin zu Verfügung.</span>
+        <!--<span id="map_info_server_time" class="map-info"><b>Server Zeit:</b> {{ server_time_local_string }}</span>-->
         <span id="map_info_server_state" class="map-info"><b>Server Status:</b> {{ server_state }}</span>
         <span id="map_info_last_data" class="map-info" v-if="!!latest_data"><b>min. Verzögerung:</b> {{ latest_data }} s</span>
         <span id="map_info_first_data" class="map-info" v-if="!!data_time_range.min_time"><b>max. Verzögerung:</b> {{ first_data }} s</span>

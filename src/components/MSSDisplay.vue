@@ -75,6 +75,7 @@
                               v-resize:debounce="on_pgv_map_resize"/>
                     </pane>
 
+                    
                     <!-- The info pane for the realtime view. -->
                     <pane :size="layout.panes.map_container.info.size.toString() + '%'"
                           v-if="layout.panes.map_container.info.visible"
@@ -105,6 +106,9 @@
                                      v-model="event_info_accordion_expanded">
                           <template #item-title.supporter="">Unterstützt von</template>
                           <template #item-content.supporter=""><SupporterPanel key="supporter_panel_key"/></template>
+                          <template #item-title.status="">Status</template>
+                          <template #item-content.status=""><MapInfoPanel key="map_info_panel_key"/></template>
+                          
                           <template #item-title.event_details="">Ereignisdetails</template>
                           <template #item-content.event_details=""><EventDetailsPanel key="event_details_panel_key"/></template>
                           <template #item-title.supplement_data="">Zusatzdaten</template>
@@ -322,6 +326,7 @@ export default {
 
         event_info_accordion_items: function() {
             let items = [{id: 'supporter'},
+                         {id: 'status'},
                          {id: 'event_details'},
                          {id: 'supplement_data'}];
             if (this.active_event) {
@@ -330,6 +335,7 @@ export default {
                                              'Hohe Wand'];
                     if (duernbach_regions.includes(this.active_event.event_region)) {
                         items = [{id: 'supporter'},
+                                 {id: 'status'},
                                  {id: 'event_details'},
                                  {id: 'blast_info'},
                                  {id: 'supplement_data'}];

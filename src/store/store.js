@@ -368,6 +368,9 @@ export default new Vuex.Store({
             supporter: {
                 expanded: true,
             },
+            status: {
+                expanded: true,
+            },
             event_details: {
                 expanded: true,
             },

@@ -59,8 +59,8 @@
         <div class="status-msg-container"
              v-if="is_realtime">
               <w-alert md bg-color="primary" color="black">
-                <b>Die Datenverarbeitung und die Darstellung der aktuellen Daten des MSS Netzwerks wurde beendet.</b><br>
-                <b>Die Archivdaten des MSS Netzwerks sind weiterhin verfügbar.</b><br>
+                <center><b>Die Datenverarbeitung und die Darstellung der Daten des MSS Netzwerks wurde im Oktober 2026 beendet.</b><br>
+                <b>Die Archivdaten des MSS Netzwerks von 2018 bis zum Ende der Auswertung im Oktober<br> 2026 sind weiterhin in der Archiv-Ansicht verfügbar.</b><br></center>
               </w-alert>
         </div>
         
